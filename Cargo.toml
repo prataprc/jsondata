@@ -1,0 +1,12 @@
+[package]
+name = "bnc-json"
+version = "0.1.0"
+authors = ["prataprc <prataprc@gmail.com>"]
+
+[dependencies]
+quickcheck = "0.7"
+quickcheck_macros = "0.7"
+
+[dev-dependencies]
+quickcheck = "0.7"
+quickcheck_macros = "0.7"
