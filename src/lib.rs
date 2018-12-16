@@ -25,3 +25,5 @@ mod tests {
         true
     }
 }
+
+#[cfg(test)] mod json_test;
