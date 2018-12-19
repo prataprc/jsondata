@@ -7,6 +7,7 @@ use kv::{self, KeyValue};
 use lex::Lex;
 use parse::parse_value;
 
+// Json as rust native values.
 #[derive(Clone,PartialEq,PartialOrd)]
 pub enum Json {
     Null,
@@ -21,6 +22,10 @@ pub enum Json {
 }
 
 impl Json {
+    pub fn new<T>(value: T) -> Json where Self : From<T> {
+        value.into()
+    }
+
     pub fn boolean(self) -> Option<bool> {
         match self { Json::Bool(s) => Some(s), _ => None }
     }

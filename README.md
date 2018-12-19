@@ -4,6 +4,8 @@ JSON as first class data type for Rust. That includes,
 * [ ] Deserialisation from JSON text to Rust native type.
 * [ ] Common arithmetic and logic operations.
 * [ ] Streaming JSON parser.
+* [ ] Sortable JSON.
+* [ ] Support [JSON5](json5.org) standard.
 
 Why yet another json crate ?
 

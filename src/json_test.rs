@@ -5,6 +5,13 @@ use kv::KeyValue;
 use test::Bencher;
 
 #[test]
+fn test_json_constructor() {
+    use self::Json;
+
+    assert_eq!(Json::new(10), Json::Integer(10));
+}
+
+#[test]
 fn test_simple_jsons() {
     use self::Json::{Null, Bool, String, Integer, Float, Array, Object};
 
