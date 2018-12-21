@@ -21,15 +21,15 @@ Why JSON ?
 
 <br/>
 @snap[fragment]
-Lingua franca of data exchange for web.
+The data exchange standard for web.
 @snapend
 
 @snap[mt30 fragment]
-Compromises on rich-data types over inter-operability with languages.
+Inter-operability with languages over rich-data types.
 @snapend
 
 @snap[mt30 fragment]
-Textual representation, hence human friendly as apposed to machine friendly.
+Human friendly as apposed to machine friendly.
 @snapend
 
 ---
@@ -38,7 +38,7 @@ Primary types
 =============
 
 @ul
-* **null**, equivalent of None, nil, null in other languages and unity-type in rust-language.
+* **null**, equivalent of None, nil, null in many languages.
 * **number**, base 10 representation.
 * **bool**, true or false. Both represented in lowercase.
 * **string**, double quoted, utf-8 encoded plain text.
@@ -50,7 +50,7 @@ Primary types
 
 @ul
 * Integer numbers within the range [-(2**53)+1, (2**53)-1] are generally considered interoperable.
-* Floating point numbers are expected to support accuracy and precision defined by IEEE 754 binary64 (double precision).
+* Floating point numbers shall support accuracy and precision defined by IEEE 754 binary64 (double precision).
 @ulend
 
 +++
