@@ -3,6 +3,7 @@ Why yet another json package for Rust ?
 This crate makes several tradeoffs that are tuned for bigdata
 and document database.
 
+* [ ] Support for 128-bit signed integers.
 * [ ] Serialisation from Rust native type to JSON text.
 * [ ] Deserialisation from JSON text to Rust native type.
 * [ ] Sorted keys in property object.
