@@ -4,8 +4,6 @@ use std::fmt::{self, Write};
 use std::ops::{Neg, Not, Mul, Div, Rem, Add, Sub, Shr, Shl};
 use std::ops::{BitAnd, BitXor, BitOr};
 
-extern crate bnc_query as query;
-
 use db::{self, Document, Doctype, Docindex};
 use db::{And, Or, Slice, ItemIterator};
 use lex::Lex;

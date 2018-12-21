@@ -11,7 +11,7 @@
 
 @snap[south-east author-box]
 @fa[envelope](prataprc@gmail.com - R Pratap Chakravarthy) <br/>
-@fa[github](https://github.com/bnclabs/bnc-json) <br/>
+@fa[github](https://github.com/bnclabs/jsondata) <br/>
 @snapend
 
 ---
