@@ -41,7 +41,7 @@ Primary types
 * **null**, equivalent of None, nil, null in many languages.
 * **number**, base 10 representation.
 * **bool**, true or false. Both represented in lowercase.
-* **string**, double quoted, utf-8 encoded plain text.
+* **string**, double quoted, utf8 encoded plain text.
 @ulend
 
 @snap[mt20 fragment]
@@ -111,7 +111,7 @@ Strings
 =======
 
 ```bnf
-string: '"' utf-8-unicode-chars '"'.
+string: '"' utf8-unicode-chars '"'.
 ```
 
 @snap[mt30 fragment]
