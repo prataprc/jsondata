@@ -52,26 +52,6 @@ impl Json {
 }
 
 impl Json {
-    fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
-        write!(w, "\"")?;
-
-        let mut start = 0;
-        for (i, byte) in val.bytes().enumerate() {
-            let escstr = ESCAPE[byte as usize];
-            if escstr.len() == 0 { continue }
-
-            if start < i {
-                write!(w, "{}", &val[start..i])?;
-            }
-            write!(w, "{}", escstr)?;
-            start = i + 1;
-        }
-        if start != val.len() {
-            write!(w, "{}", &val[start..])?;
-        }
-        write!(w, "\"")
-    }
-
     // TODO: should we expose this in rustdoc ?
     pub fn insert(&mut self, item: KeyValue) {
         match self {
@@ -159,7 +139,7 @@ impl Display for Json {
             Bool(false) => write!(f, "false"),
             Integer(val) => write!(f, "{}", val),
             Float(val) => write!(f, "{:e}", val),
-            S(val) => { Self::encode_string(f, &val)?; Ok(()) },
+            S(val) => { encode_string(f, &val)?; Ok(()) },
             Array(val) => {
                 if val.len() == 0 {
                     write!(f, "[]")
@@ -181,7 +161,7 @@ impl Display for Json {
                 } else {
                     write!(f, "{{")?;
                     for (i, kv) in val.iter().enumerate() {
-                        Self::encode_string(f, kv.key_ref())?;
+                        encode_string(f, kv.key_ref())?;
                         write!(f, ":{}", kv.value_ref())?;
                         if i < (val_len - 1) { write!(f, ",")?; }
                     }
@@ -197,6 +177,27 @@ impl fmt::Debug for Json {
         <Self as fmt::Display>::fmt(self, f)
     }
 }
+
+fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
+    write!(w, "\"")?;
+
+    let mut start = 0;
+    for (i, byte) in val.bytes().enumerate() {
+        let escstr = ESCAPE[byte as usize];
+        if escstr.len() == 0 { continue }
+
+        if start < i {
+            write!(w, "{}", &val[start..i])?;
+        }
+        write!(w, "{}", escstr)?;
+        start = i + 1;
+    }
+    if start != val.len() {
+        write!(w, "{}", &val[start..])?;
+    }
+    write!(w, "\"")
+}
+
 
 static ESCAPE: [&'static str; 256] = [
     "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
