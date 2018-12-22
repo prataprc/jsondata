@@ -1,6 +1,7 @@
 Why yet another json package in Rust ?
 ======================================
 
+[![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
 [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/bnclabs/jsondata/master?grs=github)
 
 This crate makes several trade-offs that are tuned for bigdata
@@ -16,12 +17,12 @@ and document database.
 * [ ] Common arithmetic and logic operations.
 * [ ] Sortable JSON.
 
-Deferred conversion for integer / float
-=======================================
+Deferred conversion for numbers
+===============================
 
 Converting JSON numbers to Rust native type is not always desired.
 Especially in the context of bigdata where data is stored in JSON
-format and we need to lookup specific fields within the document.
+format and we need to lookup, only, specific fields within the document.
 
 This implementation provides deferred conversion for JSON numbers
 that leads to a [performance improvement of upto 30%](commit-deferred).
