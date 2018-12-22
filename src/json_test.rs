@@ -145,3 +145,9 @@ fn bench_map_to_json(b: &mut Bencher) {
     let mut outs = String::with_capacity(64);
     b.iter(|| {outs.clear(); write!(outs, "{}", val)});
 }
+
+#[bench]
+fn bench_deferred(b: &mut Bencher) {
+    let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
+    b.iter(|| {inp.parse::<Json>().unwrap()});
+}
