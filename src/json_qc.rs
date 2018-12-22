@@ -95,9 +95,9 @@ impl Display for JsonQC {
 
                 } else {
                     write!(f, "{{")?;
-                    for (i, kv) in val.iter().enumerate() {
-                        Self::encode_string(f, kv.key_ref())?;
-                        write!(f, ":{}", kv.value_ref())?;
+                    for (i, prop) in val.iter().enumerate() {
+                        Self::encode_string(f, prop.key_ref())?;
+                        write!(f, ":{}", prop.value_ref())?;
                         if i < (val_len - 1) { write!(f, ",")?; }
                     }
                     write!(f, "}}")

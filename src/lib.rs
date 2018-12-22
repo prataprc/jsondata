@@ -8,13 +8,13 @@
 extern crate test;
 
 mod lex;
-mod kv; // TODO: should we rename this as "property"
+mod property; // TODO: should we rename this as "property"
 mod json;
 mod parse;
 mod ops;
 
 // Re-exports for API documentation.
-pub use kv::Property;
+pub use property::Property;
 pub use json::Json;
 
 #[cfg(test)]

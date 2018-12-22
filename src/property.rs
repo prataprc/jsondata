@@ -83,9 +83,9 @@ pub fn search_by_key(obj: &Vec<Property>, key: &str) -> Result<usize,usize> {
     if cmp == Equal { Ok(base) } else { Err(base + (cmp == Less) as usize) }
 }
 
-pub fn upsert_object_key(obj: &mut Vec<Property>, kv: Property) {
-    match search_by_key(obj, kv.key_ref()) {
-        Ok(off) => obj[off] = kv,
-        Err(off) => obj.insert(off, kv),
+pub fn upsert_object_key(obj: &mut Vec<Property>, prop: Property) {
+    match search_by_key(obj, prop.key_ref()) {
+        Ok(off) => obj[off] = prop,
+        Err(off) => obj.insert(off, prop),
     }
 }

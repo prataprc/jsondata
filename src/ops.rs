@@ -1,7 +1,7 @@
 use std::ops::{Neg, Not, Mul, Div, Rem, Add, Sub, Shr, Shl};
 use std::ops::{BitAnd, BitXor, BitOr};
 
-use kv::{self, Property};
+use property::{self, Property};
 use json::Json;
 
 impl Neg for Json {
@@ -292,7 +292,7 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>)
     use json::Json::{Object};
 
     for o in other.into_iter() {
-        match kv::search_by_key(&this, o.key_ref()) {
+        match property::search_by_key(&this, o.key_ref()) {
             Ok(off) => match (this[off].clone().value(), o.clone().value()) {
                 (Object(val), Object(val2)) => {
                     this[off].set_value(Object(mixin_object(val, val2)))

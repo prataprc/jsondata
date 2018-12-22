@@ -4,7 +4,7 @@ use std::convert::From;
 use std::str::FromStr;
 use std::cmp::Ordering;
 
-use kv::{self, Property};
+use property::{self, Property};
 use lex::Lex;
 use parse::parse_value;
 
@@ -154,7 +154,7 @@ impl Json {
 
         match self {
             Array(arr) => arr.iter_mut().for_each(|v| v.validate()),
-            Object(items) => items.iter_mut().for_each(|kv| kv.value_mut().validate()),
+            Object(items) => items.iter_mut().for_each(|prop| prop.value_mut().validate()),
             Integer(item) => { item.compute(); },
             Float(item) => { item.compute(); },
             _ => (),
@@ -166,7 +166,7 @@ impl Json {
 
         match self {
             Array(arr) => arr.iter_mut().for_each(|v| v.compute()),
-            Object(items) => items.iter_mut().for_each(|kv| kv.value_mut().compute()),
+            Object(items) => items.iter_mut().for_each(|prop| prop.value_mut().compute()),
             Integer(item) => { item.compute(); },
             Float(item) => { item.compute(); },
             _ => (),
@@ -179,7 +179,7 @@ impl Json {
     pub fn insert(&mut self, item: Property) {
         match self {
             Json::Object(obj) => {
-                match kv::search_by_key(obj, item.key_ref()) {
+                match property::search_by_key(obj, item.key_ref()) {
                     Ok(off) => obj.insert(off, item),
                     Err(off) => obj.insert(off, item),
                 }
@@ -286,9 +286,9 @@ impl Display for Json {
 
                 } else {
                     write!(f, "{{")?;
-                    for (i, kv) in val.iter().enumerate() {
-                        encode_string(f, kv.key_ref())?;
-                        write!(f, ":{}", kv.value_ref())?;
+                    for (i, prop) in val.iter().enumerate() {
+                        encode_string(f, prop.key_ref())?;
+                        write!(f, ":{}", prop.value_ref())?;
                         if i < (val_len - 1) { write!(f, ",")?; }
                     }
                     write!(f, "}}")

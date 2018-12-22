@@ -1,7 +1,7 @@
 use std::fmt::{Write};
 
 use json::{Json, IntText, FloatText};
-use kv::Property;
+use property::Property;
 use test::Bencher;
 
 #[test]
