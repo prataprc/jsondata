@@ -80,7 +80,7 @@ fn bench_bool(b: &mut Bencher) {
 
 #[bench]
 fn bench_num(b: &mut Bencher) {
-    b.iter(|| {"10.2".parse::<Json>().unwrap()});
+    b.iter(|| {"123121.2234234".parse::<Json>().unwrap()});
 }
 
 #[bench]
