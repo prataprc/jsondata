@@ -3,12 +3,12 @@ use std::cmp::Ordering;
 use json::Json;
 
 #[derive(Debug,Clone)]
-pub struct KeyValue(String,Json);
+pub struct Property(String,Json);
 
-impl KeyValue {
+impl Property {
     #[inline]
-    pub fn new(key: String, value: Json) -> KeyValue {
-        KeyValue(key, value)
+    pub fn new(key: String, value: Json) -> Property {
+        Property(key, value)
     }
 
     #[inline]
@@ -44,22 +44,22 @@ impl KeyValue {
 
 // Eq, PartialEq and PartialOrd
 
-impl Eq for KeyValue {}
+impl Eq for Property {}
 
-impl PartialEq for KeyValue {
-    fn eq(&self, other: &KeyValue) -> bool {
+impl PartialEq for Property {
+    fn eq(&self, other: &Property) -> bool {
         self.0 == other.0 // compare only the key.
     }
 }
 
-impl PartialOrd for KeyValue {
-    fn partial_cmp(&self, other: &KeyValue) -> Option<Ordering> {
+impl PartialOrd for Property {
+    fn partial_cmp(&self, other: &Property) -> Option<Ordering> {
         self.0.partial_cmp(other.key_ref()) // compare only the key.
     }
 }
 
 
-pub fn search_by_key(obj: &Vec<KeyValue>, key: &str) -> Result<usize,usize> {
+pub fn search_by_key(obj: &Vec<Property>, key: &str) -> Result<usize,usize> {
     use std::cmp::Ordering::{Greater, Equal, Less};
 
     let mut size = obj.len();
@@ -83,7 +83,7 @@ pub fn search_by_key(obj: &Vec<KeyValue>, key: &str) -> Result<usize,usize> {
     if cmp == Equal { Ok(base) } else { Err(base + (cmp == Less) as usize) }
 }
 
-pub fn upsert_object_key(obj: &mut Vec<KeyValue>, kv: KeyValue) {
+pub fn upsert_object_key(obj: &mut Vec<Property>, kv: Property) {
     match search_by_key(obj, kv.key_ref()) {
         Ok(off) => obj[off] = kv,
         Err(off) => obj.insert(off, kv),

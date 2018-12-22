@@ -3,7 +3,7 @@ use std::char;
 
 use lex::Lex;
 use json::{Json, IntText, FloatText};
-use kv::{self, KeyValue};
+use kv::{self, Property};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json,String> {
     parse_whitespace(text, lex);
@@ -222,7 +222,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
 
     parse_whitespace(text, lex);
 
-    let mut m: Vec<KeyValue> = Vec::new();
+    let mut m: Vec<Property> = Vec::new();
 
     if (&text[lex.off..]).as_bytes()[0] == b'}' {
         lex.incr_col(1);
@@ -241,7 +241,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
         parse_whitespace(text, lex);
         let value = parse_value(text, lex)?;
 
-        kv::upsert_object_key(&mut m, KeyValue::new(key, value));
+        kv::upsert_object_key(&mut m, Property::new(key, value));
         //println!("parse {} {} {:?}", key, i, m);
 
         // is exit

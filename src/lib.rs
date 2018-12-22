@@ -14,7 +14,7 @@ mod parse;
 mod ops;
 
 // Re-exports for API documentation.
-pub use kv::KeyValue;
+pub use kv::Property;
 pub use json::Json;
 
 #[cfg(test)]

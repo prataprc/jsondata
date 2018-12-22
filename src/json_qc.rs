@@ -1,7 +1,7 @@
 use std::fmt::{Write};
 
 use json::Json;
-use kv::KeyValue;
+use property::Property;
 use quickcheck::Arbitrary;
 
 pub enum JsonQC {
@@ -11,7 +11,7 @@ pub enum JsonQC {
     Float(f64),
     String(String),
     Array(Vec<Json>),
-    Object(Vec<KeyValue>),
+    Object(Vec<Property>),
 }
 
 impl Into<Json> for JsonQC {
@@ -61,7 +61,7 @@ impl Arbitrary for JsonQC {
         let r = g.next_u32();
         let val = Vec::new();
         (0..r).foreach(val.push({
-            KeyValue::new(JsonQC::arbitrary_string(g), JsonQC::arbitrary(g));
+            Property::new(JsonQC::arbitrary_string(g), JsonQC::arbitrary(g));
         })
     }
 }

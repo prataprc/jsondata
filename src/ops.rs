@@ -1,7 +1,7 @@
 use std::ops::{Neg, Not, Mul, Div, Rem, Add, Sub, Shr, Shl};
 use std::ops::{BitAnd, BitXor, BitOr};
 
-use kv::{self, KeyValue};
+use kv::{self, Property};
 use json::Json;
 
 impl Neg for Json {
@@ -286,8 +286,8 @@ impl BitOr for Json {
 //    }
 //}
 
-fn mixin_object(mut this: Vec<KeyValue>, other: Vec<KeyValue>)
-    -> Vec<KeyValue>
+fn mixin_object(mut this: Vec<Property>, other: Vec<Property>)
+    -> Vec<Property>
 {
     use json::Json::{Object};
 

@@ -4,7 +4,7 @@ use std::convert::From;
 use std::str::FromStr;
 use std::cmp::Ordering;
 
-use kv::{self, KeyValue};
+use kv::{self, Property};
 use lex::Lex;
 use parse::parse_value;
 
@@ -109,7 +109,7 @@ pub enum Json {
     Float(FloatText),
     String(String),
     Array(Vec<Json>),
-    Object(Vec<KeyValue>),
+    Object(Vec<Property>),
     // TODO: Add error as a variant, that will help seamless
     // integrate with ops' dynamic errors.
 }
@@ -145,7 +145,7 @@ impl Json {
         match self { Json::Array(arr) => Some(arr.clone()), _ => None }
     }
 
-    pub fn object(&self) -> Option<Vec<KeyValue>> {
+    pub fn object(&self) -> Option<Vec<Property>> {
         match self { Json::Object(obj) => Some(obj.clone()), _ => None }
     }
 
@@ -176,7 +176,7 @@ impl Json {
 
 impl Json {
     // TODO: should we expose this in rustdoc ?
-    pub fn insert(&mut self, item: KeyValue) {
+    pub fn insert(&mut self, item: Property) {
         match self {
             Json::Object(obj) => {
                 match kv::search_by_key(obj, item.key_ref()) {
@@ -231,8 +231,8 @@ impl From<Vec<Json>> for Json {
     }
 }
 
-impl From<Vec<KeyValue>> for Json {
-    fn from(val: Vec<KeyValue>) -> Json {
+impl From<Vec<Property>> for Json {
+    fn from(val: Vec<Property>) -> Json {
         Json::Object(val)
     }
 }
