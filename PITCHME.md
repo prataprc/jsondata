@@ -25,7 +25,7 @@ The data exchange standard for web.
 @snapend
 
 @snap[mt30 fragment]
-Inter-operability with languages over rich-data types.
+Inter-operability with several languages.
 @snapend
 
 @snap[mt30 fragment]
@@ -37,20 +37,13 @@ Human friendly as apposed to machine friendly.
 Primary types
 =============
 
+There are 4 primitive types.
+
 @ul
 * **null**, equivalent of None, nil, null in many languages.
 * **number**, base 10 representation.
 * **bool**, true or false. Both represented in lowercase.
 * **string**, double quoted, utf8 encoded plain text.
-@ulend
-
-@snap[mt20 fragment]
-**Number**
-@snapend
-
-@ul
-* Integer numbers within the range [-(2**53)+1, (2**53)-1] are generally considered interoperable.
-* Floating point numbers shall support accuracy and precision defined by IEEE 754 binary64 (double precision).
 @ulend
 
 +++
@@ -72,6 +65,8 @@ Examples
 true
 @snapend
 
+@snap[fragment]
+null
 @snapend
 
 +++
@@ -80,29 +75,42 @@ Examples: Numbers
 =================
 
 @snap[west ml5]
-@ul[number-eg]
-* 132837
-* -132837
-* 0
-* .123
-* 0.123
-* -0.123
-* -.123
-* 1e2
-@ulend
+<pre style="line-height: 2em">
+132837
+-132837
+0
+.123
+0.123
+-0.123
+-.123
+1e2
+</pre>
 @snapend
 
 @snap[east mr5]
-@ul[number-eg]
-* -1e+2
-* 1e-2
-* -1e-2
-* .123e2
-* 0.123e+2
-* -0.123e-2
-* -.123e+2
-* -1.123e+2
-@ulend
+<pre style="line-height: 2em">
+-1e+2
+1e-2
+-1e-2
+.123e2
+0.123e+2
+-0.123e-2
+-.123e+2
+-1.123e+2
+</pre>
+@snapend
+
+---
+
+Numbers
+=======
+
+@snap[fragment]
+Integer numbers within the range [-(2^53)+1, (2^53)-1] are generally considered interoperable.
+@snapend
+
+@snap[mt30 fragment]
+Floating point numbers shall support accuracy and precision defined by IEEE 754 binary64 (double precision).
 @snapend
 
 ---
@@ -129,12 +137,12 @@ Unicode chars that needs to be escaped:
 Structured types
 ================
 
-@snap[west text-blue arraytype]
-Array
+@snap[west arraytype]
+**Array**
 @snapend
 
-@snap[east text-blue objecttype]
-Object
+@snap[east objecttype]
+**Object**
 @snapend
 
 +++
@@ -216,9 +224,15 @@ serve only to separate tokens in the grammar, and have no
 semantic significance.
 
 ```bnf
-white-space     : space | horizontal-tab | new-line | carriage-return.
+white-space     : space | horizontal-tab | new-line | cr
 space           : %x20
 horizontal-tab  : %x09
 new-line        : %x0A
-carriage-return : %x0D
+cr              : %x0D // Carriage-Return
 ```
+
+---
+
+@snap[midpoint]
+<h1>Thank you</h1>
+@snapend
