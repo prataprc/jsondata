@@ -2,18 +2,111 @@ use std::fmt::{self, Write, Display};
 use std::default::Default;
 use std::convert::From;
 use std::str::FromStr;
+use std::cmp::Ordering;
 
 use kv::{self, KeyValue};
 use lex::Lex;
 use parse::parse_value;
 
+#[derive(Clone,Debug)]
+pub struct IntText {
+    len: usize,
+    txt: [u8; 32],
+    val: Option<i128>,
+}
+
+impl IntText {
+    pub fn new(txt: &str) -> IntText {
+        let mut res = IntText{len: txt.len(), txt: [0_u8; 32], val: None};
+        res.txt[..txt.len()].as_mut().copy_from_slice(txt.as_bytes());
+        res
+    }
+
+    fn integer(&self) -> Option<i128> {
+        use std::str::from_utf8;
+        if self.val.is_none() {
+            from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>().ok()
+        } else {
+            self.val
+        }
+    }
+
+    fn compute(&mut self) {
+        use std::str::from_utf8;
+        if self.val.is_none() {
+            self.val = from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>().ok();
+        }
+    }
+}
+
+impl Eq for IntText {}
+
+impl PartialEq for IntText {
+    fn eq(&self, other: &IntText) -> bool {
+        self.integer() == other.integer()
+    }
+}
+
+impl PartialOrd for IntText {
+    fn partial_cmp(&self, other: &IntText) -> Option<Ordering> {
+        self.integer().partial_cmp(&other.integer())
+    }
+}
+
+
+#[derive(Clone,Debug)]
+pub struct FloatText {
+    len: usize,
+    txt: [u8; 32],
+    val: Option<f64>,
+}
+
+impl FloatText {
+    pub fn new(txt: &str) -> FloatText {
+        let mut res = FloatText{len: txt.len(), txt: [0_u8; 32], val: None};
+        res.txt[..txt.len()].as_mut().copy_from_slice(txt.as_bytes());
+        res
+    }
+
+    fn float(&self) -> Option<f64> {
+        use std::str::from_utf8;
+        if self.val.is_none() {
+            from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>().ok()
+        } else {
+            self.val
+        }
+    }
+
+    fn compute(&mut self) {
+        use std::str::from_utf8;
+        if self.val.is_none() {
+            self.val = from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>().ok();
+        }
+    }
+}
+
+impl Eq for FloatText {}
+
+impl PartialEq for FloatText {
+    fn eq(&self, other: &FloatText) -> bool {
+        self.float() == other.float()
+    }
+}
+
+impl PartialOrd for FloatText {
+    fn partial_cmp(&self, other: &FloatText) -> Option<Ordering> {
+        self.float().partial_cmp(&other.float())
+    }
+}
+
+
 // Json as rust native values.
-#[derive(Clone,PartialEq,PartialOrd)]
+#[derive(Clone,Debug,PartialEq,PartialOrd)]
 pub enum Json {
     Null,
     Bool(bool),
-    Integer(i128),
-    Float(f64),
+    Integer(IntText),
+    Float(FloatText),
     String(String),
     Array(Vec<Json>),
     Object(Vec<KeyValue>),
@@ -26,28 +119,58 @@ impl Json {
         value.into()
     }
 
-    pub fn boolean(self) -> Option<bool> {
-        match self { Json::Bool(s) => Some(s), _ => None }
+    pub fn boolean(&self) -> Option<bool> {
+        match self { Json::Bool(s) => Some(*s), _ => None }
     }
 
-    pub fn string(self) -> Option<String> {
-        match self { Json::String(s) => Some(s), _ => None }
+    pub fn string(&self) -> Option<String> {
+        match self { Json::String(s) => Some(s.clone()), _ => None }
     }
 
-    pub fn integer(self) -> Option<i128> {
-        match self { Json::Integer(n) => Some(n), _ => None }
+    pub fn integer(&self) -> Option<i128> {
+        match self {
+            Json::Integer(item) => item.integer(),
+            _ => None
+        }
     }
 
-    pub fn float(self) -> Option<f64> {
-        match self { Json::Float(f) => Some(f), _ => None }
+    pub fn float(&self) -> Option<f64> {
+        match self {
+            Json::Float(item) => item.float(),
+            _ => None,
+        }
     }
 
-    pub fn array(self) -> Option<Vec<Json>> {
-        match self { Json::Array(arr) => Some(arr), _ => None }
+    pub fn array(&self) -> Option<Vec<Json>> {
+        match self { Json::Array(arr) => Some(arr.clone()), _ => None }
     }
 
-    pub fn object(self) -> Option<Vec<KeyValue>> {
-        match self { Json::Object(obj) => Some(obj), _ => None }
+    pub fn object(&self) -> Option<Vec<KeyValue>> {
+        match self { Json::Object(obj) => Some(obj.clone()), _ => None }
+    }
+
+    pub fn validate(&mut self) {
+        use json::Json::{Array, Object, Integer, Float};
+
+        match self {
+            Array(arr) => arr.iter_mut().for_each(|v| v.validate()),
+            Object(items) => items.iter_mut().for_each(|kv| kv.value_mut().validate()),
+            Integer(item) => { item.compute(); },
+            Float(item) => { item.compute(); },
+            _ => (),
+        };
+    }
+
+    pub fn compute(&mut self) {
+        use json::Json::{Array, Object, Integer, Float};
+
+        match self {
+            Array(arr) => arr.iter_mut().for_each(|v| v.compute()),
+            Object(items) => items.iter_mut().for_each(|kv| kv.value_mut().compute()),
+            Integer(item) => { item.compute(); },
+            Float(item) => { item.compute(); },
+            _ => (),
+        };
     }
 }
 
@@ -80,13 +203,13 @@ impl From<bool> for Json {
 
 impl From<i128> for Json {
     fn from(val: i128) -> Json {
-        Json::Integer(val)
+        Json::Integer(IntText{len: 0, txt: [0_u8; 32], val: Some(val)})
     }
 }
 
 impl From<f64> for Json {
     fn from(val: f64) -> Json {
-        Json::Float(val)
+        Json::Float(FloatText{len: 0, txt: [0_u8; 32], val: Some(val)})
     }
 }
 
@@ -132,13 +255,16 @@ impl FromStr for Json {
 impl Display for Json {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::Json::{Null,Bool,Integer,Float,Array,Object, String as S};
+        use std::str::from_utf8;
 
         match self {
             Null => write!(f, "null"),
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
-            Integer(val) => write!(f, "{}", val),
-            Float(val) => write!(f, "{:e}", val),
+            Integer(IntText{len:_, txt:_, val: Some(v)}) => write!(f, "{}", v),
+            Integer(IntText{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Float(FloatText{len:_, txt:_, val: Some(v)}) => write!(f, "{:e}", v),
+            Float(FloatText{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
             S(val) => { encode_string(f, &val)?; Ok(()) },
             Array(val) => {
                 if val.len() == 0 {
@@ -169,12 +295,6 @@ impl Display for Json {
                 }
             }
         }
-    }
-}
-
-impl fmt::Debug for Json {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as fmt::Display>::fmt(self, f)
     }
 }
 

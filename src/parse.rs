@@ -2,7 +2,7 @@ use std::str::CharIndices;
 use std::char;
 
 use lex::Lex;
-use json::Json;
+use json::{Json, IntText, FloatText};
 use kv::{self, KeyValue};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json,String> {
@@ -60,24 +60,19 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
     let mut doparse = |text: &str, i: usize, f: bool| -> Result<Json,String> {
         lex.incr_col(i);
         if f {
-            text.parse::<f64>()
-                .map(|v| Json::Float(v))
-                .map_err(|_| format!("parse: invalid {}", text))
+            Ok(Json::Float(FloatText::new(&text)))
         } else {
-            text.parse::<i128>()
-                .map(|v| Json::Integer(v))
-                .map_err(|_| format!("parse: invalid {}", text))
+            Ok(Json::Integer(IntText::new(&text)))
         }
     };
 
     let mut is_float = false;
     for (i, ch) in text.char_indices() {
-        match ch {
-            '0'..='9'|'+'|'-' => continue, // valid number
-            '.'|'e'|'E' => { is_float = true; continue}, // float number
-            _ => (),
+        if ISNUMBER[ch as usize] == 0 {
+            return doparse(&text[..i], i, is_float)
+        } else if !is_float && ISNUMBER[ch as usize] == 2 {
+            is_float = true
         }
-        return doparse(&text[..i], i, is_float)
     }
     doparse(text, text.len(), is_float)
 }
@@ -332,4 +327,23 @@ static WS_LOOKUP: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+];
+
+static ISNUMBER: [u8; 256] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];

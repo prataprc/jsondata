@@ -1,6 +1,6 @@
 use std::fmt::{Write};
 
-use json::Json;
+use json::{Json, IntText, FloatText};
 use kv::KeyValue;
 use test::Bencher;
 
@@ -8,54 +8,29 @@ use test::Bencher;
 fn test_json_constructor() {
     use self::Json;
 
-    assert_eq!(Json::new(10), Json::Integer(10));
+    assert_eq!(Json::new(10), Json::Integer(IntText::new("10")));
 }
 
 #[test]
 fn test_simple_jsons() {
-    use self::Json::{Null, Bool, String, Integer, Float, Array, Object};
+    use self::Json::{Null, Bool, String, Array, Object};
 
     let jsons = include!("../testdata/test_simple.jsons");
-    let mut refs = include!("../testdata/test_simple.jsons.ref");
-    let refs_len = refs.len();
+    let refs = include!("../testdata/test_simple.jsons.ref");
 
-    let mut n = 4;
-    let obj = Vec::new();
-    refs[refs_len - n] = Object(obj);
-    n -= 1;
+    for (i, json) in jsons.iter().enumerate() {
+        let mut value: Json = json.parse().unwrap();
+        value.compute();
+        assert_eq!(value, refs[i], "testcase {}", i);
+    }
+}
 
-    let mut obj = Vec::new();
-    let (k, v) = ("key1".to_string(), r#""value1""#.parse().unwrap());
-    obj.insert(0, KeyValue::new(k, v));
-    refs[refs_len - n] = Object(obj);
-    n -= 1;
+#[test]
+fn test_simple_jsons_ref() {
+    use self::Json::{Null, Bool, String, Array, Object};
 
-    let mut obj = Vec::new();
-    let (k, v) = ("key1".to_string(), r#""value1""#.parse().unwrap());
-    obj.insert(0, KeyValue::new(k, v));
-    let (k, v) = ("key2".to_string(), r#""value2""#.parse().unwrap());
-    obj.insert(1, KeyValue::new(k, v));
-    refs[refs_len - n] = Object(obj);
-    n -= 1;
-
-    let mut obj = Vec::new();
-    let (k, v) = ("a".to_string(), "1".parse().unwrap());
-    obj.insert(0, KeyValue::new(k, v));
-    let (k, v) = ("b".to_string(), "1".parse().unwrap());
-    obj.insert(1, KeyValue::new(k, v));
-    let (k, v) = ("c".to_string(), "1".parse().unwrap());
-    obj.insert(2, KeyValue::new(k, v));
-    let (k, v) = ("d".to_string(), "1".parse().unwrap());
-    obj.insert(3, KeyValue::new(k, v));
-    let (k, v) = ("e".to_string(), "1".parse().unwrap());
-    obj.insert(4, KeyValue::new(k, v));
-    let (k, v) = ("f".to_string(), "1".parse().unwrap());
-    obj.insert(5, KeyValue::new(k, v));
-    let (k, v) = ("x".to_string(), "1".parse().unwrap());
-    obj.insert(6, KeyValue::new(k, v));
-    let (k, v) = ("z".to_string(), "1".parse().unwrap());
-    obj.insert(7, KeyValue::new(k, v));
-    refs[refs_len - n] = Object(obj);
+    let jsons = include!("../testdata/test_simple.jsons");
+    let refs = include!("../testdata/test_simple.jsons.ref");
 
     let value: Json = jsons[51].parse().unwrap();
     assert_eq!(value, refs[51]);
@@ -66,6 +41,20 @@ fn test_simple_jsons() {
         //println!("{} {}", i, &s);
         assert_eq!(&s, ref_jsons[i], "testcase: {}", i);
     }
+}
+
+#[test]
+fn test_deferred() {
+    let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
+    let value: Json = inp.parse().unwrap();
+    let refval = Json::Array(vec![
+        Json::Float(FloatText::new("10123.1231")),
+        Json::Float(FloatText::new("1231.123123")),
+        Json::Float(FloatText::new("1233.123123")),
+        Json::Float(FloatText::new("123.1231231")),
+        Json::Float(FloatText::new("12312e10")),
+    ]);
+    assert_eq!(value, refval);
 }
 
 #[bench]
@@ -150,4 +139,10 @@ fn bench_map_to_json(b: &mut Bencher) {
 fn bench_deferred(b: &mut Bencher) {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     b.iter(|| {inp.parse::<Json>().unwrap()});
+}
+
+#[bench]
+fn bench_no_deferred(b: &mut Bencher) {
+    let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
+    b.iter(|| {inp.parse::<Json>().unwrap().compute()});
 }

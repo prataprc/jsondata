@@ -20,8 +20,7 @@ pub use json::Json;
 #[cfg(test)]
 mod tests {
     #[quickcheck]
-    fn double_reversal_is_identity(xs: i8) -> bool {
-        println!("{}", xs);
+    fn double_reversal_is_identity(_xs: i8) -> bool {
         true
     }
 }
