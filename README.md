@@ -18,6 +18,8 @@ and document database.
 * [ ] Common arithmetic and logic operations.
 * [ ] Sortable JSON.
 
+**[API Documentation](https://docs.rs/jsondata)**
+
 Deferred conversion for numbers
 ===============================
 
