@@ -2,7 +2,8 @@ use std::str::CharIndices;
 use std::char;
 
 use lex::Lex;
-use json::{Json, IntText, FloatText};
+use json::{Json};
+use num::{Integral, Floating};
 use property::{self, Property};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json,String> {
@@ -60,9 +61,9 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
     let mut doparse = |text: &str, i: usize, f: bool| -> Result<Json,String> {
         lex.incr_col(i);
         if f {
-            Ok(Json::Float(FloatText::new(&text)))
+            Ok(Json::Float(Floating::new(text)))
         } else {
-            Ok(Json::Integer(IntText::new(&text)))
+            Ok(Json::Integer(Integral::new(text)))
         }
     };
 

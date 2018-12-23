@@ -1,6 +1,7 @@
 use std::fmt::{Write};
 
-use json::{Json, IntText, FloatText};
+use json::{Json};
+use num::{Integral, Floating};
 use property::Property;
 use test::Bencher;
 
@@ -8,7 +9,7 @@ use test::Bencher;
 fn test_json_constructor() {
     use self::Json;
 
-    assert_eq!(Json::new(10), Json::Integer(IntText::new("10")));
+    assert_eq!(Json::new(10), Json::Integer(Integral::new("10")));
 }
 
 #[test]
@@ -20,7 +21,7 @@ fn test_simple_jsons() {
 
     for (i, json) in jsons.iter().enumerate() {
         let mut value: Json = json.parse().unwrap();
-        value.compute();
+        value.compute().unwrap();
         assert_eq!(value, refs[i], "testcase {}", i);
     }
 }
@@ -48,13 +49,49 @@ fn test_deferred() {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     let value: Json = inp.parse().unwrap();
     let refval = Json::Array(vec![
-        Json::Float(FloatText::new("10123.1231")),
-        Json::Float(FloatText::new("1231.123123")),
-        Json::Float(FloatText::new("1233.123123")),
-        Json::Float(FloatText::new("123.1231231")),
-        Json::Float(FloatText::new("12312e10")),
+        Json::Float(Floating::new("10123.1231")),
+        Json::Float(Floating::new("1231.123123")),
+        Json::Float(Floating::new("1233.123123")),
+        Json::Float(Floating::new("123.1231231")),
+        Json::Float(Floating::new("12312e10")),
     ]);
     assert_eq!(value, refval);
+}
+
+#[test]
+fn test_validate_sorted() {
+    let json = r#"{"z":1,"a":[2, {"x":"y"}, true],"c":[null],"d":3}"#;
+    let mut value: Json = json.parse().unwrap();
+
+    assert_eq!(value.validate(), Ok(()));
+
+    let mut props: Vec<Property> = Vec::new();
+    let prop = vec![Property::new("x", Json::new("y"))];
+    let items = vec![ Json::new(2), Json::new(prop), Json::new(true) ];
+    props.push(Property::new("a", Json::new(items)));
+    props.push(Property::new("c", Json::new(vec![Json::Null])));
+    props.push(Property::new("d", Json::new(3)));
+    props.push( Property::new("z", Json::new(1)) );
+
+    assert_eq!(value, Json::new(props));
+}
+
+#[test]
+fn test_compute() {
+    let json = r#"{"z":1,"a":[2, {"x":"y"}, true],"c":[null],"d":3}"#;
+    let mut value: Json = json.parse().unwrap();
+
+    assert_eq!(value.compute(), Ok(()));
+
+    let mut props: Vec<Property> = Vec::new();
+    let prop = vec![Property::new("x", Json::new("y"))];
+    let items = vec![ Json::new(2), Json::new(prop), Json::new(true) ];
+    props.push(Property::new("a", Json::new(items)));
+    props.push(Property::new("c", Json::new(vec![Json::Null])));
+    props.push(Property::new("d", Json::new(3)));
+    props.push( Property::new("z", Json::new(1)) );
+
+    assert_eq!(value, Json::new(props));
 }
 
 #[bench]
@@ -144,5 +181,5 @@ fn bench_deferred(b: &mut Bencher) {
 #[bench]
 fn bench_no_deferred(b: &mut Bencher) {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
-    b.iter(|| {inp.parse::<Json>().unwrap().compute()});
+    b.iter(|| {inp.parse::<Json>().unwrap().compute().unwrap()});
 }

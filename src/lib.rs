@@ -1,3 +1,20 @@
+//! Jsondata is yet another [JSON] implementation in Rust, but tuned
+//! and optimized for bigdata and document-databases that store
+//! documents in [JSON] format. Following is the approximate scope
+//! for this package:
+//!
+//! * Support for 128-bit signed integers.
+//! * Deferred conversion of numbers.
+//! * Serialization from Rust native type to JSON text.
+//! * De-serialization from JSON text to Rust native type.
+//! * Sorted keys in property object.
+//! * Streaming JSON parser.
+//! * Support JSON5 standard.
+//! * Common arithmetic and logic operations.
+//! * Sortable JSON.
+//!
+//! [JSON]: https://tools.ietf.org/html/rfc8259
+
 #![feature(test)]
 #![feature(plugin)]
 #![feature(vec_remove_item)]
@@ -9,6 +26,7 @@ extern crate test;
 
 mod lex;
 mod property; // TODO: should we rename this as "property"
+mod num;
 mod json;
 mod parse;
 mod ops;

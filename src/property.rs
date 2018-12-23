@@ -2,13 +2,28 @@ use std::cmp::Ordering;
 
 use json::Json;
 
+/// Property type captures a single (key,value) pair in a JSON object.
+///
+/// Where,
+/// * **key** is [String] type, defined by JSON spec.
+/// * **value** is JSON value.
+///
+/// Implements [PartialEq] and [PartialOrd], where only the key component
+/// is considered for equality and ordering.
+///
+/// [string]: std::string::String
+/// [PartialEq]: std::cmp::PartialEq
+/// [PartialOrd]: std::cmp::PartialOrd
 #[derive(Debug,Clone)]
 pub struct Property(String,Json);
 
+/// Following inherent methods are self explanatory, typically
+/// used to move, or obtain a reference to either key or value
+/// component of a property.
 impl Property {
     #[inline]
-    pub fn new(key: String, value: Json) -> Property {
-        Property(key, value)
+    pub fn new<T>(key: T, value: Json) -> Property where T: ToString {
+        Property(key.to_string(), value)
     }
 
     #[inline]

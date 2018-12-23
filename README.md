@@ -8,9 +8,10 @@ This crate makes several trade-offs that are tuned for bigdata
 and document database.
 
 * [x] Support for 128-bit signed integers.
-* [x] Deferred conversion of integer / float.
+* [x] Deferred conversion for JSON numbers.
 * [x] Serialization from Rust native type to JSON text.
 * [x] De-serialization from JSON text to Rust native type.
+* [ ] CRUD operation on JSON documents.
 * [ ] Sorted keys in property object.
 * [ ] Streaming JSON parser.
 * [ ] Support [JSON5](json5.org) standard.

@@ -2,123 +2,170 @@ use std::fmt::{self, Write, Display};
 use std::default::Default;
 use std::convert::From;
 use std::str::FromStr;
-use std::cmp::Ordering;
 
 use property::{self, Property};
 use lex::Lex;
 use parse::parse_value;
+use num::{Integral, Floating};
 
-#[derive(Clone,Debug)]
-pub struct IntText {
-    len: usize,
-    txt: [u8; 32],
-    val: Option<i128>,
-}
-
-impl IntText {
-    pub fn new(txt: &str) -> IntText {
-        let mut res = IntText{len: txt.len(), txt: [0_u8; 32], val: None};
-        res.txt[..txt.len()].as_mut().copy_from_slice(txt.as_bytes());
-        res
-    }
-
-    fn integer(&self) -> Option<i128> {
-        use std::str::from_utf8;
-        if self.val.is_none() {
-            from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>().ok()
-        } else {
-            self.val
-        }
-    }
-
-    fn compute(&mut self) {
-        use std::str::from_utf8;
-        if self.val.is_none() {
-            self.val = from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>().ok();
-        }
-    }
-}
-
-impl Eq for IntText {}
-
-impl PartialEq for IntText {
-    fn eq(&self, other: &IntText) -> bool {
-        self.integer() == other.integer()
-    }
-}
-
-impl PartialOrd for IntText {
-    fn partial_cmp(&self, other: &IntText) -> Option<Ordering> {
-        self.integer().partial_cmp(&other.integer())
-    }
-}
-
-
-#[derive(Clone,Debug)]
-pub struct FloatText {
-    len: usize,
-    txt: [u8; 32],
-    val: Option<f64>,
-}
-
-impl FloatText {
-    pub fn new(txt: &str) -> FloatText {
-        let mut res = FloatText{len: txt.len(), txt: [0_u8; 32], val: None};
-        res.txt[..txt.len()].as_mut().copy_from_slice(txt.as_bytes());
-        res
-    }
-
-    fn float(&self) -> Option<f64> {
-        use std::str::from_utf8;
-        if self.val.is_none() {
-            from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>().ok()
-        } else {
-            self.val
-        }
-    }
-
-    fn compute(&mut self) {
-        use std::str::from_utf8;
-        if self.val.is_none() {
-            self.val = from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>().ok();
-        }
-    }
-}
-
-impl Eq for FloatText {}
-
-impl PartialEq for FloatText {
-    fn eq(&self, other: &FloatText) -> bool {
-        self.float() == other.float()
-    }
-}
-
-impl PartialOrd for FloatText {
-    fn partial_cmp(&self, other: &FloatText) -> Option<Ordering> {
-        self.float().partial_cmp(&other.float())
-    }
-}
-
-
-// Json as rust native values.
+/// Json type implements JavaScrip Object Notation as per specification
+/// [RFC-8259](https://tools.ietf.org/html/rfc8259).
+///
+/// * Numbers are implemented with deferred conversion, using
+///   ``Integral`` and ``Floating`` types.
+/// * Arrays are implemented as vector of Json values.
+/// * Objects are implemented as vector of properties, where each property
+///   is a tuple of (key, value). Here key is [String] type and value is
+///   Json type.
+///
+/// [string]: std::string::String
 #[derive(Clone,Debug,PartialEq,PartialOrd)]
 pub enum Json {
     Null,
     Bool(bool),
-    Integer(IntText),
-    Float(FloatText),
+    Integer(Integral),
+    Float(Floating),
     String(String),
     Array(Vec<Json>),
     Object(Vec<Property>),
-    // TODO: Add error as a variant, that will help seamless
-    // integrate with ops' dynamic errors.
 }
 
+/// Implementation provides methods to construct Json values.
 impl Json {
+    /// Construct [Json] from [bool], [i128], [f64], [String], [str],
+    /// [Vec]. To parse JSON text use [parse], as in:
+    ///
+    /// ```
+    /// extern crate jsondata;
+    /// use jsondata::Json;
+    ///
+    /// let text = r#"[null,true,false,10,"true"]"#;
+    /// let json = text.parse::<Json>(); // returns Result<Json,String>
+    /// ```
+    ///
+    /// Array can be composed as:
+    ///
+    /// ```
+    /// extern crate jsondata;
+    /// use jsondata::Json;
+    ///
+    /// let mut js = Json::new::<Vec<Json>>(Vec::new());
+    /// js.append(Json::new(10));
+    /// js.append(Json::new("hello world".to_string()));
+    /// ```
+    ///
+    /// It is also possbile to construct the vector of Json outside
+    /// the append() method, and finally use Json::new() to construct
+    /// the array.
+    ///
+    /// Object can be composed as:
+    ///
+    /// ```
+    /// extern crate jsondata;
+    /// use jsondata::{Json, Property};
+    ///
+    /// let mut js = Json::new::<Vec<Property>>(Vec::new());
+    /// js.insert(Property::new("key1".to_string(), Json::new(10)));
+    /// js.insert(Property::new("key2".to_string(), Json::new(true)));
+    /// ```
+    ///
+    /// It is also possbile to construct the vector of properties outside
+    /// the insert() method, and finally use Json::new() to construct
+    /// the object.
+    ///
+    /// [parse]: str::method.parse
     pub fn new<T>(value: T) -> Json where Self : From<T> {
         value.into()
     }
 
+    /// Validate parts of JSON text that are not yet parsed. Typically,
+    /// when used in database context, JSON documents are validated once
+    /// but parsed multiple times.
+    pub fn validate(&mut self) -> Result<(), String> {
+        use json::Json::{Array, Object, Integer, Float};
+
+        match self {
+            Array(items) => {
+                for item in items.iter_mut() {
+                    item.validate()?
+                }
+            }
+            Object(props) => {
+                for prop in props.iter_mut() {
+                    prop.value_mut().validate()?
+                }
+            },
+            Integer(item) => { item.compute()?; },
+            Float(item) => { item.compute()?; },
+            _ => (),
+        };
+        Ok(())
+    }
+
+    /// Compute parses unparsed text and convert them into numbers.
+    /// When a JSON document is parsed once but operated on multiple
+    /// times it is better to call compute for better performance.
+    ///
+    /// ```
+    /// extern crate jsondata;
+    /// use jsondata::Json;
+    ///
+    /// let text = r#"[null,true,false,10,"true"]"#;
+    /// let mut json: Json = text.parse().unwrap();
+    /// json.compute();
+    ///
+    /// // perform lookup and arithmetic operations on parsed document.
+    /// ```
+    pub fn compute(&mut self) -> Result<(), String> {
+        use json::Json::{Array, Object, Integer, Float};
+
+        match self {
+            Array(items) => {
+                for item in items.iter_mut() {
+                    item.compute()?
+                }
+            },
+            Object(props) => {
+                for prop in props.iter_mut() {
+                    prop.value_mut().compute()?
+                }
+            },
+            Integer(item) => { item.compute()?; },
+            Float(item) => { item.compute()?; },
+            _ => (),
+        };
+        Ok(())
+    }
+}
+
+/// TODO: CRUD operations on JSON document.
+impl Json {
+    pub fn insert(&mut self, item: Property) {
+        match self {
+            Json::Object(obj) => {
+                match property::search_by_key(obj, item.key_ref()) {
+                    Ok(off) => obj.insert(off, item),
+                    Err(off) => obj.insert(off, item),
+                }
+            },
+            _ => ()
+        }
+    }
+
+    pub fn append(&mut self, item: Json) {
+        match self {
+            Json::Array(arr) => {
+                arr.push(item)
+            },
+            _ => ()
+        }
+    }
+}
+
+/// Implementation provides readonly access to underlying type for each
+/// Json variant. The return value is always an [Option] because JSON
+/// follows a schemaless data representation.
+impl Json {
     pub fn boolean(&self) -> Option<bool> {
         match self { Json::Bool(s) => Some(*s), _ => None }
     }
@@ -148,45 +195,10 @@ impl Json {
     pub fn object(&self) -> Option<Vec<Property>> {
         match self { Json::Object(obj) => Some(obj.clone()), _ => None }
     }
-
-    pub fn validate(&mut self) {
-        use json::Json::{Array, Object, Integer, Float};
-
-        match self {
-            Array(arr) => arr.iter_mut().for_each(|v| v.validate()),
-            Object(items) => items.iter_mut().for_each(|prop| prop.value_mut().validate()),
-            Integer(item) => { item.compute(); },
-            Float(item) => { item.compute(); },
-            _ => (),
-        };
-    }
-
-    pub fn compute(&mut self) {
-        use json::Json::{Array, Object, Integer, Float};
-
-        match self {
-            Array(arr) => arr.iter_mut().for_each(|v| v.compute()),
-            Object(items) => items.iter_mut().for_each(|prop| prop.value_mut().compute()),
-            Integer(item) => { item.compute(); },
-            Float(item) => { item.compute(); },
-            _ => (),
-        };
-    }
 }
 
 impl Json {
     // TODO: should we expose this in rustdoc ?
-    pub fn insert(&mut self, item: Property) {
-        match self {
-            Json::Object(obj) => {
-                match property::search_by_key(obj, item.key_ref()) {
-                    Ok(off) => obj.insert(off, item),
-                    Err(off) => obj.insert(off, item),
-                }
-            },
-            _ => ()
-        }
-    }
 }
 
 impl Default for Json {
@@ -203,13 +215,13 @@ impl From<bool> for Json {
 
 impl From<i128> for Json {
     fn from(val: i128) -> Json {
-        Json::Integer(IntText{len: 0, txt: [0_u8; 32], val: Some(val)})
+        Json::Integer(Integral::new(val))
     }
 }
 
 impl From<f64> for Json {
     fn from(val: f64) -> Json {
-        Json::Float(FloatText{len: 0, txt: [0_u8; 32], val: Some(val)})
+        Json::Float(Floating::new(val))
     }
 }
 
@@ -246,7 +258,7 @@ impl From<Json> for bool {
 impl FromStr for Json {
     type Err=String;
 
-    fn from_str(text: &str) -> Result<Json,String> {
+    fn from_str(text: &str) -> Result<Json, String> {
         let mut lex = Lex::new(0, 1, 1);
         parse_value(&text, &mut lex)
     }
@@ -261,10 +273,10 @@ impl Display for Json {
             Null => write!(f, "null"),
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
-            Integer(IntText{len:_, txt:_, val: Some(v)}) => write!(f, "{}", v),
-            Integer(IntText{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
-            Float(FloatText{len:_, txt:_, val: Some(v)}) => write!(f, "{:e}", v),
-            Float(FloatText{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Integer(Integral{len:_, txt:_, val: Some(v)}) => write!(f, "{}", v),
+            Integer(Integral{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Float(Floating{len:_, txt:_, val: Some(v)}) => write!(f, "{:e}", v),
+            Float(Floating{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
             S(val) => { encode_string(f, &val)?; Ok(()) },
             Array(val) => {
                 if val.len() == 0 {
