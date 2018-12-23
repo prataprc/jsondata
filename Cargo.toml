@@ -2,6 +2,15 @@
 name = "jsondata"
 version = "0.1.0"
 authors = ["prataprc <prataprc@gmail.com>"]
+description = "JSON processing package for document databses"
+documentation = "https://docs.rs/jsondata"
+homepage = "https://github.com/bnclabs/jsondata"
+repository = "https://github.com/bnclabs/jsondata"
+keywords = ["json", "json5"]
+categories = ["encoding"]
+maintenance = { status = "actively-developed" }
+license = "MIT"
+exclude = ["template"]
 
 [dependencies]
 quickcheck = "0.7"
