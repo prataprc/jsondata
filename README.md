@@ -3,6 +3,7 @@ Why yet another json package in Rust ?
 
 [![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
 [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/bnclabs/jsondata/master?grs=github)
+[![Build Status](https://travis-ci.org/bnclabs/jsondata.svg?branch=master)](https://travis-ci.org/bnclabs/jsondata)
 
 This crate makes several trade-offs that are tuned for bigdata
 and document database.
