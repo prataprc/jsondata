@@ -162,8 +162,8 @@ impl Json {
     }
 }
 
-/// Implementation provides readonly access to underlying type for each
-/// Json variant. The return value is always an [Option] because JSON
+/// Implementation clones underlying type for each Json variant.
+/// The return value is always an [Option] because JSON
 /// follows a schemaless data representation.
 impl Json {
     pub fn boolean(&self) -> Option<bool> {

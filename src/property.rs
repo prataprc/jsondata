@@ -18,7 +18,7 @@ use json::Json;
 pub struct Property(String,Json);
 
 /// Following inherent methods are self explanatory, typically
-/// used to move, or obtain a reference to either key or value
+/// used to move, or obtain a reference for key or value
 /// component of a property.
 impl Property {
     #[inline]
