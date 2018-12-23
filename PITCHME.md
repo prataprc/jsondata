@@ -233,6 +233,65 @@ cr              : %x0D // Carriage-Return
 
 ---
 
+128-bit integers
+================
+
+@snap[mt30 fragment]
+[JSON specification](https://tools.ietf.org/html/rfc8259) do not define
+the precision for integer numbers.
+@snapend
+
+@snap[mt30 fragment]
+While most implementation of JSON handles number as 64-bit floating-point,
+[jsondata](https://github.com/bnclabs/jsondata), a rust implementation
+to process JSON, support serialization and de-serialisation of signed
+128-bit integers.
+@snapend
+
+---
+
+Numbers: Deferred conversion
+============================
+
+@snap[mt30 fragment]
+When used in context of a document-database, parsing JSON data is a
+repeated operation, and many times only specific fields within
+a JSON document need to be lookedup.
+@snapend
+
+@snap[mt30 fragment]
+To that end, [jsondata](https://github.com/bnclabs/jsondata) supports
+deferred conversion of numbers.
+@snapend
+
++++
+
+Benchmark results
+=================
+
+```rust
+Without deferred conversion:
+
+    test json_test::bench_no_deferred    1,093 ns/iter (+/- 88)
+    test json_test::bench_num              109 ns/iter (+/- 19)
+
+With deferred conversion:
+
+    test json_test::bench_deferred       1,004 ns/iter (+/- 215)
+    test json_test::bench_num               77 ns/iter (+/- 4)
+```
+
+An improvement around 10-30%.
+
+```rust
+// bench_no_deferred uses the following sample
+r#"[10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
+// bench_num uses the following sample
+"123121.2234234"
+```
+
+---
+
 @snap[midpoint]
 <h1>Thank you</h1>
 @snapend
