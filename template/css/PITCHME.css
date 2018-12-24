@@ -318,3 +318,9 @@ div.objecttype {
     font-size: 2em;
     margin-right:2em;
 }
+table {
+    font-size: .8em !important;
+}
+section.jptr-result {
+    font-size: .7em !important;
+}

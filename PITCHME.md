@@ -292,6 +292,89 @@ r#"[10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
 
 ---
 
+JSON Pointer
+============
+
+[JSON Pointer][jptr] defines a string syntax for identifying a specific value
+within a JSON document.
+
+A JSON pointer text is made of path components separated by @color[blue](/).
+
+For Example: @color[blue](/users/0/name)
+
+ path     | meaning
+--------- |---------------------------------------------------------------------
+ /users   | fetch the member value with matching key - @color[blue](users)
+ /0       | fetch the @color[blue](first value) from an array
+ /name    | fetch the member value with matching key - @color[blue](name)
+
+
+[jptr]: https://tools.ietf.org/html/rfc6901
+
++++
+
+Path matching
+=============
+
+After un-escaping the path-fragment for both **~** escape and **\** escape,
+property name is compared byte-by-byte with the path-fragment.
+
+If currently referenced value is a JSON array, path-fragment is
+interpreted as base-10 integer in ASCII and converted to zero-based index.
+
+**String-escape**
+
+All instances of quotation mark '"' (%x22), reverse solidus '\' (%x5C),
+and control (%x00-1F) characters MUST be escaped.
+
++++
+
+<!-- .slide: class="jptr-result" -->
+
+Example: Result
+===============
+
+@img[west jptr-eg span-45](./template/jpt-eg.png)
+
+<table class="east jptr-eg span-45">
+    <tr><th>pointer-text</th> <th>result</th></tr>
+    <tr><td>""</td>           <td>// the whole document</td></tr>
+    <tr><td>"/foo"</td>       <td>["bar", "baz"]</td></tr>
+    <tr><td>"/foo/0"</td>     <td>"bar"</td></tr>
+    <tr><td>"/"</td>          <td>0</td></tr>
+    <tr><td>"/a~1b"</td>      <td>1</td></tr>
+    <tr><td>"/c%d"</td>       <td>2</td></tr>
+    <tr><td>"/e^f"</td>       <td>3</td></tr>
+    <tr><td>"/g|h"</td>       <td>4</td></tr>
+    <tr><td>"/i\\j"</td>      <td>5</td></tr>
+    <tr><td>"/k\"l"</td>      <td>6</td></tr>
+    <tr><td>"/ "</td>         <td>7</td></tr>
+    <tr><td>"/m~0n"</td>      <td>8</td></tr>
+</table>
+
++++
+
+Grammar
+=======
+
+<br/>
+
+```bnf
+json-pointer    = *( "/" reference-token )
+reference-token = *( unescaped | escaped )
+unescaped       = %x00-2E | %x30-7D | %x7F-10FFFF
+escaped         = "~" ( "0" | "1" )
+```
+
+@ul[mt30]
+* %x2F ('/') and %x7E ('~') are excluded from 'unescaped'
+* @color[blue](~0) means @color[blue](~)
+* @color[blue](~1) means @color[blue](/).
+* @color[blue](~) escaping is not applied recursively. @color[blue](~01) literally becomes @color[blue](~1).
+@ulend
+
+---
+
 @snap[midpoint]
 <h1>Thank you</h1>
 @snapend
