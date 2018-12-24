@@ -12,7 +12,7 @@ and document database.
 * [x] Deferred conversion for JSON numbers.
 * [x] Serialization from Rust native type to JSON text.
 * [x] De-serialization from JSON text to Rust native type.
-* [ ] CRUD operation on JSON documents.
+* [ ] CRUD operation on JSON documents, using [JSON Pointer][jptr].
 * [ ] Sorted keys in property object.
 * [ ] Streaming JSON parser.
 * [ ] Support [JSON5](json5.org) standard.
@@ -32,3 +32,4 @@ This implementation provides deferred conversion for JSON numbers
 that leads to a **[performance improvement of upto 30%](commit-deferred)**.
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
+[jptr]: https://tools.ietf.org/html/rfc6901
