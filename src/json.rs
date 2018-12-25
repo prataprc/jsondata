@@ -18,7 +18,32 @@ use num::{Integral, Floating};
 ///   is a tuple of (key, value). Here key is [String] type and value is
 ///   Json type.
 ///
+/// To parse JSON text, use [parse]:
+///
+/// ```
+/// extern crate jsondata;
+/// use jsondata::Json;
+///
+/// let text = r#"[null,true,false,10,"true"]"#;
+/// let json = text.parse::<Json>(); // returns Result<Json,String>
+/// ```
+///
+/// To serialise Json type to JSON text:
+///
+/// ```
+/// extern crate jsondata;
+/// use jsondata::Json;
+///
+/// let text = r#"[null,true,false,10,"true"]"#;
+/// let json = text.parse::<Json>().unwrap();
+///
+/// let text1 = json.to_string();
+/// let text2 = format!("{}", json);
+/// assert_eq!(text1, text2);
+/// ```
+///
 /// [string]: std::string::String
+/// [parse]: str::method.parse
 #[derive(Clone,Debug,PartialEq,PartialOrd)]
 pub enum Json {
     Null,
@@ -33,15 +58,7 @@ pub enum Json {
 /// Implementation provides methods to construct Json values.
 impl Json {
     /// Construct [Json] from [bool], [i128], [f64], [String], [str],
-    /// [Vec]. To parse JSON text use [parse], as in:
-    ///
-    /// ```
-    /// extern crate jsondata;
-    /// use jsondata::Json;
-    ///
-    /// let text = r#"[null,true,false,10,"true"]"#;
-    /// let json = text.parse::<Json>(); // returns Result<Json,String>
-    /// ```
+    /// [Vec].
     ///
     /// Array can be composed as:
     ///
@@ -72,8 +89,6 @@ impl Json {
     /// It is also possbile to construct the vector of properties outside
     /// the insert() method, and finally use Json::new() to construct
     /// the object.
-    ///
-    /// [parse]: str::method.parse
     pub fn new<T>(value: T) -> Json where Self : From<T> {
         value.into()
     }

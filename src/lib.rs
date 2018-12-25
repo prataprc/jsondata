@@ -7,7 +7,7 @@
 //! * Deferred conversion of numbers.
 //! * Serialization from Rust native type to JSON text.
 //! * De-serialization from JSON text to Rust native type.
-//! * [CRUD] operation on JSON documents.
+//! * [CRUD] operation on JSON documents, using [JSON Pointer].
 //! * Sorted keys in property object.
 //! * Streaming JSON parser.
 //! * Support JSON5 standard.
@@ -16,6 +16,7 @@
 //!
 //! [JSON]: https://tools.ietf.org/html/rfc8259
 //! [CRUD]: https://en.wikipedia.org/wiki/Create,_read,_update_and_delete
+//! [JSON Pointer]: https://tools.ietf.org/html/rfc6901
 
 #![feature(test)]
 #![feature(plugin)]
