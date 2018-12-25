@@ -20,24 +20,29 @@ Why JSON ?
 ==========
 
 <br/>
-@snap[fragment]
-The data exchange standard for web.
+@snap[fragment text-center text-blue]
+Web standard for data exchange.
 @snapend
 
-@snap[mt30 fragment]
+@snap[mt30 fragment text-center text-green]
 Inter-operability with several languages.
 @snapend
 
-@snap[mt30 fragment]
+@snap[mt30 fragment text-center text-black]
 Human friendly as apposed to machine friendly.
 @snapend
 
 ---
 
-Primary types
-=============
+Data types
+==========
 
-There are 4 primitive types.
+JSON defines the least common subset of data types across
+sevaral languages.
+
+@snap[fragment mt30]
+<b>Primitive types</b>
+@snapend
 
 @ul
 * **null**, equivalent of None, nil, null in many languages.
@@ -45,6 +50,16 @@ There are 4 primitive types.
 * **bool**, true or false. Both represented in lowercase.
 * **string**, double quoted, utf8 encoded plain text.
 @ulend
+
+@snap[fragment mt30]
+<b>Structured types</b>
+@snapend
+
+@ul
+* **Array**, heterogenous collection of other types, with number index.
+* **Object**, heterogenous collection of other types, with string index.
+@ulend
+
 
 +++
 
@@ -134,21 +149,8 @@ Unicode chars that needs to be escaped:
 
 ---
 
-Structured types
-================
-
-@snap[west arraytype]
-**Array**
-@snapend
-
-@snap[east objecttype]
-**Object**
-@snapend
-
-+++
-
-Examples: object
-================
+Example: object
+===============
 
 ```json
 {
@@ -167,10 +169,10 @@ Examples: object
 }
 ```
 
-+++
+---
 
-Examples: array
-===============
+Example: array
+==============
 
 ```json
 [
@@ -298,15 +300,21 @@ JSON Pointer
 [JSON Pointer][jptr] defines a string syntax for identifying a specific value
 within a JSON document.
 
+@snap[fragment]
 A JSON pointer text is made of path components separated by @color[blue](/).
+@snapend
 
+<div class="fragment mt30">
 For Example: @color[blue](/users/0/name)
 
- path     | meaning
---------- |---------------------------------------------------------------------
- /users   | fetch the member value with matching key - @color[blue](users)
- /0       | fetch the @color[blue](first value) from an array
- /name    | fetch the member value with matching key - @color[blue](name)
+<table style="margin: unset" class="mt30">
+<tr> <th> path </th> <th> meaning </th> </tr>
+<tr> <td>/users</td> <td> fetch the member value with matching key - @color[blue](users) </td> </tr>
+<tr> <td>/0    </td> <td> fetch the @color[blue](first value) from an array </td> </tr>
+<tr> <td>/name </td> <td> fetch the member value with matching key - @color[blue](name) </td> </tr>
+</table>
+
+</div>
 
 
 [jptr]: https://tools.ietf.org/html/rfc6901
@@ -316,16 +324,25 @@ For Example: @color[blue](/users/0/name)
 Path matching
 =============
 
-After un-escaping the path-fragment for both **~** escape and **\** escape,
-property name is compared byte-by-byte with the path-fragment.
+@css[text-bold fragment](String-escape)
 
-If currently referenced value is a JSON array, path-fragment is
-interpreted as base-10 integer in ASCII and converted to zero-based index.
-
-**String-escape**
-
+@snap[fragment]
 All instances of quotation mark '"' (%x22), reverse solidus '\' (%x5C),
-and control (%x00-1F) characters MUST be escaped.
+and control (%x00-1F) characters MUST be un-escaped.
+@snapend
+
+@css[text-bold fragment](Tilde-escape)
+
+@snap[fragment]
+All instances of ~0 and ~1 must be un-escaped to ~ and /.
+@snapend
+
+@css[text-bold fragment](Comparison)
+
+@ul
+* If current reference value is an object, path-fragment is compared byte-by-byte with the property name.
+* If currently referenced value is a JSON array, path-fragment is interpreted as base-10 integer in ASCII and converted to zero-based index.
+@ulend
 
 +++
 

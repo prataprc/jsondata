@@ -8,7 +8,7 @@ use lex::Lex;
 use parse::parse_value;
 use num::{Integral, Floating};
 
-/// Json type implements JavaScrip Object Notation as per specification
+/// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
 ///
 /// * Numbers are implemented with deferred conversion, using

@@ -265,6 +265,10 @@ div.docslink a:hover {
     text-align: left !important;
     font-size: 0.75em !important;
 }
+section div {
+    text-align: left !important;
+    font-size: 0.75em !important;
+}
 .reveal ul {
     text-align: left !important;
     font-size: 0.75em !important;
@@ -318,9 +322,6 @@ div.objecttype {
     font-size: 2em;
     margin-right:2em;
 }
-table {
-    font-size: .8em !important;
-}
 section.jptr-result {
-    font-size: .7em !important;
+    font-size: .6em !important;
 }
