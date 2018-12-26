@@ -266,7 +266,6 @@ div.docslink a:hover {
     font-size: 0.75em !important;
 }
 section div {
-    text-align: left !important;
     font-size: 0.75em !important;
 }
 .reveal ul {
@@ -304,9 +303,6 @@ code.hljs {
 }
 .mr5 {
     margin-right: 5em !important;
-}
-.text-left {
-    text-align: left !important;
 }
 div.slide1 h1 {
     text-align: center !important;
