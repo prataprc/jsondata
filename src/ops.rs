@@ -65,9 +65,11 @@ impl Add for Json {
                 Array(a)
             }
             (Object(l), Object(r)) => {
+                use json;
+
                 let mut obj = Json::Object(Vec::new());
-                l.to_vec().into_iter().for_each(|p| Json::insert(&mut obj, p));
-                r.to_vec().into_iter().for_each(|p| Json::insert(&mut obj, p));
+                l.to_vec().into_iter().for_each(|p| json::insert(&mut obj, p));
+                r.to_vec().into_iter().for_each(|p| json::insert(&mut obj, p));
                 obj
             }
             (_, _) => Null,

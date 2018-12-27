@@ -21,6 +21,7 @@
 #![feature(test)]
 #![feature(plugin)]
 #![feature(vec_remove_item)]
+#![feature(exclusive_range_pattern)]
 
 #![plugin(quickcheck_macros)]
 
@@ -33,10 +34,12 @@ mod num;
 mod json;
 mod parse;
 mod ops;
+mod jptr;
 
 // Re-exports for API documentation.
 pub use property::Property;
 pub use json::Json;
+pub use jptr::{quote, unquote};
 
 #[cfg(test)]
 mod tests {

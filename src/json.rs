@@ -7,6 +7,7 @@ use property::{self, Property};
 use lex::Lex;
 use parse::parse_value;
 use num::{Integral, Floating};
+use jptr;
 
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
@@ -151,28 +152,95 @@ impl Json {
         };
         Ok(())
     }
+
+    fn typename(&self) -> String {
+        match self {
+            Json::Null => "null".to_string(),
+            Json::Bool(_) => "bool".to_string(),
+            Json::Integer(_) => "integer".to_string(),
+            Json::Float(_) => "float".to_string(),
+            Json::String(_) => "string".to_string(),
+            Json::Array(_) => "array".to_string(),
+            Json::Object(_) => "object".to_string(),
+        }
+    }
 }
 
-/// TODO: CRUD operations on JSON document.
 impl Json {
-    pub fn insert(&mut self, item: Property) {
-        match self {
-            Json::Object(obj) => {
-                match property::search_by_key(obj, item.key_ref()) {
-                    Ok(off) => obj.insert(off, item),
-                    Err(off) => obj.insert(off, item),
-                }
-            },
-            _ => ()
+    pub fn get(&self, jptr: &str) -> Result<Json,String> {
+        if jptr.len() == 0 {
+            Ok(self.clone())
+
+        } else {
+            let (json, frag) = jptr::g_lookup(self, jptr)?;
+            let json = jptr::g_lookup_container(json, &frag)?;
+            Ok(json.clone())
         }
     }
 
-    pub fn append(&mut self, item: Json) {
-        match self {
+    pub fn set(&mut self, jptr: &str, value: Json) -> Result<(),String> {
+
+        if jptr.len() == 0 { return Ok(()) }
+
+        let (json, frag) = jptr::lookup(self, jptr)?;
+        match json {
             Json::Array(arr) => {
-                arr.push(item)
+                match frag.parse::<usize>() {
+                    Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                    Ok(n) => { arr[n] = value; Ok(()) },
+                    Err(err) => Err(format!("jptr: not array-index {}", err)),
+                }
             },
-            _ => ()
+            Json::Object(props) => {
+                match property::search_by_key(&props, &frag) {
+                    Ok(n) => Ok(props.insert(n, Property::new(frag, value))),
+                    Err(n) => Ok(props.insert(n, Property::new(frag, value))),
+                }
+            },
+            _ => Err(format!("jptr: not a container {} at {}", json, frag)),
+        }
+    }
+
+    pub fn delete(&mut self, jptr: &str) -> Result<(),String> {
+        if jptr.len() == 0 { return Ok(()) }
+
+        let (json, frag) = jptr::lookup(self, jptr)?;
+        match json {
+            Json::Array(arr) => {
+                match frag.parse::<usize>() {
+                    Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                    Ok(n) => {arr.remove(n); Ok(())},
+                    Err(err) => Err(format!("jptr: not array-index {}", err)),
+                }
+            },
+            Json::Object(props) => {
+                match property::search_by_key(&props, &frag) {
+                    Ok(n) => {props.remove(n); Ok(())},
+                    Err(_) => Err(format!("jptr: key {} not found", frag)),
+                }
+            },
+            _ => Err(format!("{} not a container type", json.typename())),
+        }
+    }
+
+    pub fn append(&mut self, jptr: &str, value: Json ) -> Result<(), String> {
+
+        if jptr.len() == 0 { return Ok(()) }
+
+        let (json, frag) = jptr::lookup(self, jptr)?;
+        let json = jptr::lookup_container(json, &frag)?;
+        match json {
+            Json::String(s1) => {
+                if let Json::String(s2) = value {
+                    let mut s = String::new();
+                    s.push_str(&s1); s.push_str(&s2);
+                    Ok(())
+                } else {
+                    Err(format!("jptr: cannot add {} to `{}`", value.typename(), s1))
+                }
+            },
+            Json::Array(arr) => { let n = arr.len(); Ok(arr.insert(n, value)) },
+            _ => Err(format!("jptr: not a container {} at {}", json, frag)),
         }
     }
 }
@@ -345,6 +413,17 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
     write!(w, "\"")
 }
 
+pub fn insert(json: &mut Json, item: Property) {
+    match json {
+        Json::Object(obj) => {
+            match property::search_by_key(&obj, item.key_ref()) {
+                Ok(off) => obj.insert(off, item),
+                Err(off) => obj.insert(off, item),
+            }
+        },
+        _ => ()
+    }
+}
 
 static ESCAPE: [&'static str; 256] = [
     "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
