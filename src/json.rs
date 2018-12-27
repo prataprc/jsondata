@@ -68,8 +68,8 @@ impl Json {
     /// use jsondata::Json;
     ///
     /// let mut js = Json::new::<Vec<Json>>(Vec::new());
-    /// js.append(Json::new(10));
-    /// js.append(Json::new("hello world".to_string()));
+    /// js.append("", Json::new(10));
+    /// js.append("", Json::new("hello world".to_string()));
     /// ```
     ///
     /// It is also possbile to construct the vector of Json outside
@@ -83,12 +83,12 @@ impl Json {
     /// use jsondata::{Json, Property};
     ///
     /// let mut js = Json::new::<Vec<Property>>(Vec::new());
-    /// js.insert(Property::new("key1".to_string(), Json::new(10)));
-    /// js.insert(Property::new("key2".to_string(), Json::new(true)));
+    /// js.set("/key1", Json::new(10));
+    /// js.set("/key2", Json::new(true));
     /// ```
     ///
     /// It is also possbile to construct the vector of properties outside
-    /// the insert() method, and finally use Json::new() to construct
+    /// the set() method, and finally use Json::new() to construct
     /// the object.
     pub fn new<T>(value: T) -> Json where Self : From<T> {
         value.into()
