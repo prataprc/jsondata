@@ -44,6 +44,12 @@ pub fn unquote(jptr: &str) -> Result<String,String> {
     Ok(outs)
 }
 
+
+// TODO: Can we fold lookup and g_lookup into a single implementation
+// using macros or somehow using the type parameters ? The main
+// different between the two is that lookup takes a mutable reference
+// and g_lookup takes a immutable reference.
+
 pub fn lookup<'a>(json: &'a mut Json, jptr: &str)
     -> Result<(&'a mut Json, String), String>
 {
