@@ -12,8 +12,8 @@ and document database.
 * [x] Deferred conversion for JSON numbers.
 * [x] Serialization from Rust native type to JSON text.
 * [x] De-serialization from JSON text to Rust native type.
-* [ ] CRUD operation on JSON documents, using [JSON Pointer][jptr].
-* [ ] Sorted keys in property object.
+* [x] CRUD operation on JSON documents, using [JSON Pointer][jptr].
+* [x] Sorted keys in property object.
 * [ ] Streaming JSON parser.
 * [ ] Support [JSON5](json5.org) standard.
 * [ ] Common arithmetic and logic operations.
