@@ -14,37 +14,12 @@ use jptr;
 ///
 /// * Numbers are implemented with deferred conversion, using
 ///   ``Integral`` and ``Floating`` types.
-/// * Arrays are implemented as vector of Json values.
-/// * Objects are implemented as vector of properties, where each property
-///   is a tuple of (key, value). Here key is [String] type and value is
-///   Json type.
-///
-/// To parse JSON text, use [parse]:
-///
-/// ```
-/// extern crate jsondata;
-/// use jsondata::Json;
-///
-/// let text = r#"[null,true,false,10,"true"]"#;
-/// let json = text.parse::<Json>(); // returns Result<Json,String>
-/// ```
-///
-/// To serialise Json type to JSON text:
-///
-/// ```
-/// extern crate jsondata;
-/// use jsondata::Json;
-///
-/// let text = r#"[null,true,false,10,"true"]"#;
-/// let json = text.parse::<Json>().unwrap();
-///
-/// let text1 = json.to_string();
-/// let text2 = format!("{}", json);
-/// assert_eq!(text1, text2);
-/// ```
+/// * Arrays are implemented as vector of Json values Vec<[Json]>.
+/// * Objects are implemented as vector of properties, Vec<[Property]>,
+///   where each property is a tuple of (key, value). Here key is [String]
+///   type and value is [Json] type.
 ///
 /// [string]: std::string::String
-/// [parse]: str::method.parse
 #[derive(Clone,Debug)]
 pub enum Json {
     Null,
@@ -56,7 +31,7 @@ pub enum Json {
     Object(Vec<Property>),
 }
 
-/// Implementation provides methods to construct Json values.
+/// Implementation provides methods to construct and validate Json values.
 impl Json {
     /// Construct [Json] from [bool], [i128], [f64], [String], [str],
     /// [Vec].
@@ -166,7 +141,16 @@ impl Json {
     }
 }
 
+/// Implementation provides CRUD access into [Json] document using
+/// [Json Pointer]. For all methods,
+///
+/// * Path must be valid JSON Pointer.
+/// * Path fragment must be valid key if parent container is an object.
+/// * Path fragment must be a number index if parent container is an array.
+///
+/// [JSON Pointer]: https://tools.ietf.org/html/rfc6901
 impl Json {
+    /// get a json field, within the document, locatable by ``path``.
     pub fn get(&self, path: &str) -> Result<Json,String> {
         if path.len() == 0 {
             Ok(self.clone())
@@ -179,6 +163,7 @@ impl Json {
         }
     }
 
+    /// set a json field, within the document, locatable by ``path``.
     pub fn set(&mut self, path: &str, value: Json) -> Result<(),String> {
 
         if path.len() == 0 { return Ok(()) }
@@ -205,6 +190,7 @@ impl Json {
         }
     }
 
+    /// delete a json field, within the document, locatable by ``path``.
     pub fn delete(&mut self, path: &str) -> Result<(),String> {
 
         if path.len() == 0 { return Ok(()) }
@@ -231,6 +217,8 @@ impl Json {
         }
     }
 
+    /// append a string or array to a json field within the document that is
+    /// either a string or array.
     pub fn append(&mut self, path: &str, value: Json ) -> Result<(), String> {
 
         if path.len() == 0 { return Ok(()) }

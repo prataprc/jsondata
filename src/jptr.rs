@@ -1,7 +1,15 @@
+//! module jptr implements [JSON Pointer RFC spec].
+//!
+//! [JSON Pointer RFC spec]: https://tools.ietf.org/html/rfc6901
+
 use json::Json;
 use property;
 
-pub fn quote(path: &str) -> String {
+/// quote path fragment using backslash escape and tilde escape defined by the
+/// RFC spec.
+///
+/// After escaping each path-fragment caller can join them with '/'.
+pub fn quote(fragment: &str) -> String {
     let mut outs = String::new();
     for ch in path.chars() {
         match ch {
@@ -16,6 +24,10 @@ pub fn quote(path: &str) -> String {
     outs
 }
 
+/// unquote path fragment for backslash and tilde escape defined by the
+/// RFC spec.
+///
+/// After un-escaping each path-fragment caller can join them with '/'.
 pub fn unquote(path: &str) -> Result<String,String> {
     let mut outs = String::new();
     let (mut escaped, mut tilde) = (false, false);

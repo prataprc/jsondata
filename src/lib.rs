@@ -14,9 +14,34 @@
 //! * Common arithmetic and logic operations.
 //! * Sortable JSON.
 //!
+//! To parse JSON text, use [parse]:
+//!
+//! ```
+//! extern crate jsondata;
+//! use jsondata::Json;
+//!
+//! let text = r#"[null,true,false,10,"true"]"#;
+//! let json = text.parse::<Json>(); // returns Result<Json,String>
+//! ```
+//!
+//! To serialise Json type to JSON text:
+//!
+//! ```
+//! extern crate jsondata;
+//! use jsondata::Json;
+//!
+//! let text = r#"[null,true,false,10,"true"]"#;
+//! let json = text.parse::<Json>().unwrap();
+//!
+//! let text1 = json.to_string();
+//! let text2 = format!("{}", json);
+//! assert_eq!(text1, text2);
+//! ```
+//!
 //! [JSON]: https://tools.ietf.org/html/rfc8259
 //! [CRUD]: https://en.wikipedia.org/wiki/Create,_read,_update_and_delete
 //! [JSON Pointer]: https://tools.ietf.org/html/rfc6901
+//! [parse]: str::method.parse
 
 #![feature(test)]
 #![feature(plugin)]
