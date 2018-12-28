@@ -10,7 +10,7 @@ keywords = ["json", "json5"]
 categories = ["encoding"]
 maintenance = { status = "actively-developed" }
 license = "MIT"
-exclude = ["template"]
+exclude = ["template/**"]
 
 [dependencies]
 quickcheck = "0.7"
