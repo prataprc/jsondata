@@ -15,7 +15,7 @@ and document database.
 * [x] CRUD operation on JSON documents, using [JSON Pointer][jptr].
 * [x] Sorted keys in property object.
 * [ ] Streaming JSON parser.
-* [ ] Support [JSON5](json5.org) standard.
+* [ ] Support [JSON5](http://json5.org) standard.
 * [ ] Common arithmetic and logic operations.
 * [ ] Sortable JSON.
 
