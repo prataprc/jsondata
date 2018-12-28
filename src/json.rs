@@ -167,22 +167,24 @@ impl Json {
 }
 
 impl Json {
-    pub fn get(&self, jptr: &str) -> Result<Json,String> {
-        if jptr.len() == 0 {
+    pub fn get(&self, path: &str) -> Result<Json,String> {
+        if path.len() == 0 {
             Ok(self.clone())
 
         } else {
-            let (json, frag) = jptr::g_lookup(self, jptr)?;
+            let path = jptr::fix_prefix(path)?;
+            let (json, frag) = jptr::g_lookup(self, path)?;
             let json = jptr::g_lookup_container(json, &frag)?;
             Ok(json.clone())
         }
     }
 
-    pub fn set(&mut self, jptr: &str, value: Json) -> Result<(),String> {
+    pub fn set(&mut self, path: &str, value: Json) -> Result<(),String> {
 
-        if jptr.len() == 0 { return Ok(()) }
+        if path.len() == 0 { return Ok(()) }
+        let path = jptr::fix_prefix(path)?;
 
-        let (json, frag) = jptr::lookup(self, jptr)?;
+        let (json, frag) = jptr::lookup(self, path)?;
         match json {
             Json::Array(arr) => {
                 match frag.parse::<usize>() {
@@ -201,10 +203,12 @@ impl Json {
         }
     }
 
-    pub fn delete(&mut self, jptr: &str) -> Result<(),String> {
-        if jptr.len() == 0 { return Ok(()) }
+    pub fn delete(&mut self, path: &str) -> Result<(),String> {
 
-        let (json, frag) = jptr::lookup(self, jptr)?;
+        if path.len() == 0 { return Ok(()) }
+        let path = jptr::fix_prefix(path)?;
+
+        let (json, frag) = jptr::lookup(self, path)?;
         match json {
             Json::Array(arr) => {
                 match frag.parse::<usize>() {
@@ -223,11 +227,12 @@ impl Json {
         }
     }
 
-    pub fn append(&mut self, jptr: &str, value: Json ) -> Result<(), String> {
+    pub fn append(&mut self, path: &str, value: Json ) -> Result<(), String> {
 
-        if jptr.len() == 0 { return Ok(()) }
+        if path.len() == 0 { return Ok(()) }
+        let path = jptr::fix_prefix(path)?;
 
-        let (json, frag) = jptr::lookup(self, jptr)?;
+        let (json, frag) = jptr::lookup(self, path)?;
         let json = jptr::lookup_container(json, &frag)?;
         match json {
             Json::String(s1) => {

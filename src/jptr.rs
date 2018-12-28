@@ -1,9 +1,9 @@
 use json::Json;
 use property;
 
-pub fn quote(jptr: &str) -> String {
+pub fn quote(path: &str) -> String {
     let mut outs = String::new();
-    for ch in jptr.chars() {
+    for ch in path.chars() {
         match ch {
             // backslash escape
             '"' | '\\' | '\x00'..'\x1f' => { outs.push('\\'); outs.push(ch) },
@@ -16,10 +16,10 @@ pub fn quote(jptr: &str) -> String {
     outs
 }
 
-pub fn unquote(jptr: &str) -> Result<String,String> {
+pub fn unquote(path: &str) -> Result<String,String> {
     let mut outs = String::new();
     let (mut escaped, mut tilde) = (false, false);
-    for ch in jptr.chars() {
+    for ch in path.chars() {
         if escaped {
             escaped = false;
             outs.push(ch);
@@ -50,12 +50,12 @@ pub fn unquote(jptr: &str) -> Result<String,String> {
 // different between the two is that lookup takes a mutable reference
 // and g_lookup takes a immutable reference.
 
-pub fn lookup<'a>(json: &'a mut Json, jptr: &str)
+pub(crate) fn lookup<'a>(json: &'a mut Json, path: &str)
     -> Result<(&'a mut Json, String), String>
 {
     let mut frag = String::new();
     let (mut escaped, mut tilde) = (false, false);
-    let mut chars = jptr.chars();
+    let mut chars = path.chars();
     loop {
         let ch = match chars.next() {
             Some(ch) => ch,
@@ -88,7 +88,7 @@ pub fn lookup<'a>(json: &'a mut Json, jptr: &str)
 }
 
 
-pub fn lookup_container<'a>(json: &'a mut Json, frag: &str)
+pub(crate) fn lookup_container<'a>(json: &'a mut Json, frag: &str)
     -> Result<&'a mut Json, String>
 {
     match json {
@@ -109,12 +109,12 @@ pub fn lookup_container<'a>(json: &'a mut Json, frag: &str)
     }
 }
 
-pub fn g_lookup<'a>(json: &'a Json, jptr: &str)
+pub(crate) fn g_lookup<'a>(json: &'a Json, path: &str)
     -> Result<(&'a Json, String), String>
 {
     let mut frag = String::new();
     let (mut escaped, mut tilde) = (false, false);
-    let mut chars = jptr.chars();
+    let mut chars = path.chars();
     loop {
         let ch = match chars.next() {
             Some(ch) => ch,
@@ -147,7 +147,7 @@ pub fn g_lookup<'a>(json: &'a Json, jptr: &str)
 }
 
 
-pub fn g_lookup_container<'a>(json: &'a Json, frag: &str)
+pub(crate) fn g_lookup_container<'a>(json: &'a Json, frag: &str)
     -> Result<&'a Json, String>
 {
     match json {
@@ -166,4 +166,12 @@ pub fn g_lookup_container<'a>(json: &'a Json, frag: &str)
         },
         _ => Err(format!("jptr: not a container {} at {}", json, frag)),
     }
+}
+
+pub(crate) fn fix_prefix(path: &str) -> Result<&str,String> {
+    let mut chars = path.chars();
+    if chars.next().unwrap() != '/' {
+        return Err(format!("jptr: pointer should start with forward solidus"))
+    }
+    Ok(chars.as_str())
 }

@@ -34,12 +34,12 @@ mod num;
 mod json;
 mod parse;
 mod ops;
-mod jptr;
+
+pub mod jptr;
 
 // Re-exports for API documentation.
 pub use property::Property;
 pub use json::Json;
-pub use jptr::{quote, unquote};
 
 #[cfg(test)]
 mod tests {
@@ -50,3 +50,4 @@ mod tests {
 }
 
 #[cfg(test)] mod json_test;
+#[cfg(test)] mod jptr_test;

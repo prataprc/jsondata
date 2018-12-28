@@ -29,7 +29,7 @@ Especially in the context of bigdata where data is stored in JSON
 format and we need to lookup, only, specific fields within the document.
 
 This implementation provides deferred conversion for JSON numbers
-that leads to a **[performance improvement of upto 30%](commit-deferred)**.
+that leads to a **[performance improvement of upto 30%][commit-deferred]**.
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [jptr]: https://tools.ietf.org/html/rfc6901
