@@ -45,7 +45,7 @@ use jptr;
 ///
 /// [string]: std::string::String
 /// [parse]: str::method.parse
-#[derive(Clone,Debug,PartialEq,PartialOrd)]
+#[derive(Clone,Debug)]
 pub enum Json {
     Null,
     Bool(bool),
@@ -188,14 +188,16 @@ impl Json {
         match json {
             Json::Array(arr) => {
                 match frag.parse::<usize>() {
-                    Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                    Ok(n) if n >= arr.len() => {
+                        Err(format!("jptr: index out of bound {}", n))
+                    },
                     Ok(n) => { arr[n] = value; Ok(()) },
                     Err(err) => Err(format!("jptr: not array-index {}", err)),
                 }
             },
             Json::Object(props) => {
                 match property::search_by_key(&props, &frag) {
-                    Ok(n) => Ok(props.insert(n, Property::new(frag, value))),
+                    Ok(n) => Ok(props[n].set_value(value)),
                     Err(n) => Ok(props.insert(n, Property::new(frag, value))),
                 }
             },
@@ -212,7 +214,9 @@ impl Json {
         match json {
             Json::Array(arr) => {
                 match frag.parse::<usize>() {
-                    Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                    Ok(n) if n >= arr.len() => {
+                        Err(format!("jptr: index out of bound {}", n))
+                    },
                     Ok(n) => {arr.remove(n); Ok(())},
                     Err(err) => Err(format!("jptr: not array-index {}", err)),
                 }
@@ -241,7 +245,8 @@ impl Json {
                     s.push_str(&s1); s.push_str(&s2);
                     Ok(())
                 } else {
-                    Err(format!("jptr: cannot add {} to `{}`", value.typename(), s1))
+                    let tn = value.typename();
+                    Err(format!("jptr: cannot add {} to `{}`", tn, s1))
                 }
             },
             Json::Array(arr) => { let n = arr.len(); Ok(arr.insert(n, value)) },
@@ -285,8 +290,21 @@ impl Json {
     }
 }
 
-impl Json {
-    // TODO: should we expose this in rustdoc ?
+impl PartialEq for Json {
+    fn eq(&self, other: &Json) -> bool {
+        use Json::{Null, Bool, Integer, Float, String as S, Array, Object};
+
+        match (self, other) {
+            (Null, Null) => true,
+            (Bool(a), Bool(b)) => a == b,
+            (Integer(_), Integer(_)) => self.integer() == other.integer(),
+            (Float(_), Float(_)) => self.float() == other.float(),
+            (S(a), S(b)) => a == b,
+            (Array(a), Array(b)) => a == b,
+            (Object(a), Object(b)) => a == b,
+            _ => false,
+        }
+    }
 }
 
 impl Default for Json {
@@ -362,9 +380,13 @@ impl Display for Json {
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
             Integer(Integral{len:_, txt:_, val: Some(v)}) => write!(f, "{}", v),
-            Integer(Integral{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Integer(Integral{len, txt, val:_}) => {
+                write!(f, "{}", from_utf8(&txt[..*len]).unwrap())
+            },
             Float(Floating{len:_, txt:_, val: Some(v)}) => write!(f, "{:e}", v),
-            Float(Floating{len, txt, val:_}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Float(Floating{len, txt, val:_}) => {
+                write!(f, "{}", from_utf8(&txt[..*len]).unwrap())
+            },
             S(val) => { encode_string(f, &val)?; Ok(()) },
             Array(val) => {
                 if val.len() == 0 {
