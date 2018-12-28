@@ -99,6 +99,7 @@ fn jptr_set_test() {
     let reft = r#"
        {
           "foo": [10, "baz"],
+          "boo": 10,
           "": true,
           "a/b": true,
           "c%d": true,
@@ -114,20 +115,20 @@ fn jptr_set_test() {
     let mut json: Json = text.parse().unwrap();
     let refv: Json = reft.parse().unwrap();
 
-    json.set("/foo", Json::new(10));
-    json.set("/foo/0", Json::new(10));
-    json.set("/", Json::new(true));
-    json.set("/a~1b", Json::new(true));
-    json.set("/c%d", Json::new(true));
-    json.set("/e^f", Json::Null);
-    json.set("/g|h", Json::Null);
-    json.set(r#"/i\\j"#, Json::Null);
-    json.set(r#"/k\"l"#, Json::Null);
-    json.set("/ ", Json::new("hello"));
-    json.set("/m~0n", Json::new("world"));
+    json.set("/boo", Json::new(10)).unwrap();
+    json.set("/foo/0", Json::new(10)).unwrap();
+    json.set("/", Json::new(true)).unwrap();
+    json.set("/a~1b", Json::new(true)).unwrap();
+    json.set("/c%d", Json::new(true)).unwrap();
+    json.set("/e^f", Json::Null).unwrap();
+    json.set("/g|h", Json::Null).unwrap();
+    json.set(r#"/i\\j"#, Json::Null).unwrap();
+    json.set(r#"/k\"l"#, Json::Null).unwrap();
+    json.set("/ ", Json::new("hello")).unwrap();
+    json.set("/m~0n", Json::new("world")).unwrap();
 
-    json.set("/d", Json::new::<Vec<Property>>(Vec::new()));
-    json.set("/d/key1", Json::new("value"));
+    json.set("/d", Json::new::<Vec<Property>>(Vec::new())).unwrap();
+    json.set("/d/key1", Json::new("value")).unwrap();
 
     assert_eq!(json, refv);
 }
@@ -144,7 +145,7 @@ fn jptr_append_test() {
           "g|h": 4,
           "i\\j": 5,
           "k\"l": 6,
-          " ": 7,
+          " ": "hello",
           "m~n": 8,
           "d" : {"key1": [10,20]}
        }
@@ -167,10 +168,10 @@ fn jptr_append_test() {
     let mut json: Json = text.parse().unwrap();
     let refv: Json = reft.parse().unwrap();
 
-    json.append("/foo", Json::new("goz"));
-    json.append("/foo/0", Json::new("jek"));
-    json.append("/ ", Json::new("workd"));
-    json.append("/d/key1", Json::new("workd"));
+    json.append("/foo", Json::new("goz")).unwrap();
+    json.append("/foo/0", Json::new("jek")).unwrap();
+    json.append("/ ", Json::new("workd")).unwrap();
+    json.append("/d/key1", Json::new("workd")).unwrap();
 
     assert_eq!(json, refv);
 }
@@ -208,10 +209,10 @@ fn jptr_delete_test() {
     let mut json: Json = text.parse().unwrap();
     let refv: Json = reft.parse().unwrap();
 
-    json.delete("/foo/1");
-    json.delete("/");
-    json.delete("/ ");
-    json.delete("/d/key1/0");
+    json.delete("/foo/1").unwrap();
+    json.delete("/").unwrap();
+    json.delete("/ ").unwrap();
+    json.delete("/d/key1/0").unwrap();
 
     assert_eq!(json, refv);
 }
