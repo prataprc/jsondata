@@ -11,7 +11,7 @@ use property;
 /// After escaping each path-fragment caller can join them with '/'.
 pub fn quote(fragment: &str) -> String {
     let mut outs = String::new();
-    for ch in path.chars() {
+    for ch in fragment.chars() {
         match ch {
             // backslash escape
             '"' | '\\' | '\x00'..'\x1f' => { outs.push('\\'); outs.push(ch) },
@@ -28,10 +28,10 @@ pub fn quote(fragment: &str) -> String {
 /// RFC spec.
 ///
 /// After un-escaping each path-fragment caller can join them with '/'.
-pub fn unquote(path: &str) -> Result<String,String> {
+pub fn unquote(fragment: &str) -> Result<String,String> {
     let mut outs = String::new();
     let (mut escaped, mut tilde) = (false, false);
-    for ch in path.chars() {
+    for ch in fragment.chars() {
         if escaped {
             escaped = false;
             outs.push(ch);
