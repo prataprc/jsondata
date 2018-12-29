@@ -21,7 +21,7 @@
 //! use jsondata::Json;
 //!
 //! let text = r#"[null,true,false,10,"true"]"#;
-//! let json = text.parse::<Json>(); // returns Result<Json,String>
+//! let json = text.parse::<Json>().unwrap();
 //! ```
 //!
 //! To serialise Json type to JSON text:
@@ -33,8 +33,8 @@
 //! let text = r#"[null,true,false,10,"true"]"#;
 //! let json = text.parse::<Json>().unwrap();
 //!
-//! let text1 = json.to_string();
-//! let text2 = format!("{}", json);
+//! let text1 = json.to_string();    // one way to serialize to JSON
+//! let text2 = format!("{}", json); // another way to serialize to JSON
 //! assert_eq!(text1, text2);
 //! ```
 //!

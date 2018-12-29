@@ -119,7 +119,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {
             'u' => match decode_json_hex_code(&mut chars, lex)? {
                 code1 @ 0xDC00 ... 0xDFFF => {
                     lex.incr_col(i);
-                    let err = format!("parse: invalid string codepoint {}", code1);
+                    let err = format!("parse: invalid char codepoint {}", code1);
                     return Err(lex.format(&err))
                 },
                 // Non-BMP characters are encoded as a sequence of
@@ -128,7 +128,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {
                     let code2 = decode_json_hex_code2(&mut chars, lex)?;
                     if code2 < 0xDC00 || code2 > 0xDFFF {
                         lex.incr_col(i);
-                        let err = format!("parse: invalid string codepoint {}", code2);
+                        let err = format!("parse: invalid codepoint {}", code2);
                         return Err(lex.format(&err))
                     }
                     let code = (((code1 - 0xD800) as u32) << 10 |
@@ -140,7 +140,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {
                     Some(ch) => res.push(ch),
                     None => {
                         lex.incr_col(i);
-                        let err = format!("parse: invalid string escape code {:?}", n);
+                        let err = format!("parse: invalid escape code {:?}", n);
                         return Err(lex.format(&err))
                     },
                 },
@@ -259,14 +259,18 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
 }
 
 fn parse_whitespace(text: &str, lex: &mut Lex) {
-    for &ch in (&text[lex.off..]).as_bytes() {
-        match WS_LOOKUP[ch as usize] {
-            0 => break,
-            1 => { lex.col += 1 },              // ' ' | '\t' | '\r'
-            2 => { lex.row += 1; lex.col = 0 }, // '\n'
-            _ => panic!("unreachable code"),
-        };
-        lex.off += 1;
+    for ch in text[lex.off..].chars() {
+        if ch.is_whitespace() {
+            if (ch as u32) < 256 && ch == '\n' {
+                lex.row += 1;
+                lex.col = 0;
+            } else {
+                lex.col += 1;
+            }
+            lex.off += 1;
+            continue
+        }
+        break
     }
 }
 
@@ -311,7 +315,7 @@ static HEXNUM: [u8; 256] = [
     20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
 ];
 
-static WS_LOOKUP: [u8; 256] = [
+static _WS_LOOKUP: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
