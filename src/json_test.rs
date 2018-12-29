@@ -94,6 +94,12 @@ fn test_compute() {
     assert_eq!(value, Json::new(props));
 }
 
+#[test]
+fn test_hexnumber() {
+    let json: Json = "0x1234".parse().unwrap();
+    assert_eq!(json.integer(), Json::new(0x1234).integer());
+}
+
 #[bench]
 fn bench_null(b: &mut Bencher) {
     b.iter(|| {"null".parse::<Json>().unwrap()});
@@ -107,6 +113,11 @@ fn bench_bool(b: &mut Bencher) {
 #[bench]
 fn bench_num(b: &mut Bencher) {
     b.iter(|| {"123121.2234234".parse::<Json>().unwrap()});
+}
+
+#[bench]
+fn bench_hexnum(b: &mut Bencher) {
+    b.iter(|| {"0x1235abcd".parse::<Json>().unwrap()});
 }
 
 #[bench]

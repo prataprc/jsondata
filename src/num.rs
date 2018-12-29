@@ -15,7 +15,12 @@ impl Integral {
     pub fn integer(&self) -> Option<i128> {
         use std::str::from_utf8;
         if self.val.is_none() {
-            from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>().ok()
+            let bytes = &self.txt[0..self.len];
+            if bytes[0] == 48 /*'0'*/ && bytes[1] == 120 /*'x'*/ {
+                i128::from_str_radix(from_utf8(&bytes[2..]).unwrap(), 16).ok()
+            } else {
+                i128::from_str_radix(from_utf8(bytes).unwrap(), 10).ok()
+            }
         } else {
             self.val
         }
