@@ -11,3 +11,15 @@
 =====
 
 * CRUD operation on JSON documents, using JSON Pointer.
+
+Release Checklist
+=================
+
+* Bump up the version:
+  * __major__: backward incompatible API changes.
+  * __minor__: backward compatible API Changes.
+  * __patch__: bug fixes.
+* Run cargo test, bench, doc for the new version.
+* Cargo benchcmp between older version and new version.
+* Create a git-tag for the new version.
+* Cargo publish the new version.
