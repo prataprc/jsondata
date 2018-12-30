@@ -8,7 +8,6 @@ homepage = "https://github.com/bnclabs/jsondata"
 repository = "https://github.com/bnclabs/jsondata"
 keywords = ["json", "json5"]
 categories = ["encoding"]
-maintenance = { status = "actively-developed" }
 license = "MIT"
 exclude = ["template/**"]
 
@@ -20,3 +19,7 @@ lazy_static = "1.2.0"
 [dev-dependencies]
 quickcheck = "0.7"
 quickcheck_macros = "0.7"
+
+[badges]
+maintenance = { status = "actively-developed" }
+travis-ci = { repository = "pest-parser/pest" }
