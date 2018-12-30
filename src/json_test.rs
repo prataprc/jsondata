@@ -1,4 +1,5 @@
 use std::fmt::{Write};
+use std::f64;
 
 use json::{Json};
 use num::{Integral, Floating};
@@ -97,16 +98,23 @@ fn test_compute() {
 #[test]
 fn test_json5_num() {
     let json: Json = "0x1234".parse().unwrap();
-    assert_eq!(json.integer(), Json::new(0x1234).integer());
+    assert_eq!(json, Json::new(0x1234));
 
     let json: Json = "1234.".parse().unwrap();
     assert_eq!(json.float(), Json::new(1234.0).float());
 
     let json: Json = ".1234".parse().unwrap();
-    assert_eq!(json.float(), Json::new(0.1234).float());
+    assert_eq!(json, Json::new(0.1234));
 
     let json: Json = ".1234.".parse().unwrap();
     assert_eq!(json.float(), None);
+
+    let json: Json = "[Infinity, -Infinity, NaN]".parse().unwrap();
+    let value = Json::new(vec![
+        Json::new(f64::INFINITY), Json::new(f64::NEG_INFINITY),
+        Json::new(f64::NAN)
+    ]);
+    assert_eq!(json, value);
 }
 
 #[test]
@@ -209,5 +217,11 @@ fn bench_deferred(b: &mut Bencher) {
 #[bench]
 fn bench_no_deferred(b: &mut Bencher) {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
+    b.iter(|| {inp.parse::<Json>().unwrap().compute().unwrap()});
+}
+
+#[bench]
+fn bench_json5_num(b: &mut Bencher) {
+    let inp = r#" -Infinity"#;
     b.iter(|| {inp.parse::<Json>().unwrap().compute().unwrap()});
 }

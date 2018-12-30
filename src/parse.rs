@@ -1,5 +1,5 @@
 use std::str::CharIndices;
-use std::char;
+use std::{char, f64};
 
 use lex::Lex;
 use json::{Json};
@@ -12,14 +12,18 @@ pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json,String> {
     check_eof(text, lex)?;
 
     //println!("text -- {:?}", &text[lex.off..].as_bytes());
-    match (&text[lex.off..]).as_bytes()[0] {
+    let bs = (&text[lex.off..]).as_bytes();
+    match bs[0] {
         b'n' => parse_null(text, lex),
         b't' => parse_true(text, lex),
         b'f' => parse_false(text, lex),
+        b'-' if bs.len() > 1 && bs[1] == b'I' => parse_json5_float(text, lex, 1),
         b'0'..=b'9'|b'+'|b'-'|b'.'|b'e'|b'E' => parse_num(text, lex),
         b'"' => parse_string(text, lex),
         b'[' => parse_array(text, lex),
         b'{' => parse_object(text, lex),
+        b'I' => parse_json5_float(text, lex, 2),
+        b'N' => parse_json5_float(text, lex, 3),
         ch => Err(lex.format(&format!("parse: invalid token {}", ch))),
     }
     //println!("valu -- {:?}", v);
@@ -76,6 +80,26 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
         }
     }
     doparse(text, text.len(), is_float)
+}
+
+fn parse_json5_float(text: &str, lex: &mut Lex, w: usize) -> Result<Json,String> {
+    lazy_static! {
+        static ref JSON5_FLOAT_LOOKUP: Vec<(String,usize,Json)> = vec![
+            ("".to_string(), 0_usize, Json::Null),
+            ("-Infinity".to_string(), 9, Json::new(f64::NEG_INFINITY)),
+            ("Infinity".to_string(), 8, Json::new(f64::INFINITY)),
+            ("NaN".to_string(), 3, Json::new(f64::NAN)),
+        ];
+    }
+    let (token, l, res) = &JSON5_FLOAT_LOOKUP[w];
+    let text = &text[lex.off..];
+    if text.len() >= *l && token == &text[..*l] {
+        lex.col += l;
+        lex.off += l;
+        Ok(res.clone())
+    } else {
+        Err(lex.format(&format!("parse: expected {}", token)))
+    }
 }
 
 fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {

@@ -15,6 +15,7 @@ exclude = ["template/**"]
 [dependencies]
 quickcheck = "0.7"
 quickcheck_macros = "0.7"
+lazy_static = "1.2.0"
 
 [dev-dependencies]
 quickcheck = "0.7"
