@@ -11,7 +11,7 @@ pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json,String> {
 
     check_eof(text, lex)?;
 
-    //println!("text -- {:?}", valtext);
+    //println!("text -- {:?}", &text[lex.off..].as_bytes());
     match (&text[lex.off..]).as_bytes()[0] {
         b'n' => parse_null(text, lex),
         b't' => parse_true(text, lex),
@@ -259,7 +259,8 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
 }
 
 fn parse_whitespace(text: &str, lex: &mut Lex) {
-    for ch in text[lex.off..].chars() {
+    for (i, ch) in text[lex.off..].char_indices() {
+        //println!("{} {}", ch as u32, ch.is_whitespace());
         if ch.is_whitespace() {
             if (ch as u32) < 256 && ch == '\n' {
                 lex.row += 1;
@@ -267,9 +268,9 @@ fn parse_whitespace(text: &str, lex: &mut Lex) {
             } else {
                 lex.col += 1;
             }
-            lex.off += 1;
             continue
         }
+        lex.off += i;
         break
     }
 }

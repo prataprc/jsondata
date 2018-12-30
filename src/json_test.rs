@@ -109,6 +109,14 @@ fn test_json5_num() {
     assert_eq!(json.float(), None);
 }
 
+#[test]
+fn test_json5_whitespace() {
+    let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string() +
+        &("\u{00a0} \r \t \n 0x1234".to_string());
+    let json: Json = text.parse().unwrap();
+    assert_eq!(json.integer(), Json::new(0x1234).integer());
+}
+
 #[bench]
 fn bench_null(b: &mut Bencher) {
     b.iter(|| {"null".parse::<Json>().unwrap()});
