@@ -95,9 +95,18 @@ fn test_compute() {
 }
 
 #[test]
-fn test_hexnumber() {
+fn test_json5_num() {
     let json: Json = "0x1234".parse().unwrap();
     assert_eq!(json.integer(), Json::new(0x1234).integer());
+
+    let json: Json = "1234.".parse().unwrap();
+    assert_eq!(json.float(), Json::new(1234.0).float());
+
+    let json: Json = ".1234".parse().unwrap();
+    assert_eq!(json.float(), Json::new(0.1234).float());
+
+    let json: Json = ".1234.".parse().unwrap();
+    assert_eq!(json.float(), None);
 }
 
 #[bench]
