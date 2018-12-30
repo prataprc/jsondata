@@ -46,6 +46,24 @@ fn test_simple_jsons_ref() {
 }
 
 #[test]
+fn test_convert() {
+    let js: Json = true.into();
+    assert_eq!(js, Json::new(true));
+
+    let js: Json = 1024.into();
+    assert_eq!(js, Json::new(1024));
+
+    let js: Json = 1024.2.into();
+    assert_eq!(js, Json::new(1024.2));
+
+    let js: Json = "hello world".to_string().into();
+    assert_eq!(js, Json::new("hello world"));
+
+    let js: Json = "hello world".into();
+    assert_eq!(js, Json::new("hello world"));
+}
+
+#[test]
 fn test_deferred() {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     let value: Json = inp.parse().unwrap();

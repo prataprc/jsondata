@@ -251,10 +251,6 @@ impl Json {
         match self { Json::Bool(s) => Some(*s), _ => None }
     }
 
-    pub fn string(&self) -> Option<String> {
-        match self { Json::String(s) => Some(s.clone()), _ => None }
-    }
-
     pub fn integer(&self) -> Option<i128> {
         match self {
             Json::Integer(item) => item.integer(),
@@ -267,6 +263,10 @@ impl Json {
             Json::Float(item) => item.float(),
             _ => None,
         }
+    }
+
+    pub fn string(&self) -> Option<String> {
+        match self { Json::String(s) => Some(s.clone()), _ => None }
     }
 
     pub fn array(&self) -> Option<Vec<Json>> {
@@ -362,6 +362,60 @@ impl FromStr for Json {
     fn from_str(text: &str) -> Result<Json, String> {
         let mut lex = Lex::new(0, 1, 1);
         parse_value(&text, &mut lex)
+    }
+}
+
+impl AsRef<str> for Json {
+    fn as_ref(&self) -> &str {
+        match self {
+            Json::String(s) => s,
+            _ => panic!("Json is not string"),
+        }
+    }
+}
+
+impl AsRef<Vec<Json>> for Json {
+    fn as_ref(&self) -> &Vec<Json> {
+        match self {
+            Json::Array(arr) => arr,
+            _ => panic!("Json is not an array"),
+        }
+    }
+}
+
+impl AsRef<Vec<Property>> for Json {
+    fn as_ref(&self) -> &Vec<Property> {
+        match self {
+            Json::Object(obj) => obj,
+            _ => panic!("Json is not an object"),
+        }
+    }
+}
+
+impl AsMut<str> for Json {
+    fn as_mut(&mut self) -> &mut str {
+        match self {
+            Json::String(s) => s,
+            _ => panic!("Json is not string"),
+        }
+    }
+}
+
+impl AsMut<Vec<Json>> for Json {
+    fn as_mut(&mut self) -> &mut Vec<Json> {
+        match self {
+            Json::Array(arr) => arr,
+            _ => panic!("Json is not an array"),
+        }
+    }
+}
+
+impl AsMut<Vec<Property>> for Json {
+    fn as_mut(&mut self) -> &mut Vec<Property> {
+        match self {
+            Json::Object(obj) => obj,
+            _ => panic!("Json is not an object"),
+        }
     }
 }
 
