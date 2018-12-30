@@ -16,7 +16,7 @@ impl Integral {
         use std::str::from_utf8;
         if self.val.is_none() {
             let bytes = &self.txt[0..self.len];
-            if bytes[0] == 48 /*'0'*/ && bytes[1] == 120 /*'x'*/ {
+            if bytes.len() > 2 && bytes[0] == 48 /*'0'*/ && bytes[1] == 120 /*'x'*/ {
                 i128::from_str_radix(from_utf8(&bytes[2..]).unwrap(), 16).ok()
             } else {
                 i128::from_str_radix(from_utf8(bytes).unwrap(), 10).ok()
