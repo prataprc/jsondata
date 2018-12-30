@@ -286,7 +286,14 @@ impl PartialEq for Json {
             (Null, Null) => true,
             (Bool(a), Bool(b)) => a == b,
             (Integer(_), Integer(_)) => self.integer() == other.integer(),
-            (Float(_), Float(_)) => self.float() == other.float(),
+            (Float(_), Float(_)) => {
+                let (fs, fo) = (self.float().unwrap(), other.float().unwrap());
+                if fs.is_finite() && fo.is_finite() { return true }
+
+                (fs.is_nan() && fo.is_nan()) ||
+                (fs.is_sign_positive() && fo.is_sign_positive()) ||
+                (fs.is_sign_negative() && fo.is_sign_negative())
+            },
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
             (Object(a), Object(b)) => a == b,
