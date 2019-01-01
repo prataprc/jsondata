@@ -15,11 +15,13 @@ impl Integral {
     pub fn integer(&self) -> Option<i128> {
         use std::str::from_utf8;
         if self.val.is_none() {
-            let bytes = &self.txt[0..self.len];
-            if bytes.len() > 2 && bytes[0] == 48 /*'0'*/ && bytes[1] == 120 /*'x'*/ {
-                i128::from_str_radix(from_utf8(&bytes[2..]).unwrap(), 16).ok()
+            let bs = &self.txt[0..self.len];
+            if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120 /*'x'*/ {
+                i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16).ok()
+            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120 /*'x'*/ {
+                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x).ok()
             } else {
-                i128::from_str_radix(from_utf8(bytes).unwrap(), 10).ok()
+                i128::from_str_radix(from_utf8(bs).unwrap(), 10).ok()
             }
         } else {
             self.val
@@ -29,8 +31,17 @@ impl Integral {
     pub fn compute(&mut self) -> Result<(), String> {
         use std::str::from_utf8;
 
+        //println!("{:?}", self.txt);
         if self.val.is_none() {
-            match from_utf8(&self.txt[0..self.len]).unwrap().parse::<i128>() {
+            let bs = &self.txt[0..self.len];
+            let res = if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120 /*'x'*/ {
+                i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16)
+            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120 /*'x'*/ {
+                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x)
+            } else {
+                i128::from_str_radix(from_utf8(bs).unwrap(), 10)
+            };
+            match res {
                 Ok(val) => self.val = Some(val),
                 Err(err) => return Err(format!("parse: {}", err)),
             }

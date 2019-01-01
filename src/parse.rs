@@ -62,9 +62,10 @@ fn parse_false(text: &str, lex: &mut Lex) -> Result<Json,String> {
 fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
     let text = &text[lex.off..];
 
-    let mut doparse = |text: &str, i: usize, f: bool| -> Result<Json,String> {
+    let mut doparse = |text: &str, i: usize, f: bool, h: bool| -> Result<Json,String> {
         lex.incr_col(i);
-        if f {
+        //println!("parse_num -- {}", text);
+        if f && !h {
             Ok(Json::Float(Floating::new(text)))
         } else {
             Ok(Json::Integer(Integral::new(text)))
@@ -72,14 +73,17 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
     };
 
     let mut is_float = false;
+    let mut is_hex = false;
     for (i, ch) in text.char_indices() {
         if ISNUMBER[ch as usize] == 0 {
-            return doparse(&text[..i], i, is_float)
+            return doparse(&text[..i], i, is_float, is_hex)
         } else if !is_float && ISNUMBER[ch as usize] == 2 {
             is_float = true
+        } else if ISNUMBER[ch as usize] == 3 {
+            is_hex = true
         }
     }
-    doparse(text, text.len(), is_float)
+    doparse(text, text.len(), is_float, is_hex)
 }
 
 fn parse_json5_float(text: &str, lex: &mut Lex, w: usize) -> Result<Json,String> {
@@ -306,7 +310,7 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<(),String> {
         return Err(lex.format(&format!("parse: missing token {}", b)));
     }
     if progbytes[0] != b {
-        return Err(lex.format(&format!("parse: invalid token {}", b)));
+        return Err(lex.format(&format!("parse: invalid byte {}", b)));
     }
     lex.incr_col(1);
 
@@ -364,10 +368,10 @@ static ISNUMBER: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2, 0,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
