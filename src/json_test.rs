@@ -143,6 +143,13 @@ fn test_json5_num() {
     json.compute().unwrap();
     let value = Json::new(vec![Json::new(0xdecaf), Json::new(-0xC0FFEE)]);
     assert_eq!(json, value);
+
+    let mut json: Json = "[ 123, 123.456, .456, 123e-456 ]".parse().unwrap();
+    json.compute().unwrap();
+    let value = Json::new(vec![
+        Json::new(123), Json::new(123.456), Json::new(0.456), Json::new(123e-456),
+    ]);
+    assert_eq!(json, value);
 }
 
 #[test]
