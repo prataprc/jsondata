@@ -115,23 +115,33 @@ fn test_compute() {
 
 #[test]
 fn test_json5_num() {
-    let json: Json = "0x1234".parse().unwrap();
+    let mut json: Json = "0x1234".parse().unwrap();
+    json.compute().unwrap();
     assert_eq!(json, Json::new(0x1234));
 
-    let json: Json = "1234.".parse().unwrap();
+    let mut json: Json = "1234.".parse().unwrap();
+    json.compute().unwrap();
     assert_eq!(json.float(), Json::new(1234.0).float());
 
-    let json: Json = ".1234".parse().unwrap();
+    let mut json: Json = ".1234".parse().unwrap();
+    json.compute().unwrap();
     assert_eq!(json, Json::new(0.1234));
 
-    let json: Json = ".1234.".parse().unwrap();
+    let mut json: Json = ".1234.".parse().unwrap();
+    json.compute().unwrap_err();
     assert_eq!(json.float(), None);
 
-    let json: Json = "[Infinity, -Infinity, NaN]".parse().unwrap();
+    let mut json: Json = "[Infinity, -Infinity, NaN]".parse().unwrap();
+    json.compute().unwrap();
     let value = Json::new(vec![
         Json::new(f64::INFINITY), Json::new(f64::NEG_INFINITY),
         Json::new(f64::NAN)
     ]);
+    assert_eq!(json, value);
+
+    let mut json: Json = " [ 0xdecaf, -0xC0FFEE ]".parse().unwrap();
+    json.compute().unwrap();
+    let value = Json::new(vec![Json::new(0xdecaf), Json::new(-0xC0FFEE)]);
     assert_eq!(json, value);
 }
 
