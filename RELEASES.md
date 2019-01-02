@@ -26,6 +26,8 @@ Release Checklist
   * cargo doc
   * cargo benchcmp between older version and new version.
   * cargo clippy
+  * cargo deadlinks
+  * cargo outdated
 * Create a git-tag for the new version.
 * Cargo publish the new version.
 * Badges
