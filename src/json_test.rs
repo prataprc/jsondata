@@ -114,6 +114,14 @@ fn test_compute() {
 }
 
 #[test]
+fn test_json5_whitespace() {
+    let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string() +
+        &("\u{00a0} \r \t \n 0x1234".to_string());
+    let json: Json = text.parse().unwrap();
+    assert_eq!(json.integer(), Json::new(0x1234).integer());
+}
+
+#[test]
 fn test_json5_num() {
     let mut json: Json = "0x1234".parse().unwrap();
     json.compute().unwrap();
@@ -153,11 +161,59 @@ fn test_json5_num() {
 }
 
 #[test]
-fn test_json5_whitespace() {
-    let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string() +
-        &("\u{00a0} \r \t \n 0x1234".to_string());
-    let json: Json = text.parse().unwrap();
-    assert_eq!(json.integer(), Json::new(0x1234).integer());
+fn test_json5_array() {
+    let json: Json = "[]".parse().unwrap();
+    let value = Json::new::<Vec<Json>>(vec![]);
+    assert_eq!(json, value);
+
+    let mut json: Json = r#"[ 1, true, "three", ]"#.parse().unwrap();
+    json.compute().unwrap();
+    let value = Json::new(vec![
+        Json::new(1), Json::new(true), Json::new("three"),
+    ]);
+    assert_eq!(json, value);
+
+    let json: Json = r#"[ [1, true, "three"], [4, "five", 0x6], ]"#.parse().unwrap();
+    let value = Json::new(vec![
+        Json::new(vec![Json::new(1), Json::new(true), Json::new("three")]),
+        Json::new(vec![Json::new(4), Json::new("five"), Json::new(0x6)]),
+    ]);
+    assert_eq!(json, value);
+}
+
+#[test]
+fn test_json5_object() {
+    let json: Json = "{}".parse().unwrap();
+    let value = Json::new::<Vec<Property>>(vec![]);
+    assert_eq!(json, value);
+
+    let mut json: Json = "{ width: 1920, height: 1080, }".parse().unwrap();
+    json.compute().unwrap();
+    let value = Json::new(vec![
+        Property::new("height", 1080.into()), Property::new("width", 1920.into()),
+    ]);
+    assert_eq!(json, value);
+
+    let mut json: Json = r#"{ image: { width: 1920, height: 1080, "aspect-ratio": "16:9", } }"#.parse().unwrap();
+    json.compute().unwrap();
+    let props = Json::new(vec![
+        Property::new("aspect-ratio", "16:9".into()),
+        Property::new("height", 1080.into()),
+        Property::new("width", 1920.into()),
+    ]);
+    let value = Json::new(vec![Property::new("image", props)]);
+    assert_eq!(json, value);
+
+    let mut json: Json = r#"[ { name: "Joe", age: 27 }, { name: "Jane", age: 32 }, ]"#.parse().unwrap();
+    json.compute().unwrap();
+    let obj1 = Json::new::<Vec<Property>>(vec![
+        Property::new("age", 27.into()), Property::new("name", "joe".into()), 
+    ]);
+    let obj2 = Json::new::<Vec<Property>>(vec![
+        Property::new("age", 32.into()), Property::new("name", "jane".into()), 
+    ]);
+    let value = Json::new(vec![obj1, obj2]);
+    assert_eq!(json, value);
 }
 
 #[bench]

@@ -77,8 +77,10 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json,String> {
     for (i, ch) in text.char_indices() {
         if ISNUMBER[ch as usize] == 0 {
             return doparse(&text[..i], i, is_float, is_hex)
+
         } else if !is_float && ISNUMBER[ch as usize] == 2 {
             is_float = true
+
         } else if ISNUMBER[ch as usize] == 3 {
             is_hex = true
         }
@@ -261,7 +263,12 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
     loop {
         // key
         parse_whitespace(text, lex);
-        let key: String = parse_string(text, lex)?.string().unwrap();
+        let key: String = match text[lex.off..].chars().next() {
+            Some('}') => { lex.incr_col(1); break Ok(Json::Object(m)) },
+            Some('"') => parse_string(text, lex)?.string().unwrap(),
+            Some(ch) if ch.is_alphabetic() => parse_identifier(text, lex),
+            _ => break Err(lex.format("parse: expected valid key"))
+        };
         // colon
         parse_whitespace(text, lex);
         check_next_byte(text, lex, b':')?;
@@ -275,15 +282,23 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json,String> {
 
         // is exit
         parse_whitespace(text, lex);
-        if (&text[lex.off..]).len() == 0 {
-            break Err(lex.format("parse: unexpected eof"))
-        } else if (&text[lex.off..]).as_bytes()[0] == b'}' { // exit
-            lex.incr_col(1);
-            break Ok(Json::Object(m))
-        } else if (&text[lex.off..]).as_bytes()[0] == b',' { // skip comma
-            lex.incr_col(1);
+        let mut chars = text[lex.off..].chars();
+        match chars.next() {
+            None => break Err(lex.format("parse: unexpected eof")),
+            Some(',') => { lex.incr_col(1); },
+            _ => (),
         }
     }
+}
+
+fn parse_identifier(text: &str, lex: &mut Lex) -> String {
+    let mut ident = String::new();
+    for (i, ch) in text[lex.off..].char_indices() {
+        if ch.is_alphanumeric() { ident.push(ch); continue }
+        lex.off += i;
+        break
+    }
+    ident
 }
 
 fn parse_whitespace(text: &str, lex: &mut Lex) {
@@ -310,7 +325,7 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<(),String> {
         return Err(lex.format(&format!("parse: missing token {}", b)));
     }
     if progbytes[0] != b {
-        return Err(lex.format(&format!("parse: invalid byte {}", b)));
+        return Err(lex.format(&format!("parse: invalid byte {}, {}", b, progbytes[0])));
     }
     lex.incr_col(1);
 
