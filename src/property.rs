@@ -74,7 +74,7 @@ impl PartialOrd for Property {
 }
 
 
-pub fn search_by_key(obj: &Vec<Property>, key: &str) -> Result<usize,usize> {
+pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize,usize> {
     use std::cmp::Ordering::{Greater, Equal, Less};
 
     let mut size = obj.len();

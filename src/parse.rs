@@ -121,7 +121,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {
     }
 
     while let Some((i, ch)) = chars.next() {
-        if escape == false {
+        if !escape {
             if ch == '\\' {
                 escape = true;
                 continue
@@ -184,7 +184,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json,String> {
         escape = false;
     }
     lex.incr_col(i);
-    return Err(lex.format("parse: incomplete string"))
+    Err(lex.format("parse: incomplete string"))
 }
 
 fn decode_json_hex_code2(chars: &mut CharIndices, lex: &mut Lex)
@@ -198,7 +198,7 @@ fn decode_json_hex_code2(chars: &mut CharIndices, lex: &mut Lex)
         }
     }
     let err = "parse: invalid string string escape type";
-    return Err(lex.format(err))
+    Err(lex.format(err))
 }
 
 fn decode_json_hex_code(chars: &mut CharIndices, lex: &mut Lex)
@@ -206,12 +206,12 @@ fn decode_json_hex_code(chars: &mut CharIndices, lex: &mut Lex)
 {
     let mut n = 0;
     let mut code = 0_u32;
-    while let Some((_, ch)) = chars.next() {
+    for (_, ch) in chars {
         if (ch as u8) > 128 || HEXNUM[ch as usize] == 20 {
             let err = format!("parse: invalid string escape code {:?}", ch);
             return Err(lex.format(&err))
         }
-        code = code * 16 + (HEXNUM[ch as usize] as u32);
+        code = code * 16 + u32::from(HEXNUM[ch as usize]);
         n += 1;
         if n == 4 {
             break
@@ -321,7 +321,7 @@ fn parse_whitespace(text: &str, lex: &mut Lex) {
 fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<(),String> {
     let progbytes = (&text[lex.off..]).as_bytes();
 
-    if progbytes.len() == 0 {
+    if progbytes.is_empty() {
         return Err(lex.format(&format!("parse: missing token {}", b)));
     }
     if progbytes[0] != b {
@@ -333,7 +333,7 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<(),String> {
 }
 
 fn check_eof(text: &str, lex: &mut Lex) -> Result<(),String> {
-    if (&text[lex.off..]).len() == 0 {
+    if (&text[lex.off..]).is_empty() {
         Err(lex.format("parse: unexpected eof"))
     } else {
         Ok(())

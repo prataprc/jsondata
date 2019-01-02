@@ -152,7 +152,7 @@ impl Json {
 impl Json {
     /// get a json field, within the document, locatable by ``path``.
     pub fn get(&self, path: &str) -> Result<Json,String> {
-        if path.len() == 0 {
+        if path.is_empty() {
             Ok(self.clone())
 
         } else {
@@ -166,7 +166,10 @@ impl Json {
     /// set a json field, within the document, locatable by ``path``.
     pub fn set(&mut self, path: &str, value: Json) -> Result<(),String> {
 
-        if path.len() == 0 { return Ok(()) }
+        if path.is_empty() {
+            return Ok(())
+        }
+
         let path = jptr::fix_prefix(path)?;
 
         let (json, frag) = jptr::lookup(self, path)?;
@@ -182,8 +185,8 @@ impl Json {
             },
             Json::Object(props) => {
                 match property::search_by_key(&props, &frag) {
-                    Ok(n) => Ok(props[n].set_value(value)),
-                    Err(n) => Ok(props.insert(n, Property::new(frag, value))),
+                    Ok(n) => { props[n].set_value(value); Ok(()) },
+                    Err(n) => { props.insert(n, Property::new(frag, value)); Ok(()) },
                 }
             },
             _ => Err(format!("jptr: not a container {} at {}", json, frag)),
@@ -193,7 +196,10 @@ impl Json {
     /// delete a json field, within the document, locatable by ``path``.
     pub fn delete(&mut self, path: &str) -> Result<(),String> {
 
-        if path.len() == 0 { return Ok(()) }
+        if path.is_empty() {
+            return Ok(())
+        }
+
         let path = jptr::fix_prefix(path)?;
 
         let (json, frag) = jptr::lookup(self, path)?;
@@ -221,7 +227,9 @@ impl Json {
     /// either a string or array.
     pub fn append(&mut self, path: &str, value: Json ) -> Result<(), String> {
 
-        if path.len() == 0 { return Ok(()) }
+        if path.is_empty() {
+            return Ok(())
+        }
         let path = jptr::fix_prefix(path)?;
 
         let (json, frag) = jptr::lookup(self, path)?;
@@ -237,7 +245,7 @@ impl Json {
                     Err(format!("jptr: cannot add {} to `{}`", tn, s1))
                 }
             },
-            Json::Array(arr) => { let n = arr.len(); Ok(arr.insert(n, value)) },
+            Json::Array(arr) => { let n = arr.len(); arr.insert(n, value); Ok(()) },
             _ => Err(format!("jptr: not a container {} at {}", json, frag)),
         }
     }
@@ -428,17 +436,13 @@ impl Display for Json {
             Null => write!(f, "null"),
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
-            Integer(Integral{len:_, txt:_, val: Some(v)}) => write!(f, "{}", v),
-            Integer(Integral{len, txt, val:_}) => {
-                write!(f, "{}", from_utf8(&txt[..*len]).unwrap())
-            },
-            Float(Floating{len:_, txt:_, val: Some(v)}) => write!(f, "{:e}", v),
-            Float(Floating{len, txt, val:_}) => {
-                write!(f, "{}", from_utf8(&txt[..*len]).unwrap())
-            },
+            Integer(Integral{val: Some(v), ..}) => write!(f, "{}", v),
+            Integer(Integral{len, txt, ..}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Float(Floating{val: Some(v), ..}) => write!(f, "{:e}", v),
+            Float(Floating{len, txt, ..}) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
             S(val) => { encode_string(f, &val)?; Ok(()) },
             Array(val) => {
-                if val.len() == 0 {
+                if val.is_empty() {
                     write!(f, "[]")
 
                 } else {
@@ -475,7 +479,7 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
     let mut start = 0;
     for (i, byte) in val.bytes().enumerate() {
         let escstr = ESCAPE[byte as usize];
-        if escstr.len() == 0 { continue }
+        if escstr.is_empty() { continue }
 
         if start < i {
             write!(w, "{}", &val[start..i])?;
@@ -490,14 +494,11 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 }
 
 pub fn insert(json: &mut Json, item: Property) {
-    match json {
-        Json::Object(obj) => {
-            match property::search_by_key(&obj, item.key_ref()) {
-                Ok(off) => obj.insert(off, item),
-                Err(off) => obj.insert(off, item),
-            }
-        },
-        _ => ()
+    if let Json::Object(obj) = json {
+        match property::search_by_key(&obj, item.key_ref()) {
+            Ok(off) => obj.insert(off, item),
+            Err(off) => obj.insert(off, item),
+        }
     }
 }
 

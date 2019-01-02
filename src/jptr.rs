@@ -183,7 +183,7 @@ pub(crate) fn g_lookup_container<'a>(json: &'a Json, frag: &str)
 pub(crate) fn fix_prefix(path: &str) -> Result<&str,String> {
     let mut chars = path.chars();
     if chars.next().unwrap() != '/' {
-        return Err(format!("jptr: pointer should start with forward solidus"))
+        return Err("jptr: pointer should start with forward solidus".to_string())
     }
     Ok(chars.as_str())
 }
