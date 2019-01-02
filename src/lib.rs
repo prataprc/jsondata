@@ -47,25 +47,26 @@
 #![feature(plugin)]
 #![feature(vec_remove_item)]
 #![feature(exclusive_range_pattern)]
-
 #![plugin(quickcheck_macros)]
 
-#[macro_use] extern crate lazy_static;
-#[cfg(test)] extern crate quickcheck;
+#[macro_use]
+extern crate lazy_static;
+#[cfg(test)]
+extern crate quickcheck;
 extern crate test;
 
-mod lex;
-mod property; // TODO: should we rename this as "property"
-mod num;
 mod json;
-mod parse;
+mod lex;
+mod num;
 mod ops;
+mod parse;
+mod property; // TODO: should we rename this as "property"
 
 pub mod jptr;
 
 // Re-exports for API documentation.
-pub use property::Property;
 pub use json::Json;
+pub use property::Property;
 
 #[cfg(test)]
 mod tests {
@@ -75,5 +76,7 @@ mod tests {
     }
 }
 
-#[cfg(test)] mod json_test;
-#[cfg(test)] mod jptr_test;
+#[cfg(test)]
+mod jptr_test;
+#[cfg(test)]
+mod json_test;

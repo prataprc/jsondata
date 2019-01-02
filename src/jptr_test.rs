@@ -42,7 +42,6 @@ fn unquote_test() {
     assert_eq!(unquote(r#"/k\"l"#).unwrap(), r#"/k"l"#);
 }
 
-
 #[test]
 fn jptr_get_test() {
     let text = r#"
@@ -127,7 +126,8 @@ fn jptr_set_test() {
     json.set("/ ", Json::new("hello")).unwrap();
     json.set("/m~0n", Json::new("world")).unwrap();
 
-    json.set("/d", Json::new::<Vec<Property>>(Vec::new())).unwrap();
+    json.set("/d", Json::new::<Vec<Property>>(Vec::new()))
+        .unwrap();
     json.set("/d/key1", Json::new("value")).unwrap();
 
     assert_eq!(json, refv);

@@ -14,15 +14,18 @@ use json::Json;
 /// [string]: std::string::String
 /// [PartialEq]: std::cmp::PartialEq
 /// [PartialOrd]: std::cmp::PartialOrd
-#[derive(Debug,Clone)]
-pub struct Property(String,Json);
+#[derive(Debug, Clone)]
+pub struct Property(String, Json);
 
 /// Following inherent methods are self explanatory, typically
 /// used to move, or obtain a reference for key or value
 /// component of a property.
 impl Property {
     #[inline]
-    pub fn new<T>(key: T, value: Json) -> Property where T: ToString {
+    pub fn new<T>(key: T, value: Json) -> Property
+    where
+        T: ToString,
+    {
         Property(key.to_string(), value)
     }
 
@@ -73,12 +76,13 @@ impl PartialOrd for Property {
     }
 }
 
-
-pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize,usize> {
-    use std::cmp::Ordering::{Greater, Equal, Less};
+pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize, usize> {
+    use std::cmp::Ordering::{Equal, Greater, Less};
 
     let mut size = obj.len();
-    if size == 0 { return Err(0) }
+    if size == 0 {
+        return Err(0);
+    }
 
     let mut base = 0_usize;
     while size > 1 {
@@ -95,7 +99,11 @@ pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize,usize> {
     // base is always in [0, size) because base <= mid.
     let item: &str = obj[base].key_ref();
     let cmp = item.cmp(key);
-    if cmp == Equal { Ok(base) } else { Err(base + (cmp == Less) as usize) }
+    if cmp == Equal {
+        Ok(base)
+    } else {
+        Err(base + (cmp == Less) as usize)
+    }
 }
 
 pub fn upsert_object_key(obj: &mut Vec<Property>, prop: Property) {

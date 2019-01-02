@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct Integral {
     pub len: usize,
     pub txt: [u8; 32],
@@ -8,7 +8,10 @@ pub struct Integral {
 }
 
 impl Integral {
-    pub fn new<T>(val: T) -> Integral where Self: From<T> {
+    pub fn new<T>(val: T) -> Integral
+    where
+        Self: From<T>,
+    {
         val.into()
     }
 
@@ -16,10 +19,16 @@ impl Integral {
         use std::str::from_utf8;
         if self.val.is_none() {
             let bs = &self.txt[0..self.len];
-            if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120 /*'x'*/ {
+            if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120
+            /*'x'*/
+            {
                 i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16).ok()
-            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120 /*'x'*/ {
-                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x).ok()
+            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120
+            /*'x'*/
+            {
+                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16)
+                    .map(|x| -x)
+                    .ok()
             } else {
                 i128::from_str_radix(from_utf8(bs).unwrap(), 10).ok()
             }
@@ -34,9 +43,13 @@ impl Integral {
         //println!("{:?}", self.txt);
         if self.val.is_none() {
             let bs = &self.txt[0..self.len];
-            let res = if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120 /*'x'*/ {
+            let res = if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120
+            /*'x'*/
+            {
                 i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16)
-            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120 /*'x'*/ {
+            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120
+            /*'x'*/
+            {
                 i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x)
             } else {
                 i128::from_str_radix(from_utf8(bs).unwrap(), 10)
@@ -52,18 +65,27 @@ impl Integral {
 
 impl From<i128> for Integral {
     fn from(val: i128) -> Integral {
-        Integral{len: 0, txt: [0_u8; 32], val: Some(val)}
+        Integral {
+            len: 0,
+            txt: [0_u8; 32],
+            val: Some(val),
+        }
     }
 }
 
 impl<'a> From<&'a str> for Integral {
     fn from(val: &str) -> Integral {
-        let mut res = Integral{len: val.len(), txt: [0_u8; 32], val: None};
-        res.txt[..val.len()].as_mut().copy_from_slice(val.as_bytes());
+        let mut res = Integral {
+            len: val.len(),
+            txt: [0_u8; 32],
+            val: None,
+        };
+        res.txt[..val.len()]
+            .as_mut()
+            .copy_from_slice(val.as_bytes());
         res
     }
 }
-
 
 impl Eq for Integral {}
 
@@ -79,8 +101,7 @@ impl PartialOrd for Integral {
     }
 }
 
-
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct Floating {
     pub len: usize,
     pub txt: [u8; 32],
@@ -88,7 +109,10 @@ pub struct Floating {
 }
 
 impl Floating {
-    pub fn new<T>(val: T) -> Floating where Self: From<T> {
+    pub fn new<T>(val: T) -> Floating
+    where
+        Self: From<T>,
+    {
         val.into()
     }
 
@@ -96,7 +120,10 @@ impl Floating {
         use std::str::from_utf8;
 
         if self.val.is_none() {
-            from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>().ok()
+            from_utf8(&self.txt[0..self.len])
+                .unwrap()
+                .parse::<f64>()
+                .ok()
         } else {
             self.val
         }
@@ -117,14 +144,24 @@ impl Floating {
 
 impl From<f64> for Floating {
     fn from(val: f64) -> Floating {
-        Floating{len: 0, txt: [0_u8; 32], val: Some(val)}
+        Floating {
+            len: 0,
+            txt: [0_u8; 32],
+            val: Some(val),
+        }
     }
 }
 
 impl<'a> From<&'a str> for Floating {
     fn from(val: &str) -> Floating {
-        let mut res = Floating{len: val.len(), txt: [0_u8; 32], val: None};
-        res.txt[..val.len()].as_mut().copy_from_slice(val.as_bytes());
+        let mut res = Floating {
+            len: val.len(),
+            txt: [0_u8; 32],
+            val: None,
+        };
+        res.txt[..val.len()]
+            .as_mut()
+            .copy_from_slice(val.as_bytes());
         res
     }
 }
@@ -142,6 +179,3 @@ impl PartialOrd for Floating {
         self.float().partial_cmp(&other.float())
     }
 }
-
-
-

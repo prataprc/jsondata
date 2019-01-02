@@ -1,8 +1,8 @@
-use std::fmt::{Write};
 use std::f64;
+use std::fmt::Write;
 
-use json::{Json};
-use num::{Integral, Floating};
+use json::Json;
+use num::{Floating, Integral};
 use property::Property;
 use test::Bencher;
 
@@ -15,7 +15,7 @@ fn test_json_constructor() {
 
 #[test]
 fn test_simple_jsons() {
-    use self::Json::{Null, Bool, String, Array, Object};
+    use self::Json::{Array, Bool, Null, Object, String};
 
     let jsons = include!("../testdata/test_simple.jsons");
     let refs = include!("../testdata/test_simple.jsons.ref");
@@ -29,7 +29,7 @@ fn test_simple_jsons() {
 
 #[test]
 fn test_simple_jsons_ref() {
-    use self::Json::{Null, Bool, String, Array, Object};
+    use self::Json::{Array, Bool, Null, Object, String};
 
     let jsons = include!("../testdata/test_simple.jsons");
     let refs = include!("../testdata/test_simple.jsons.ref");
@@ -86,11 +86,11 @@ fn test_validate_sorted() {
 
     let mut props: Vec<Property> = Vec::new();
     let prop = vec![Property::new("x", Json::new("y"))];
-    let items = vec![ Json::new(2), Json::new(prop), Json::new(true) ];
+    let items = vec![Json::new(2), Json::new(prop), Json::new(true)];
     props.push(Property::new("a", Json::new(items)));
     props.push(Property::new("c", Json::new(vec![Json::Null])));
     props.push(Property::new("d", Json::new(3)));
-    props.push( Property::new("z", Json::new(1)) );
+    props.push(Property::new("z", Json::new(1)));
 
     assert_eq!(value, Json::new(props));
 }
@@ -104,19 +104,19 @@ fn test_compute() {
 
     let mut props: Vec<Property> = Vec::new();
     let prop = vec![Property::new("x", Json::new("y"))];
-    let items = vec![ Json::new(2), Json::new(prop), Json::new(true) ];
+    let items = vec![Json::new(2), Json::new(prop), Json::new(true)];
     props.push(Property::new("a", Json::new(items)));
     props.push(Property::new("c", Json::new(vec![Json::Null])));
     props.push(Property::new("d", Json::new(3)));
-    props.push( Property::new("z", Json::new(1)) );
+    props.push(Property::new("z", Json::new(1)));
 
     assert_eq!(value, Json::new(props));
 }
 
 #[test]
 fn test_json5_whitespace() {
-    let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string() +
-        &("\u{00a0} \r \t \n 0x1234".to_string());
+    let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string()
+        + &("\u{00a0} \r \t \n 0x1234".to_string());
     let json: Json = text.parse().unwrap();
     assert_eq!(json.integer(), Json::new(0x1234).integer());
 }
@@ -142,8 +142,9 @@ fn test_json5_num() {
     let mut json: Json = "[Infinity, -Infinity, NaN]".parse().unwrap();
     json.compute().unwrap();
     let value = Json::new(vec![
-        Json::new(f64::INFINITY), Json::new(f64::NEG_INFINITY),
-        Json::new(f64::NAN)
+        Json::new(f64::INFINITY),
+        Json::new(f64::NEG_INFINITY),
+        Json::new(f64::NAN),
     ]);
     assert_eq!(json, value);
 
@@ -155,7 +156,10 @@ fn test_json5_num() {
     let mut json: Json = "[ 123, 123.456, .456, 123e-456 ]".parse().unwrap();
     json.compute().unwrap();
     let value = Json::new(vec![
-        Json::new(123), Json::new(123.456), Json::new(0.456), Json::new(123e-456),
+        Json::new(123),
+        Json::new(123.456),
+        Json::new(0.456),
+        Json::new(123e-456),
     ]);
     assert_eq!(json, value);
 }
@@ -168,9 +172,7 @@ fn test_json5_array() {
 
     let mut json: Json = r#"[ 1, true, "three", ]"#.parse().unwrap();
     json.compute().unwrap();
-    let value = Json::new(vec![
-        Json::new(1), Json::new(true), Json::new("three"),
-    ]);
+    let value = Json::new(vec![Json::new(1), Json::new(true), Json::new("three")]);
     assert_eq!(json, value);
 
     let json: Json = r#"[ [1, true, "three"], [4, "five", 0x6], ]"#.parse().unwrap();
@@ -190,11 +192,14 @@ fn test_json5_object() {
     let mut json: Json = "{ width: 1920, height: 1080, }".parse().unwrap();
     json.compute().unwrap();
     let value = Json::new(vec![
-        Property::new("height", 1080.into()), Property::new("width", 1920.into()),
+        Property::new("height", 1080.into()),
+        Property::new("width", 1920.into()),
     ]);
     assert_eq!(json, value);
 
-    let mut json: Json = r#"{ image: { width: 1920, height: 1080, "aspect-ratio": "16:9", } }"#.parse().unwrap();
+    let mut json: Json = r#"{ image: { width: 1920, height: 1080, "aspect-ratio": "16:9", } }"#
+        .parse()
+        .unwrap();
     json.compute().unwrap();
     let props = Json::new(vec![
         Property::new("aspect-ratio", "16:9".into()),
@@ -204,13 +209,17 @@ fn test_json5_object() {
     let value = Json::new(vec![Property::new("image", props)]);
     assert_eq!(json, value);
 
-    let mut json: Json = r#"[ { name: "Joe", age: 27 }, { name: "Jane", age: 32 }, ]"#.parse().unwrap();
+    let mut json: Json = r#"[ { name: "Joe", age: 27 }, { name: "Jane", age: 32 }, ]"#
+        .parse()
+        .unwrap();
     json.compute().unwrap();
     let obj1 = Json::new::<Vec<Property>>(vec![
-        Property::new("age", 27.into()), Property::new("name", "joe".into()), 
+        Property::new("age", 27.into()),
+        Property::new("name", "joe".into()),
     ]);
     let obj2 = Json::new::<Vec<Property>>(vec![
-        Property::new("age", 32.into()), Property::new("name", "jane".into()), 
+        Property::new("age", 32.into()),
+        Property::new("name", "jane".into()),
     ]);
     let value = Json::new(vec![obj1, obj2]);
     assert_eq!(json, value);
@@ -218,61 +227,70 @@ fn test_json5_object() {
 
 #[bench]
 fn bench_null(b: &mut Bencher) {
-    b.iter(|| {"null".parse::<Json>().unwrap()});
+    b.iter(|| "null".parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_bool(b: &mut Bencher) {
-    b.iter(|| {"false".parse::<Json>().unwrap()});
+    b.iter(|| "false".parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_num(b: &mut Bencher) {
-    b.iter(|| {"123121.2234234".parse::<Json>().unwrap()});
+    b.iter(|| "123121.2234234".parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_hexnum(b: &mut Bencher) {
-    b.iter(|| {"0x1235abcd".parse::<Json>().unwrap()});
+    b.iter(|| "0x1235abcd".parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_string(b: &mut Bencher) {
     let s = r#""汉语 / 漢語; Hàn\b \tyǔ ""#;
-    b.iter(|| {s.parse::<Json>().unwrap()});
+    b.iter(|| s.parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_array(b: &mut Bencher) {
     let s = r#" [null,true,false,10,"tru\"e"]"#;
-    b.iter(|| {s.parse::<Json>().unwrap()});
+    b.iter(|| s.parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_map(b: &mut Bencher) {
     let s = r#"{"a": null,"b":true,"c":false,"d\"":-10E-1,"e":"tru\"e"}"#;
-    b.iter(|| {s.parse::<Json>().unwrap()});
+    b.iter(|| s.parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_null_to_json(b: &mut Bencher) {
     let val = "null".parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
 fn bench_bool_to_json(b: &mut Bencher) {
     let val = "false".parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
 fn bench_num_to_json(b: &mut Bencher) {
     let val = "10.2".parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
@@ -280,7 +298,10 @@ fn bench_string_to_json(b: &mut Bencher) {
     let inp = r#""汉语 / 漢語; Hàn\b \tyǔ ""#;
     let val = inp.parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
@@ -288,7 +309,10 @@ fn bench_array_to_json(b: &mut Bencher) {
     let inp = r#" [null,true,false,10,"tru\"e"]"#;
     let val = inp.parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
@@ -296,23 +320,26 @@ fn bench_map_to_json(b: &mut Bencher) {
     let inp = r#"{"a": null,"b":true,"c":false,"d\"":-10E-1,"e":"tru\"e"}"#;
     let val = inp.parse::<Json>().unwrap();
     let mut outs = String::with_capacity(64);
-    b.iter(|| {outs.clear(); write!(outs, "{}", val)});
+    b.iter(|| {
+        outs.clear();
+        write!(outs, "{}", val)
+    });
 }
 
 #[bench]
 fn bench_deferred(b: &mut Bencher) {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
-    b.iter(|| {inp.parse::<Json>().unwrap()});
+    b.iter(|| inp.parse::<Json>().unwrap());
 }
 
 #[bench]
 fn bench_no_deferred(b: &mut Bencher) {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
-    b.iter(|| {inp.parse::<Json>().unwrap().compute().unwrap()});
+    b.iter(|| inp.parse::<Json>().unwrap().compute().unwrap());
 }
 
 #[bench]
 fn bench_json5_num(b: &mut Bencher) {
     let inp = r#" -Infinity"#;
-    b.iter(|| {inp.parse::<Json>().unwrap().compute().unwrap()});
+    b.iter(|| inp.parse::<Json>().unwrap().compute().unwrap());
 }
