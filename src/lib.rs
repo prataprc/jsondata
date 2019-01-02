@@ -68,13 +68,14 @@ pub mod jptr;
 pub use json::Json;
 pub use property::Property;
 
-#[cfg(test)]
-mod tests {
-    #[quickcheck]
-    fn double_reversal_is_identity(_xs: i8) -> bool {
-        true
-    }
-}
+// TODO: Remove this once quickcheck is fully added for testing.
+//#[cfg(test)]
+//mod tests {
+//    #[quickcheck]
+//    fn double_reversal_is_identity(_xs: i8) -> bool {
+//        true
+//    }
+//}
 
 #[cfg(test)]
 mod jptr_test;

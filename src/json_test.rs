@@ -150,7 +150,7 @@ fn test_json5_num() {
 
     let mut json: Json = " [ 0xdecaf, -0xC0FFEE ]".parse().unwrap();
     json.compute().unwrap();
-    let value = Json::new(vec![Json::new(0xdecaf), Json::new(-0xC0FFEE)]);
+    let value = Json::new(vec![Json::new(0xdecaf), Json::new(-0xC0_FFEE)]);
     assert_eq!(json, value);
 
     let mut json: Json = "[ 123, 123.456, .456, 123e-456 ]".parse().unwrap();
