@@ -12,6 +12,16 @@
 
 * CRUD operation on JSON documents, using JSON Pointer.
 
+0.3.0
+=====
+
+* JSON5 support. Most of JSON5 specification, especially those
+that are relavant for bigdata document database, are implemented.
+* Added release-checklist
+* Bugfixes
+* Implement AsRef and AsMut traits for Json type.
+* Travis-CI integration for ``clippy``.
+
 Release Checklist
 =================
 
