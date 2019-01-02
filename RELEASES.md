@@ -19,7 +19,16 @@ Release Checklist
   * __major__: backward incompatible API changes.
   * __minor__: backward compatible API Changes.
   * __patch__: bug fixes.
-* Run cargo test, bench, doc for the new version.
-* Cargo benchcmp between older version and new version.
+* Travis-CI integration.
+* Cargo checklist
+  * cargo test
+  * cargo bench
+  * cargo doc
+  * cargo benchcmp between older version and new version.
+  * cargo clippy
 * Create a git-tag for the new version.
 * Cargo publish the new version.
+* Badges
+  * rust-hosted
+  * gitpitch
+  * build-passing
