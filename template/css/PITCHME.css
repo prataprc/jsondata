@@ -301,7 +301,13 @@ code.hljs {
 .ml5 {
     margin-left: 5em !important;
 }
+.ml20 {
+    margin-left: 5em !important;
+}
 .mr5 {
+    margin-right: 5em !important;
+}
+.mr20 {
     margin-right: 5em !important;
 }
 div.slide1 h1 {
@@ -320,4 +326,13 @@ div.objecttype {
 }
 section.jptr-result {
     font-size: .6em !important;
+}
+section.chresc {
+    font-size: .8em !important;
+}
+section.chresc table {
+    font-size: .6em !important;
+}
+section.whitespace table {
+    font-size: .5em !important;
 }

@@ -66,21 +66,25 @@ sevaral languages.
 Examples
 ========
 
-@snap[midpoint]
-
-@snap[fragment]
+@snap[fragment text-center text-12]
 "Hello world!"
 @snapend
 
-@snap[fragment]
+<br/>
+
+@snap[fragment text-center text-12]
 42
 @snapend
 
-@snap[fragment]
+<br/>
+
+@snap[fragment text-center text-12]
 true
 @snapend
 
-@snap[fragment]
+<br/>
+
+@snap[fragment text-center text-12]
 null
 @snapend
 
@@ -89,7 +93,7 @@ null
 Examples: Numbers
 =================
 
-@snap[west ml5]
+@snap[west ml20 text-12]
 <pre style="line-height: 2em">
 132837
 -132837
@@ -102,7 +106,7 @@ Examples: Numbers
 </pre>
 @snapend
 
-@snap[east mr5]
+@snap[east mr20 text-12]
 <pre style="line-height: 2em">
 -1e+2
 1e-2
@@ -120,7 +124,7 @@ Examples: Numbers
 Numbers
 =======
 
-@snap[fragment]
+@snap[mt30 fragment]
 Integer numbers within the range [-(2^53)+1, (2^53)-1] are generally considered interoperable.
 @snapend
 
@@ -181,7 +185,6 @@ Example: array
 	   "Latitude":  37.7668,
 	   "Longitude": -122.3959,
 	   "Address":   "",
-	   "Zip":       "94107",
 	   "Country":   "US"
 	},
 	{
@@ -189,7 +192,6 @@ Example: array
 	   "Latitude":  37.371991,
 	   "Longitude": -122.026020,
 	   "Address":   "",
-	   "Zip":       "94085",
 	   "Country":   "US"
 	}
 ]
@@ -305,7 +307,8 @@ A JSON pointer text is made of path components separated by @color[blue](/).
 @snapend
 
 <div class="fragment mt30">
-For Example: @color[blue](/users/0/name)
+For Example: @color[blue](/users/0/name) <br/>
+@css[text-07]({"users": [ {"name": "joe", age: 20}, {"name": "jack", age: 30}, {"name": "jane", age: 25} ])
 
 <table style="margin: unset" class="mt30">
 <tr> <th> path </th> <th> meaning </th> </tr>
@@ -389,6 +392,261 @@ escaped         = "~" ( "0" | "1" )
 * @color[blue](~1) means @color[blue](/).
 * @color[blue](~) escaping is not applied recursively. @color[blue](~01) literally becomes @color[blue](~1).
 @ulend
+
+---
+
+Json5
+=====
+
+Corner cases and good to have features that was left out in JSON.
+
+@ul
+* Object keys may be an ECMAScript 5.1 IdentifierName.
+* Objects may have a single trailing comma.
+* Arrays may have a single trailing comma.
+* Strings may be single quoted.
+* Strings may span multiple lines by escaping new line characters.
+* Strings may include character escapes.
+* Numbers may be hexadecimal.
+* Numbers may have a leading or trailing decimal point.
+* Numbers may be IEEE 754 positive infinity, negative infinity, and NaN.
+* Numbers may begin with an explicit plus sign.
+* Single and multi-line comments are allowed.
+* Additional white space characters are allowed.
+@ulend
+
++++
+
+Identifier for bbject key
+=========================
+
+<br/>
+
+```json
+{
+    width: 1920,
+    height: 1080,
+}
+```
+
+and
+
+```json
+{
+    "width": 1920,
+    "height": 1080,
+}
+```
+
+are equivalent.
+
++++
+
+Trailing comma
+==============
+
+<br/>
+
+```json
+[
+    { name: 'Joe', age: 27, },
+    { name: 'Jane', age: 32 },
+]
+```
+
+and
+
+```json
+[
+    { name: 'Joe', age: 27 },
+    { name: 'Jane', age: 32 }
+]
+```
+
+are equivalent.
+
++++
+
+Single quoted strings
+=====================
+
+```json
+{
+    image: {
+        width: 1920,
+        height: 1080,
+        'aspect-ratio': '16:9',
+    }
+}
+```
+
+and
+
+```json
+{
+    image: {
+        width: 1920,
+        height: 1080,
+        "aspect-ratio": "16:9",
+    }
+}
+```
+
+are equivalent.
+
++++
+
+Multi-line strings
+==================
+
+<br/>
+
+```json
+"Lorem ipsum dolor sit amet, \
+consectetur adipiscing elit."
+```
+
+and
+
+```json
+'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+```
+
+are equivalent.
+
++++
+
+<!-- .slide: class="chresc" -->
+
+Character escapes in strings
+============================
+
+A string containing only a single reverse solidus character
+may be represented as ``\x5C`` or ``\u005C``.
+
+A string containing only the musical score character
+🎼 (U+1F3BC) may be represented as '\uD83C\uDFBC'.
+
+Escape | Sequence Description | Code Point
+-------|----------------------|-----------
+  \'   | Apostrophe	          | U+0027
+  \"   | Quotation mark	      | U+0022
+  \\   | Reverse solidus      | U+005C
+  \b   | Backspace            | U+0008
+  \f   | Form feed            | U+000C
+  \n   | Line feed            | U+000A
+  \r   | Carriage return      | U+000D
+  \t   | Horizontal tab       | U+0009
+  \v   | Vertical tab         | U+000B
+  \0   | Null                 | U+0000
+
++++
+
+Hexadecimal numbers
+===================
+
+<br/>
+
+```json
+{
+    positiveHex: 0xdecaf,
+    negativeHex: -0xC0FFEE,
+}
+```
+
+and
+
+```json
+{
+    positiveHex: 912559,
+    negativeHex: -12648430,
+}
+```
+
+are equivalent.
+
++++
+
+Leading/Trailing decimal point
+==============================
+
+<br/>
+
+```json
+{
+    integer: 123,
+    withFractionPart: 123.456,
+    onlyFractionPart: .456,
+    trailingPoint: 456.,
+    withExponent: 123e-456,
+}
+```
+
++++
+
++/- infinity and NaN
+====================
+
+<br/>
+
+```json
+{
+    positiveInfinity: Infinity,
+    negativeInfinity: -Infinity,
+    notANumber: NaN,
+}
+```
+
++++
+
++ Numbers
+=========
+
+<br/>
+
+```json
+{
+    impliedPositive: 123,
+    explicitPositive: +123,
+}
+```
+
++++
+
+Comments
+========
+
+<br/>
+
+```json
+// This is a single line comment.
+
+/* This is a multi-
+   line comment. */
+```
+
++++
+
+<!-- .slide: class="whitespace" -->
+
+White space characters
+======================
+
+Additional whitespace chars:
+
+Code Points          | Description
+---------------------|-----------------
+ U+0009	             | Horizontal tab
+ U+000A	             | Line feed
+ U+000B	             | Vertical tab
+ U+000C	             | Form feed
+ U+000D	             | Carriage return
+ U+0020	             | Space
+ U+00A0	             | Non-breaking space
+ U+2028	             | Line separator
+ U+2029	             | Paragraph separator
+ U+FEFF	             | Byte order mark
+ Unicode Zs category | Any other character in the Space Separator Unicode category
 
 ---
 
