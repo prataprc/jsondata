@@ -31,6 +31,6 @@ Release Checklist
 * Create a git-tag for the new version.
 * Cargo publish the new version.
 * Badges
-  * rust-hosted
+  * rust-doc
   * gitpitch
   * build-passing

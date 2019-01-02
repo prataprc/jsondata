@@ -86,9 +86,12 @@ JSON5
 Help wanted
 ===========
 
-* Add readme badges #1.
-* Alternate string parsing for non-unicode JSON #3.
-* JSON5 implementation #4.
+* Add readme badges [#1][#1].
+* Alternate string parsing for non-unicode JSON [#3][#3].
+* JSON5 implementation [#4][#4].
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [jptr]: https://tools.ietf.org/html/rfc6901
+[#1]: https://github.com/bnclabs/jsondata/issues/1
+[#3]: https://github.com/bnclabs/jsondata/issues/3
+[#4]: https://github.com/bnclabs/jsondata/issues/4
