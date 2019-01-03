@@ -31,8 +31,8 @@ format and we need to lookup, only, specific fields within the document.
 This implementation provides deferred conversion for JSON numbers
 that leads to a **[performance improvement of upto 30%][commit-deferred]**.
 
-CRUD operations on JSON documents
-=================================
+CRUD operations on JSON document
+================================
 
 Using Json Pointer it is possible to identify a specific field nested within
 a JSON document. For Example, with below document:
@@ -56,7 +56,8 @@ a JSON document. For Example, with below document:
 ```
 
 * **/age** shall point to value ``26``.
-* **/friends** shall point to value ``[{"id": 0, "name": "Glenda Chan"}]``,
+* **/friends** shall point to value ``[{"id": 0, "name": "Glenda Chan"}]``.
+* **/friends/name** shall point to value ``"Glenda Chan"``.
 
 **List of operations**
 
@@ -81,13 +82,13 @@ JSON5
 * [ ] Single and multi-line comments are allowed.
 * [x] Additional white space characters are allowed.
 
-**[Track this activity](https://github.com/bnclabs/jsondata/issues/4)**
+**[Track this feature](https://github.com/bnclabs/jsondata/issues/4)**
 
 Help wanted
 ===========
 
 * Add readme badges [#1][#1].
-* Alternate string parsing for non-unicode JSON [#3][#3].
+* Alternate parsing for non-unicode JSON string [#3][#3].
 * JSON5 implementation [#4][#4].
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782

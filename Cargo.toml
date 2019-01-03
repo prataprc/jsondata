@@ -1,6 +1,6 @@
 [package]
 name = "jsondata"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["prataprc <prataprc@gmail.com>"]
 description = "JSON processing package for document databses"
 documentation = "https://docs.rs/jsondata"
