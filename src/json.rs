@@ -612,7 +612,7 @@ where
                 break res
             }
             let res = self.codes.next();
-            if res.is_none() && self.quant.len() > 0 {
+            if res.is_none() && !self.quant.is_empty() {
                 let res = match self.quant.parse() {
                     Ok(json) => Some(Ok(json)),
                     Err(s) => Some(Ok(Json::_Error(s))),
