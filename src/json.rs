@@ -586,7 +586,7 @@ where
                                 if m == ch {
                                     break
                                 }
-                            } else if markers.len() == 0 {
+                            } else if markers.is_empty() {
                                 break
                             }
                         },

@@ -227,17 +227,20 @@ fn test_json5_object() {
 }
 
 #[test]
-fn test_stream() {
-    //let mut js: Jsons<&[u8]> = b"".as_ref().into();
-    //assert!(js.next().is_none());
+fn test_stream0() {
+    let mut js: Jsons<&[u8]> = b"".as_ref().into();
+    assert!(js.next().is_none());
 
-    //let mut js: Jsons<&[u8]> = b" \t \r \n ".as_ref().into();
-    //assert!(js.next().is_none());
+    let mut js: Jsons<&[u8]> = b" \t \r \n ".as_ref().into();
+    assert!(js.next().is_none());
 
-    //let mut js: Jsons<&[u8]> = b" 1".as_ref().into();
-    //assert_eq!(js.next().unwrap().unwrap(), Json::new(1));
+    let mut js: Jsons<&[u8]> = b" 1".as_ref().into();
+    assert_eq!(js.next().unwrap().unwrap(), Json::new(1));
+}
 
-    let file = File::open("testdata/stream.jsons").unwrap();
+#[test]
+fn test_stream1() {
+    let file = File::open("testdata/stream1.jsons").unwrap();
     let mut js: Jsons<File> = file.into();
 
     assert_eq!(js.next().unwrap().unwrap(), Json::new(1));
@@ -266,6 +269,13 @@ fn test_stream() {
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
 
+}
+
+#[test]
+fn test_stream11() {
+    let file = File::open("testdata/stream11.jsons").unwrap();
+    let mut js: Jsons<File> = file.into();
+
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(2.0));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
@@ -276,7 +286,7 @@ fn test_stream() {
     assert_eq!(js.next().unwrap().unwrap().integer(), Some(-0));
 
     assert_eq!(js.next().unwrap().unwrap().integer(), Some(-100));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-001));
+    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-1));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(-00.00));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(-2.00));
 
@@ -284,6 +294,12 @@ fn test_stream() {
     assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.02));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.0));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(-20.0));
+}
+
+#[test]
+fn test_stream2() {
+    let file = File::open("testdata/stream2.jsons").unwrap();
+    let mut js: Jsons<File> = file.into();
 
     assert_eq!(
         js.next().unwrap().unwrap().string(),
@@ -315,6 +331,12 @@ fn test_stream() {
     assert_eq!(
         js.next().unwrap().unwrap(), "汉语 / 漢語; Hàn\u{8} \tyǔ ".into()
     );
+}
+
+#[test]
+fn test_stream3() {
+    let file = File::open("testdata/stream3.jsons").unwrap();
+    let mut js: Jsons<File> = file.into();
 
     assert_eq!(
         js.next().unwrap().unwrap(),

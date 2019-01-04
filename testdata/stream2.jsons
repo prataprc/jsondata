@@ -1,0 +1,9 @@
+
+"hello\"  	"
+
+ "hello\u0234\u005c \uD834\uDD1E"
+"'é' character is one Unicode code point \u00e9 while 'é' \u0065\u0301 "
+  [] [10]  [null,true,false,10,"tru\"e"]
+
+"汉语 / 漢語; Hàn\b \tyǔ "
+
