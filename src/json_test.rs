@@ -380,6 +380,13 @@ fn test_stream() {
             Property::new("x", 1.into()),
         ])
     );
+
+    let obj = Json::new(vec![Property::new("key3", 20.into())]);
+    let obj = Json::new(vec![Property::new("key2", obj)]);
+    let arr = Json::new::<Vec<Json>>(vec!["world".into(), obj]);
+    let obj = Json::new(vec![Property::new("key1", arr)]);
+    let arr = Json::new::<Vec<Json>>(vec!["hello".into(), obj]);
+    assert_eq!(js.next().unwrap().unwrap(), arr);
 }
 
 #[bench]

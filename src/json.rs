@@ -581,11 +581,13 @@ where
                     match ch {
                         '{' => markers.push('}'),
                         '[' => markers.push(']'),
-                        '}' | ']' => {
-                            for m in markers.pop() {
+                        '}' | ']' => loop {
+                            if let Some(m) = markers.pop() {
                                 if m == ch {
                                     break
                                 }
+                            } else if markers.len() == 0 {
+                                break
                             }
                         },
                         '"' => match Jsons::read_string(self)? {
@@ -622,14 +624,13 @@ where
         let mut escape = false;
         loop {
             let ok_ch = self.codes.next()?;
-            let res = match ok_ch {
+            match ok_ch {
                 Ok(ch) if escape => { self.quant.push(ch); escape = false;},
                 Ok('\\') => { self.quant.push('\\'); escape = true; },
                 Ok('"') => { self.quant.push('"'); break Some(Ok(())); }
                 Ok(ch) => self.quant.push(ch),
                 Err(err) => break Some(Err(err)),
-            };
-            res
+            }
         }
     }
 
