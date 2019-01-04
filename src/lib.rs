@@ -54,6 +54,7 @@ extern crate lazy_static;
 #[cfg(test)]
 extern crate quickcheck;
 extern crate test;
+extern crate unicode_reader;
 
 mod json;
 mod lex;

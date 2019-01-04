@@ -1,7 +1,9 @@
 use std::convert::From;
 use std::default::Default;
 use std::fmt::{self, Display, Write};
+use std::io;
 use std::str::FromStr;
+use unicode_reader::CodePoints;
 
 use jptr;
 use lex::Lex;
@@ -29,6 +31,8 @@ pub enum Json {
     String(String),
     Array(Vec<Json>),
     Object(Vec<Property>),
+    // Hidden variants
+    _Error(String),
 }
 
 /// Implementation provides methods to construct and validate Json values.
@@ -148,6 +152,7 @@ impl Json {
             Json::String(_) => "string".to_string(),
             Json::Array(_) => "array".to_string(),
             Json::Object(_) => "object".to_string(),
+            Json::_Error(_) => "error".to_string(),
         }
     }
 }
@@ -383,7 +388,9 @@ impl From<Vec<Json>> for Json {
 
 impl From<Vec<Property>> for Json {
     fn from(val: Vec<Property>) -> Json {
-        Json::Object(val)
+        let mut obj = Json::Object(vec![]);
+        val.into_iter().for_each(|item| insert(&mut obj, item));
+        obj
     }
 }
 
@@ -504,6 +511,7 @@ impl Display for Json {
                     write!(f, "}}")
                 }
             }
+            Json::_Error(err) => write!(f, "error: {}", err),
         }
     }
 }
@@ -535,6 +543,103 @@ pub fn insert(json: &mut Json, item: Property) {
         match property::search_by_key(&obj, item.key_ref()) {
             Ok(off) => obj.insert(off, item),
             Err(off) => obj.insert(off, item),
+        }
+    }
+}
+
+pub struct Jsons<R>
+where
+    R: io::Read
+{
+    codes: CodePoints<io::Bytes<R>>,
+    quant: String,
+}
+
+impl<R> From<R> for Jsons<R>
+where
+    R: io::Read
+{
+    fn from(input: R) -> Jsons<R> {
+        Jsons{codes: input.into(), quant: String::with_capacity(1024)}
+    }
+}
+
+impl<R> Iterator for Jsons<R>
+where
+    R: io::Read
+{
+    type Item=Result<Json, io::Error>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut markers = String::new();
+        let mut ok_ch = self.read_whitespace()?;
+        loop {
+            let ch = match ok_ch {
+                Ok(ch) => {
+                    //println!("{}", ch);
+                    self.quant.push(ch);
+                    match ch {
+                        '{' => markers.push('}'),
+                        '[' => markers.push(']'),
+                        '}' | ']' => {
+                            for m in markers.pop() {
+                                if m == ch {
+                                    break
+                                }
+                            }
+                        },
+                        '"' => match Jsons::read_string(self)? {
+                            Ok(_) => (),
+                            Err(err) => break Some(Err(err)),
+                        },
+                        _ => (),
+                    }
+                    //println!("loop {:?} {}", self.quant.as_bytes(), ch);
+                    ch
+                },
+                Err(err) => break Some(Err(err)),
+            };
+            let eov = ch.is_whitespace() || ch == '}' || ch == ']' || ch == '"';
+            if markers.is_empty() && eov {
+                let res = match self.quant.parse() {
+                    Ok(json) => Some(Ok(json)),
+                    Err(s) => Some(Ok(Json::_Error(s))),
+                };
+                //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
+                self.quant.truncate(0);
+                break res
+            }
+            ok_ch = self.codes.next()?;
+        }
+    }
+}
+
+impl<R> Jsons<R>
+where
+    R: io::Read
+{
+    fn read_string(&mut self) -> Option<Result<(), io::Error>> {
+        let mut escape = false;
+        loop {
+            let ok_ch = self.codes.next()?;
+            let res = match ok_ch {
+                Ok(ch) if escape => { self.quant.push(ch); escape = false;},
+                Ok('\\') => { self.quant.push('\\'); escape = true; },
+                Ok('"') => { self.quant.push('"'); break Some(Ok(())); }
+                Ok(ch) => self.quant.push(ch),
+                Err(err) => break Some(Err(err)),
+            };
+            res
+        }
+    }
+
+    fn read_whitespace(&mut self) -> Option<Result<char, io::Error>> {
+        loop {
+            match self.codes.next()? {
+                Ok(ch) if !ch.is_whitespace() => break Some(Ok(ch)),
+                Ok(_) => (),
+                Err(err) => break Some(Err(err)),
+            }
         }
     }
 }

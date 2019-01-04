@@ -10,11 +10,13 @@ keywords = ["json", "json5"]
 categories = ["encoding"]
 license = "MIT"
 exclude = ["template/**"]
+readme = "README.md"
 
 [dependencies]
 quickcheck = "0.7"
 quickcheck_macros = "0.7"
 lazy_static = "1.2.0"
+unicode_reader = "0.1.1"
 
 [dev-dependencies]
 quickcheck = "0.7"
@@ -22,4 +24,4 @@ quickcheck_macros = "0.7"
 
 [badges]
 maintenance = { status = "actively-developed" }
-travis-ci = { repository = "pest-parser/pest" }
+travis-ci = { repository = "bnclabs/jsondata" }
