@@ -611,7 +611,19 @@ where
                 self.quant.truncate(0);
                 break res
             }
-            ok_ch = self.codes.next()?;
+            let res = self.codes.next();
+            if res.is_none() && self.quant.len() > 0 {
+                let res = match self.quant.parse() {
+                    Ok(json) => Some(Ok(json)),
+                    Err(s) => Some(Ok(Json::_Error(s))),
+                };
+                //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
+                self.quant.truncate(0);
+                break res
+            } else if res.is_none() {
+                break None
+            }
+            ok_ch = res.unwrap();
         }
     }
 }
@@ -623,13 +635,13 @@ where
     fn read_string(&mut self) -> Option<Result<(), io::Error>> {
         let mut escape = false;
         loop {
-            let ok_ch = self.codes.next()?;
-            match ok_ch {
-                Ok(ch) if escape => { self.quant.push(ch); escape = false;},
-                Ok('\\') => { self.quant.push('\\'); escape = true; },
-                Ok('"') => { self.quant.push('"'); break Some(Ok(())); }
-                Ok(ch) => self.quant.push(ch),
-                Err(err) => break Some(Err(err)),
+            match self.codes.next() {
+                Some(Ok(ch)) if escape => { self.quant.push(ch); escape = false;},
+                Some(Ok('\\')) => { self.quant.push('\\'); escape = true; },
+                Some(Ok('"')) => { self.quant.push('"'); break Some(Ok(())); }
+                Some(Ok(ch)) => self.quant.push(ch),
+                Some(Err(err)) => break Some(Err(err)),
+                None => break Some(Ok(())),
             }
         }
     }
