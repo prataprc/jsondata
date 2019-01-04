@@ -4,8 +4,8 @@ rust:
 before_script:
   - rustup component add clippy
 script:
-  - cargo clippy --all-targets --all-features -- -D warnings
-  - cargo build --verbose
-  - cargo test --verbose
-  - cargo bench --verbose
-  - cargo doc --verbose
+  - cargo +nightly clippy --all-targets --all-features -- -D warnings
+  - cargo +nightly build --verbose
+  - cargo +nightly test --verbose
+  - cargo +nightly bench --verbose
+  - cargo +nightly doc --verbose
