@@ -350,7 +350,7 @@ impl PartialEq for Json {
                 } else if fs.is_infinite() && fo.is_infinite() {
                     return fs.is_sign_positive() == fo.is_sign_positive()
                 }
-                return false
+                false
             },
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
@@ -368,7 +368,7 @@ impl PartialOrd for Json {
             // typically we assume that value at same position is same type.
             (Null, Null) => Some(Ordering::Equal),
             (Bool(a), Bool(_)) =>
-                if *a == false {
+                if !(*a) {
                     Some(Ordering::Less)
                 } else {
                     Some(Ordering::Greater)
