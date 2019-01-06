@@ -3,6 +3,7 @@ use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::io;
 use std::str::FromStr;
+use std::cmp::{PartialOrd, Ordering};
 use unicode_reader::CodePoints;
 
 use jptr;
@@ -316,6 +317,20 @@ impl Json {
             _ => None,
         }
     }
+
+    pub fn is_error(&self) -> bool {
+        match self {
+            Json::_Error(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn error(&self) -> Option<String> {
+        match self {
+            Json::_Error(err) => Some(err.clone()),
+            _ => None,
+        }
+    }
 }
 
 impl PartialEq for Json {
@@ -329,17 +344,90 @@ impl PartialEq for Json {
             (Float(_), Float(_)) => {
                 let (fs, fo) = (self.float().unwrap(), other.float().unwrap());
                 if fs.is_finite() && fo.is_finite() {
-                    return true;
+                    return fs == fo
+                } else if fs.is_nan() && fo.is_nan() {
+                    return true
+                } else if fs.is_infinite() && fo.is_infinite() {
+                    return fs.is_sign_positive() == fo.is_sign_positive()
                 }
-
-                (fs.is_nan() && fo.is_nan())
-                    || (fs.is_sign_positive() && fo.is_sign_positive())
-                    || (fs.is_sign_negative() && fo.is_sign_negative())
-            }
+                return false
+            },
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
             (Object(a), Object(b)) => a == b,
             _ => false,
+        }
+    }
+}
+
+impl PartialOrd for Json {
+    fn partial_cmp(&self, other: &Json) -> Option<Ordering> {
+        use Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+
+        match (self, other) {
+            // typically we assume that value at same position is same type.
+            (Null, Null) => Some(Ordering::Equal),
+            (Bool(a), Bool(_)) =>
+                if *a == false {
+                    Some(Ordering::Less)
+                } else {
+                    Some(Ordering::Greater)
+                },
+            (Integer(a), Integer(b)) => a.partial_cmp(b),
+            (Float(a), Float(b)) => a.partial_cmp(b),
+            (S(a), S(b)) => a.partial_cmp(b),
+            (Array(this), Array(that)) => {
+                for (i, a) in this.iter().enumerate() {
+                    if i == that.len() {
+                        return Some(Ordering::Greater)
+                    }
+                    let cmp = a.partial_cmp(&that[i]);
+                    if cmp != Some(Ordering::Equal) {
+                        return cmp
+                    }
+                }
+                if this.len() == that.len() {
+                    Some(Ordering::Equal)
+                } else {
+                    Some(Ordering::Less)
+                }
+            },
+            (Object(this), Object(that)) => {
+                for (i, a) in this.iter().enumerate() {
+                    if i == that.len() {
+                        return Some(Ordering::Greater)
+                    }
+                    let cmp = a.key_ref().partial_cmp(that[i].key_ref());
+                    if cmp != Some(Ordering::Equal) {
+                        return cmp
+                    }
+                    let cmp = a.value_ref().partial_cmp(that[i].value_ref());
+                    if cmp != Some(Ordering::Equal) {
+                        return cmp
+                    }
+                }
+                if this.len() == that.len() {
+                    Some(Ordering::Equal)
+                } else {
+                    Some(Ordering::Less)
+                }
+            },
+            // handle error cases, error variants sort at the end.
+            (_, Json::_Error(_)) => Some(Ordering::Less),
+            (Json::_Error(_), _) => Some(Ordering::Greater),
+            // handle cases of mixed types.
+            (Null, _) => Some(Ordering::Less),
+            (_, Null) => Some(Ordering::Greater),
+            (Bool(_), _) => Some(Ordering::Less),
+            (_, Bool(_)) => Some(Ordering::Greater),
+            (Integer(_), _) => Some(Ordering::Less),
+            (_, Integer(_)) => Some(Ordering::Greater),
+            (Float(_), _) => Some(Ordering::Less),
+            (_, Float(_)) => Some(Ordering::Greater),
+            (S(_), _) => Some(Ordering::Less),
+            (_, S(_)) => Some(Ordering::Greater),
+            (Array(_), _) => Some(Ordering::Less),
+            (_, Array(_)) => Some(Ordering::Greater),
         }
     }
 }
@@ -547,6 +635,43 @@ pub fn insert(json: &mut Json, item: Property) {
     }
 }
 
+/// Jsons can parse a stream of JSON text supplied by any [Read] instance.
+///
+/// Any [Read] instance can be converted to Jsons instance and iterated.
+/// For Example:
+///
+/// ```
+/// extern crate jsondata;
+/// use jsondata::{Json, Jsons};
+/// use std::fs::File;
+/// let file = File::open("testdata/stream1.jsons").unwrap();
+/// let mut iter: Jsons<File> = file.into();
+///
+/// for json in iter {
+///     println!("{:?}", json)
+/// }
+/// ```
+///
+/// Note that the iterated value is of type ``Result<Json, std::io::Error>``,
+/// where errors can be handled in following manner :
+///
+/// ```ignore
+/// for json in iter {
+///     match json {
+///         Ok(value) if value.integer() > 100 => {
+///             /* handle Json value*/
+///         },
+///         Ok(value) if value.is_error() => {
+///             /* value.error() to fetch the error String */
+///         },
+///         Err(err) => {
+///             /* handle std::io::Error returned by the Read instance */
+///         },
+///     }
+/// }
+/// ```
+///
+/// [Read]: std::io::Read
 pub struct Jsons<R>
 where
     R: io::Read

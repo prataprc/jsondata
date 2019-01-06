@@ -1,4 +1,4 @@
-Why yet another json package in Rust ?
+Why yet another JSON package in Rust ?
 ======================================
 
 [![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
@@ -84,6 +84,30 @@ JSON5
 
 **[Track this feature](https://github.com/bnclabs/jsondata/issues/4)**
 
+Sortable JSON
+=============
+
+* **Null** type shall sort before all other types.
+* **Boolean** type shall sort after Null type.
+* **Number** type shall sort after Boolean type.
+  * **-Infinity** shall sort before all numbers.
+  * **+Infinity** shall sort after all numbers.
+  * **NaN** shall sort after +Infinity.
+* **String** type shall sort after Number type.
+* **Array** type shall sort after String type.
+* **Object** type shall sort after Array type.
+  * All (key,value) pairs within the object shall be presorted based
+    on the key.
+  * When comparing two objects, comparison shall start from first key
+    and proceed to the last key.
+  * If two keys are equal at a given position within the objects, then
+    its corresponding values shall be compared.
+  * When one object is a subset of another object, as in, if one object
+    contain all the (key,value) properties that the other object has
+    then it shall sort before the other object.
+
+[A detailed description of JSON sort order][json-sort-order].
+
 Help wanted
 ===========
 
@@ -96,3 +120,4 @@ Help wanted
 [#1]: https://github.com/bnclabs/jsondata/issues/1
 [#3]: https://github.com/bnclabs/jsondata/issues/3
 [#4]: https://github.com/bnclabs/jsondata/issues/4
+[json-sort-order]: https://prataprc.github.io/json-sort-order.html

@@ -236,6 +236,14 @@ fn test_stream0() {
 
     let mut js: Jsons<&[u8]> = b" 1".as_ref().into();
     assert_eq!(js.next().unwrap().unwrap(), Json::new(1));
+
+    let mut js: Jsons<&[u8]> = b" n".as_ref().into();
+    let value = js.next().unwrap().unwrap();
+    assert!(value.is_error());
+    assert_eq!(
+        value.error().unwrap(),
+        "parse: expected null at offset:0 line:1 col:1".to_string()
+    );
 }
 
 #[test]
@@ -409,6 +417,27 @@ fn test_stream3() {
     let obj = Json::new(vec![Property::new("key1", arr)]);
     let arr = Json::new::<Vec<Json>>(vec!["hello".into(), obj]);
     assert_eq!(js.next().unwrap().unwrap(), arr);
+}
+
+#[test]
+fn test_partial_eq() {
+    let a = Json::new(f64::INFINITY);
+    let b = Json::new(f64::NEG_INFINITY);
+    let c = Json::new(f64::NAN);
+    let d = Json::new(0.2);
+
+    assert!(a != b);
+    assert!(a != c);
+    assert!(a != d);
+    assert!(b != a);
+    assert!(b != c);
+    assert!(b != d);
+    assert!(c != a);
+    assert!(c != b);
+    assert!(c != d);
+    assert!(d != a);
+    assert!(d != b);
+    assert!(d != c);
 }
 
 #[bench]
