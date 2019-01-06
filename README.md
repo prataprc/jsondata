@@ -82,7 +82,7 @@ JSON5
 * [ ] Single and multi-line comments are allowed.
 * [x] Additional white space characters are allowed.
 
-**[Track this feature](https://github.com/bnclabs/jsondata/issues/4)**
+**[Track this feature](https://github.com/bnclabs/jsondata/issues/4)**.
 
 Sortable JSON
 =============
@@ -106,7 +106,7 @@ Sortable JSON
     contain all the (key,value) properties that the other object has
     then it shall sort before the other object.
 
-[A detailed description of JSON sort order][json-sort-order].
+**[A detailed description of JSON sort order][json-sort-order]**.
 
 Help wanted
 ===========
