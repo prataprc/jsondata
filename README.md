@@ -17,7 +17,7 @@ and document database.
 * [x] Streaming JSON parser.
 * [x] Support [JSON5](http://json5.org) standard.
 * [ ] Common arithmetic and logic operations.
-* [ ] Sortable JSON.
+* [x] Sortable JSON.
 
 **[API Documentation](https://docs.rs/jsondata)**
 
