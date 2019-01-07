@@ -33,7 +33,8 @@ pub enum Json {
     Array(Vec<Json>),
     Object(Vec<Property>),
     // Hidden variants
-    _Error(String),
+    #[doc(hidden)]
+    __Error(String),
 }
 
 /// Implementation provides methods to construct and validate Json values.
@@ -153,7 +154,7 @@ impl Json {
             Json::String(_) => "string".to_string(),
             Json::Array(_) => "array".to_string(),
             Json::Object(_) => "object".to_string(),
-            Json::_Error(_) => "error".to_string(),
+            Json::__Error(_) => "error".to_string(),
         }
     }
 }
@@ -320,14 +321,14 @@ impl Json {
 
     pub fn is_error(&self) -> bool {
         match self {
-            Json::_Error(_) => true,
+            Json::__Error(_) => true,
             _ => false,
         }
     }
 
     pub fn error(&self) -> Option<String> {
         match self {
-            Json::_Error(err) => Some(err.clone()),
+            Json::__Error(err) => Some(err.clone()),
             _ => None,
         }
     }
@@ -341,6 +342,16 @@ impl PartialEq for Json {
             (Null, Null) => true,
             (Bool(a), Bool(b)) => a == b,
             (Integer(_), Integer(_)) => self.integer() == other.integer(),
+            (Integer(a), Float(b)) => match (a.integer(), b.float()) {
+                    (Some(x), Some(y)) => {
+                        let n = y as i128;
+                        if n == std::i128::MIN || n == std::i128::MAX || y.is_nan() {
+                            return false
+                        }
+                        x == n
+                    },
+                    _ => false,
+            },
             (Float(_), Float(_)) => {
                 let (fs, fo) = (self.float().unwrap(), other.float().unwrap());
                 if fs.is_finite() && fo.is_finite() {
@@ -352,6 +363,16 @@ impl PartialEq for Json {
                 }
                 false
             },
+            (Float(a), Integer(b)) => match (a.float(), b.integer()) {
+                    (Some(x), Some(y)) => {
+                        let n = x as i128;
+                        if n == std::i128::MIN || n == std::i128::MAX || x.is_nan() {
+                            return false
+                        }
+                        y == n
+                    },
+                    _ => false,
+                },
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
             (Object(a), Object(b)) => a == b,
@@ -367,14 +388,28 @@ impl PartialOrd for Json {
         match (self, other) {
             // typically we assume that value at same position is same type.
             (Null, Null) => Some(Ordering::Equal),
-            (Bool(a), Bool(_)) =>
-                if !(*a) {
+            (Bool(a), Bool(b)) =>
+                if (*a) == (*b) {
+                    Some(Ordering::Equal)
+                } else if !(*a) {
                     Some(Ordering::Less)
                 } else {
                     Some(Ordering::Greater)
                 },
             (Integer(a), Integer(b)) => a.partial_cmp(b),
             (Float(a), Float(b)) => a.partial_cmp(b),
+            (Integer(a), Float(b)) => match (a.integer(), b.float()) {
+                (Some(x), Some(y)) => x.partial_cmp(&(y as i128)),
+                (Some(_), None) => Some(Ordering::Greater),
+                (None, Some(_)) => Some(Ordering::Less),
+                (None, None) => Some(Ordering::Equal),
+            },
+            (Float(a), Integer(b)) => match (a.float(), b.integer()) {
+                (Some(x), Some(y)) => (x as i128).partial_cmp(&y),
+                (Some(_), None) => Some(Ordering::Greater),
+                (None, Some(_)) => Some(Ordering::Less),
+                (None, None) => Some(Ordering::Equal),
+            },
             (S(a), S(b)) => a.partial_cmp(b),
             (Array(this), Array(that)) => {
                 for (i, a) in this.iter().enumerate() {
@@ -413,8 +448,8 @@ impl PartialOrd for Json {
                 }
             },
             // handle error cases, error variants sort at the end.
-            (_, Json::_Error(_)) => Some(Ordering::Less),
-            (Json::_Error(_), _) => Some(Ordering::Greater),
+            (_, Json::__Error(_)) => Some(Ordering::Less),
+            (Json::__Error(_), _) => Some(Ordering::Greater),
             // handle cases of mixed types.
             (Null, _) => Some(Ordering::Less),
             (_, Null) => Some(Ordering::Greater),
@@ -599,7 +634,7 @@ impl Display for Json {
                     write!(f, "}}")
                 }
             }
-            Json::_Error(err) => write!(f, "error: {}", err),
+            Json::__Error(err) => write!(f, "error: {}", err),
         }
     }
 }
@@ -730,7 +765,7 @@ where
             if markers.is_empty() && eov {
                 let res = match self.quant.parse() {
                     Ok(json) => Some(Ok(json)),
-                    Err(s) => Some(Ok(Json::_Error(s))),
+                    Err(s) => Some(Ok(Json::__Error(s))),
                 };
                 //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
                 self.quant.truncate(0);
@@ -740,7 +775,7 @@ where
             if res.is_none() && !self.quant.is_empty() {
                 let res = match self.quant.parse() {
                     Ok(json) => Some(Ok(json)),
-                    Err(s) => Some(Ok(Json::_Error(s))),
+                    Err(s) => Some(Ok(Json::__Error(s))),
                 };
                 //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
                 self.quant.truncate(0);

@@ -106,7 +106,12 @@ Sortable JSON
     contain all the (key,value) properties that the other object has
     then it shall sort before the other object.
 
-**[A detailed description of JSON sort order][json-sort-order]**.
+* **[A detailed description of JSON sort order][json-sort-order]**.
+* Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
+  [issue#10184](https://github.com/rust-lang/rust/issues/10184),
+  discussing saturating cast of f64 -> integer.
+* Rust [internal discussion](https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231)
+  on f64 -> integer.
 
 Help wanted
 ===========

@@ -440,6 +440,101 @@ fn test_partial_eq() {
     assert!(d != c);
 }
 
+#[test]
+fn test_partial_ord() {
+    assert!(Json::Null < Json::new(true));
+    assert!(Json::Null < Json::new(false));
+    assert!(Json::Null < Json::new(10));
+    assert!(Json::Null < Json::new(1.0));
+    assert!(Json::Null < Json::new("hello world"));
+    assert!(Json::Null < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(Json::Null < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value = Json::new(false);
+    assert!(value > Json::Null);
+    assert!(value == Json::new(false));
+    assert!(value < Json::new(true));
+    assert!(value < Json::new(10));
+    assert!(value < Json::new(1.0));
+    assert!(value < Json::new("hello world"));
+    assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value = Json::new(true);
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value == Json::new(true));
+    assert!(value < Json::new(10));
+    assert!(value < Json::new(1.0));
+    assert!(value < Json::new("hello world"));
+    assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value = Json::new(10);
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value > Json::new(true));
+    assert!(value == Json::new(10));
+    assert!(value == Json::new(10.0));
+    assert!(value < Json::new("hello world"));
+    assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value = Json::new(10.0);
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value > Json::new(true));
+    assert!(value == Json::new(10));
+    assert!(value == Json::new(10.0));
+    assert!(value < Json::new("hello world"));
+    assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value = Json::new("hello world");
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value > Json::new(true));
+    assert!(value > Json::new(10));
+    assert!(value > Json::new(10.0));
+    assert!(value == Json::new("hello world"));
+    assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value: Json = "[10,20]".parse().unwrap();
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value > Json::new(true));
+    assert!(value > Json::new(10));
+    assert!(value > Json::new(10.0));
+    assert!(value > Json::new("hello world"));
+    assert!(value == Json::new::<Vec<Json>>(vec![10.into(), 20.into()]));
+    assert!(value > Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(Json::new::<Vec<Json>>(vec![10.into()]) < value);
+    assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+
+    let value: Json = r#"{"key1": 10, "key2":20}"#.parse().unwrap();
+    assert!(value > Json::Null);
+    assert!(value > Json::new(false));
+    assert!(value > Json::new(true));
+    assert!(value > Json::new(10));
+    assert!(value > Json::new(10.0));
+    assert!(value > Json::new("hello world"));
+    assert!(value > Json::new::<Vec<Json>>(vec![10.into()]));
+    assert!(value == Json::new::<Vec<Property>>(
+        vec![Property::new("key1", 10.into()), Property::new("key2", 10.into())]
+    ));
+    assert!(value < Json::new::<Vec<Property>>(
+        vec![Property::new("key1", 20.into()), Property::new("key2", 10.into())]
+    ));
+    assert!(value > Json::new::<Vec<Property>>(
+        vec![Property::new("key1", 5.into()), Property::new("key2", 10.into())]
+    ));
+    assert!(value > Json::new::<Vec<Property>>(
+        vec![Property::new("key1", 10.into())]
+    ));
+    assert!(Json::new::<Vec<Property>>(vec![Property::new("key1", 10.into())]) < value);
+}
+
 #[bench]
 fn bench_null(b: &mut Bencher) {
     b.iter(|| "null".parse::<Json>().unwrap());
