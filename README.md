@@ -90,6 +90,9 @@ Sortable JSON
 * **Null** type shall sort before all other types.
 * **Boolean** type shall sort after Null type.
 * **Number** type shall sort after Boolean type.
+  * f64 values that are <= -2^127 will sort before all i128 integers.
+  * f64 values that are >= 2^127-1 will sort after all i128 integers.
+  * NaN, Not a Number, values shall sort after all i128 integers
   * **-Infinity** shall sort before all numbers.
   * **+Infinity** shall sort after all numbers.
   * **NaN** shall sort after +Infinity.
@@ -106,11 +109,11 @@ Sortable JSON
     contain all the (key,value) properties that the other object has
     then it shall sort before the other object.
 
-* **[A detailed description of JSON sort order][json-sort-order]**.
-* Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
+- **[A detailed description of JSON sort order][json-sort-order]**.
+- Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
   [issue#10184](https://github.com/rust-lang/rust/issues/10184),
   discussing saturating cast of f64 -> integer.
-* Rust [internal discussion](https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231)
+- Rust [internal discussion](https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231)
   on f64 -> integer.
 
 Help wanted
