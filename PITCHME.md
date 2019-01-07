@@ -37,7 +37,7 @@ Human friendly as apposed to machine friendly.
 Data types
 ==========
 
-JSON defines the least common subset of data types across
+JSON defines the highest common subset of data types across
 sevaral languages.
 
 @snap[fragment mt30]
@@ -417,7 +417,7 @@ Corner cases and good to have features that was left out in JSON.
 
 +++
 
-Identifier for bbject key
+Identifier for object key
 =========================
 
 <br/>
@@ -649,6 +649,97 @@ Code Points          | Description
  Unicode Zs category | Any other character in the Space Separator Unicode category
 
 ---
+
+Sorting JSON
+============
+
+The need to a sort order JSON types and values arise because:
+
+@ul
+* Used as data model in many document databases.
+* Schemaless.
+* Building complex indexes on document fields.
+@ulend
+
++++
+
+Sort order for types
+====================
+
+@ul
+* **Null** type shall sort before all other types.
+* **Boolean** type shall sort after Null type.
+* **Number** type shall sort after Boolean type.
+* **String** type shall sort after Number type.
+* **Array** type shall sort after String type.
+* **Object** type shall sort after Array type.
+@ulend
+
+@css[fragment](Among Boolean type, false value sort before true value.)
+
++++
+
+Sort order for numerical values
+===============================
+
+JSON spec does not define the type and precision for numbers.
+
+* Treat integers and floating point numbers uniformly as same type.
+* Integers are capped at i128 bit precision.
+* Floating point numbers defined with f64 precision.
+
+When comparing integer number and floating-point number:
+
+* f64 values that are <= -2^127 will sort before all i128 integers.
+* f64 values that are >= 2^127-1 will sort after all i128 integers.
+* f64 NaN, Not a Number, value shall sort after all i128 integers.
+* all other f64 values shall be casted to i128 number and compared.
+* -Infinity shall sort before all numbers.
+* +Infinity shall sort after all numbers.
+* NaN shall sort after +Infinity.
+
++++
+
+Sort order for string
+=====================
+
+String values are not interpreted for codepoints are utf8 encoding.
+They are just binary compared.
+
++++
+
+Sort order for array
+====================
+
+Array items shall be compared recursively, applying the comparison
+logic on each array item and its counterpart. For example:
+
+* [] sort before [null].
+* [null] sort before [true].
+* [true] sort before [[null]].
+* [10,20] sort before [30].
+* [10, "hello"] sort before [10, "hello", "world"].
+
++++
+
+Sort order for object
+=====================
+
+* All (key,value) pairs within the object shall be presorted based on the key.
+* When comparing two objects, comparison shall start from first key and proceed to the last key.
+* If two keys are equal at a given position within the objects, then its corresponding values shall be compared.
+* When one object is a subset of another object, as in, if one object contain all the (key,value) properties that the other object has then it shall sort before the other object.
+
++++
+
+Range operation
+===============
+
+* Minbound denote from the beginning.
+* Maxbound denote till the end.
+
+---
+
 
 @snap[midpoint]
 <h1>Thank you</h1>
