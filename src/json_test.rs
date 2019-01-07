@@ -438,6 +438,11 @@ fn test_partial_eq() {
     assert!(d != a);
     assert!(d != b);
     assert!(d != c);
+
+    assert!(Json::minbound() == Json::minbound());
+    assert!(Json::maxbound() == Json::maxbound());
+    assert!(Json::minbound() != Json::maxbound());
+    assert!(Json::maxbound() != Json::minbound());
 }
 
 #[test]
@@ -540,6 +545,31 @@ fn test_partial_ord3() {
         vec![Property::new("key1", 10.into())]
     ));
     assert!(Json::new::<Vec<Property>>(vec![Property::new("key1", 10.into())]) < value);
+}
+
+#[test]
+fn test_bounds() {
+    assert!(Json::minbound() == Json::minbound());
+    assert!(Json::minbound() < Json::Null);
+    assert!(Json::minbound() < true.into());
+    assert!(Json::minbound() < false.into());
+    assert!(Json::minbound() < 10.into());
+    assert!(Json::minbound() < 10.2.into());
+    assert!(Json::minbound() < "hello world".into());
+    assert!(Json::minbound() < "[null]".parse().unwrap());
+    assert!(Json::minbound() < r#"{"key":10}"#.parse().unwrap());
+    assert!(Json::minbound() < Json::maxbound());
+
+    assert!(Json::maxbound() > Json::minbound());
+    assert!(Json::maxbound() > Json::Null);
+    assert!(Json::maxbound() > true.into());
+    assert!(Json::maxbound() > false.into());
+    assert!(Json::maxbound() > 10.into());
+    assert!(Json::maxbound() > 10.2.into());
+    assert!(Json::maxbound() > "hello world".into());
+    assert!(Json::maxbound() > "[null]".parse().unwrap());
+    assert!(Json::maxbound() > r#"{"key":10}"#.parse().unwrap());
+    assert!(Json::maxbound() == Json::maxbound());
 }
 
 #[bench]

@@ -35,6 +35,10 @@ pub enum Json {
     // Hidden variants
     #[doc(hidden)]
     __Error(String),
+    #[doc(hidden)]
+    __Minbound,
+    #[doc(hidden)]
+    __Maxbound,
 }
 
 /// Implementation provides methods to construct and validate Json values.
@@ -76,6 +80,16 @@ impl Json {
         Self: From<T>,
     {
         value.into()
+    }
+
+    /// minbound return a Json value that sort before every other [Json] type.
+    pub fn minbound() -> Json {
+        Json::__Minbound
+    }
+
+    /// maxbound return a Json value that sort after every other [Json] type.
+    pub fn maxbound() -> Json {
+        Json::__Maxbound
     }
 
     /// Validate parts of JSON text that are not yet parsed. Typically,
@@ -155,6 +169,8 @@ impl Json {
             Json::Array(_) => "array".to_string(),
             Json::Object(_) => "object".to_string(),
             Json::__Error(_) => "error".to_string(),
+            Json::__Minbound => "minbound".to_string(),
+            Json::__Maxbound => "maxbound".to_string(),
         }
     }
 }
@@ -378,6 +394,10 @@ impl PartialEq for Json {
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
             (Object(a), Object(b)) => a == b,
+            // handle boundaries
+            (Json::__Minbound, Json::__Minbound) => true,
+            (Json::__Maxbound, Json::__Maxbound) => true,
+            // catch all
             _ => false,
         }
     }
@@ -476,6 +496,13 @@ impl Ord for Json {
             // handle error cases, error variants sort at the end.
             (_, Json::__Error(_)) => Ordering::Less,
             (Json::__Error(_), _) => Ordering::Greater,
+            // handle boundaries
+            (Json::__Minbound, Json::__Minbound) => Ordering::Equal,
+            (Json::__Maxbound, Json::__Maxbound) => Ordering::Equal,
+            (Json::__Minbound, _) => Ordering::Less,
+            (Json::__Maxbound, _) => Ordering::Greater,
+            (_, Json::__Minbound) => Ordering::Greater,
+            (_, Json::__Maxbound) => Ordering::Less,
             // handle cases of mixed types.
             (Null, _) => Ordering::Less,
             (_, Null) => Ordering::Greater,
@@ -661,6 +688,8 @@ impl Display for Json {
                 }
             }
             Json::__Error(err) => write!(f, "error: {}", err),
+            Json::__Minbound => write!(f, "minbound"),
+            Json::__Maxbound => write!(f, "maxbound"),
         }
     }
 }
