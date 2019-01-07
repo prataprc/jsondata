@@ -3,7 +3,7 @@ use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::io;
 use std::str::FromStr;
-use std::cmp::{PartialOrd, Ordering};
+use std::cmp::{PartialOrd, Ord, Ordering};
 use unicode_reader::CodePoints;
 
 use jptr;
@@ -334,6 +334,8 @@ impl Json {
     }
 }
 
+impl Eq for Json {}
+
 impl PartialEq for Json {
     fn eq(&self, other: &Json) -> bool {
         use Json::{Array, Bool, Float, Integer, Null, Object, String as S};
@@ -383,86 +385,110 @@ impl PartialEq for Json {
 
 impl PartialOrd for Json {
     fn partial_cmp(&self, other: &Json) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Json {
+    fn cmp(&self, other: &Json) -> Ordering {
         use Json::{Array, Bool, Float, Integer, Null, Object, String as S};
 
         match (self, other) {
             // typically we assume that value at same position is same type.
-            (Null, Null) => Some(Ordering::Equal),
+            (Null, Null) => Ordering::Equal,
             (Bool(a), Bool(b)) =>
                 if (*a) == (*b) {
-                    Some(Ordering::Equal)
+                    Ordering::Equal
                 } else if !(*a) {
-                    Some(Ordering::Less)
+                    Ordering::Less
                 } else {
-                    Some(Ordering::Greater)
+                    Ordering::Greater
                 },
-            (Integer(a), Integer(b)) => a.partial_cmp(b),
-            (Float(a), Float(b)) => a.partial_cmp(b),
+            (Integer(a), Integer(b)) => {
+                let (x, y) = (a.integer().unwrap(), b.integer().unwrap());
+                x.cmp(&y)
+            },
+            (Float(a), Float(b)) => {
+                let (fs, fo) = (a.float().unwrap(), b.float().unwrap());
+                if fs.is_finite() && fo.is_finite() {
+                    if fs < fo {
+                        Ordering::Less
+                    } else if fs > fo {
+                        Ordering::Greater
+                    } else {
+                        Ordering::Equal
+                    }
+                } else {
+                    let is = if fs.is_infinite() { fs.signum() as i32 } else { 2 };
+                    let io = if fo.is_infinite() { fs.signum() as i32 } else { 2 };
+                    is.cmp(&io)
+                }
+            },
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
-                (Some(x), Some(y)) => x.partial_cmp(&(y as i128)),
-                (Some(_), None) => Some(Ordering::Greater),
-                (None, Some(_)) => Some(Ordering::Less),
-                (None, None) => Some(Ordering::Equal),
+                (Some(x), Some(y)) => x.cmp(&(y as i128)),
+                (Some(_), None) => Ordering::Greater,
+                (None, Some(_)) => Ordering::Less,
+                (None, None) => Ordering::Equal,
             },
             (Float(a), Integer(b)) => match (a.float(), b.integer()) {
-                (Some(x), Some(y)) => (x as i128).partial_cmp(&y),
-                (Some(_), None) => Some(Ordering::Greater),
-                (None, Some(_)) => Some(Ordering::Less),
-                (None, None) => Some(Ordering::Equal),
+                (Some(x), Some(y)) => (x as i128).cmp(&y),
+                (Some(_), None) => Ordering::Greater,
+                (None, Some(_)) => Ordering::Less,
+                (None, None) => Ordering::Equal,
             },
-            (S(a), S(b)) => a.partial_cmp(b),
+            (S(a), S(b)) => a.cmp(b),
             (Array(this), Array(that)) => {
                 for (i, a) in this.iter().enumerate() {
                     if i == that.len() {
-                        return Some(Ordering::Greater)
+                        return Ordering::Greater
                     }
-                    let cmp = a.partial_cmp(&that[i]);
-                    if cmp != Some(Ordering::Equal) {
+                    let cmp = a.cmp(&that[i]);
+                    if cmp != Ordering::Equal {
                         return cmp
                     }
                 }
                 if this.len() == that.len() {
-                    Some(Ordering::Equal)
+                    Ordering::Equal
                 } else {
-                    Some(Ordering::Less)
+                    Ordering::Less
                 }
             },
             (Object(this), Object(that)) => {
                 for (i, a) in this.iter().enumerate() {
                     if i == that.len() {
-                        return Some(Ordering::Greater)
+                        return Ordering::Greater
                     }
-                    let cmp = a.key_ref().partial_cmp(that[i].key_ref());
-                    if cmp != Some(Ordering::Equal) {
+                    let cmp = a.key_ref().cmp(that[i].key_ref());
+                    if cmp != Ordering::Equal {
                         return cmp
                     }
-                    let cmp = a.value_ref().partial_cmp(that[i].value_ref());
-                    if cmp != Some(Ordering::Equal) {
+                    let cmp = a.value_ref().cmp(that[i].value_ref());
+                    if cmp != Ordering::Equal {
                         return cmp
                     }
                 }
                 if this.len() == that.len() {
-                    Some(Ordering::Equal)
+                    Ordering::Equal
                 } else {
-                    Some(Ordering::Less)
+                    Ordering::Less
                 }
             },
             // handle error cases, error variants sort at the end.
-            (_, Json::__Error(_)) => Some(Ordering::Less),
-            (Json::__Error(_), _) => Some(Ordering::Greater),
+            (_, Json::__Error(_)) => Ordering::Less,
+            (Json::__Error(_), _) => Ordering::Greater,
             // handle cases of mixed types.
-            (Null, _) => Some(Ordering::Less),
-            (_, Null) => Some(Ordering::Greater),
-            (Bool(_), _) => Some(Ordering::Less),
-            (_, Bool(_)) => Some(Ordering::Greater),
-            (Integer(_), _) => Some(Ordering::Less),
-            (_, Integer(_)) => Some(Ordering::Greater),
-            (Float(_), _) => Some(Ordering::Less),
-            (_, Float(_)) => Some(Ordering::Greater),
-            (S(_), _) => Some(Ordering::Less),
-            (_, S(_)) => Some(Ordering::Greater),
-            (Array(_), _) => Some(Ordering::Less),
-            (_, Array(_)) => Some(Ordering::Greater),
+            (Null, _) => Ordering::Less,
+            (_, Null) => Ordering::Greater,
+            (Bool(_), _) => Ordering::Less,
+            (_, Bool(_)) => Ordering::Greater,
+            (Integer(_), _) => Ordering::Less,
+            (_, Integer(_)) => Ordering::Greater,
+            (Float(_), _) => Ordering::Less,
+            (_, Float(_)) => Ordering::Greater,
+            (S(_), _) => Ordering::Less,
+            (_, S(_)) => Ordering::Greater,
+            (Array(_), _) => Ordering::Less,
+            (_, Array(_)) => Ordering::Greater,
         }
     }
 }
