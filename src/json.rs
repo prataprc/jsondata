@@ -344,11 +344,11 @@ impl PartialEq for Json {
             (Integer(_), Integer(_)) => self.integer() == other.integer(),
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
                     (Some(x), Some(y)) => {
-                        let n = y as i128;
-                        if n == std::i128::MIN || n == std::i128::MAX || y.is_nan() {
+                        let num = y as i128;
+                        if num == std::i128::MIN || num == std::i128::MAX || y.is_nan() {
                             return false
                         }
-                        x == n
+                        x == num
                     },
                     _ => false,
             },
@@ -365,11 +365,11 @@ impl PartialEq for Json {
             },
             (Float(a), Integer(b)) => match (a.float(), b.integer()) {
                     (Some(x), Some(y)) => {
-                        let n = x as i128;
-                        if n == std::i128::MIN || n == std::i128::MAX || x.is_nan() {
+                        let num = x as i128;
+                        if num == std::i128::MIN || num == std::i128::MAX || x.is_nan() {
                             return false
                         }
-                        y == n
+                        y == num
                     },
                     _ => false,
                 },

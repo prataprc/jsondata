@@ -441,7 +441,7 @@ fn test_partial_eq() {
 }
 
 #[test]
-fn test_partial_ord() {
+fn test_partial_ord1() {
     assert!(Json::Null < Json::new(true));
     assert!(Json::Null < Json::new(false));
     assert!(Json::Null < Json::new(10));
@@ -469,7 +469,10 @@ fn test_partial_ord() {
     assert!(value < Json::new("hello world"));
     assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
     assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+}
 
+#[test]
+fn test_partial_ord2() {
     let value = Json::new(10);
     assert!(value > Json::Null);
     assert!(value > Json::new(false));
@@ -499,7 +502,11 @@ fn test_partial_ord() {
     assert!(value == Json::new("hello world"));
     assert!(value < Json::new::<Vec<Json>>(vec![10.into()]));
     assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+}
 
+
+#[test]
+fn test_partial_ord3() {
     let value: Json = "[10,20]".parse().unwrap();
     assert!(value > Json::Null);
     assert!(value > Json::new(false));
