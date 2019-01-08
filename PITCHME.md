@@ -307,14 +307,14 @@ A JSON pointer text is made of path components separated by @color[blue](/).
 @snapend
 
 <div class="fragment mt30">
-For Example: @color[blue](/users/0/name) <br/>
-@css[text-07]({"users": [ {"name": "joe", age: 20}, {"name": "jack", age: 30}, {"name": "jane", age: 25} ])
+For this example document: <br/>
+@css[text-07]({"users": [ {"name": "joe", age: 20}, {"name": "jack", age: 30}, {"name": "jane", age: 25} ]})
 
-<table style="margin: unset" class="mt30">
-<tr> <th> path </th> <th> meaning </th> </tr>
-<tr> <td>/users</td> <td> fetch the member value with matching key - @color[blue](users) </td> </tr>
-<tr> <td>/0    </td> <td> fetch the @color[blue](first value) from an array </td> </tr>
-<tr> <td>/name </td> <td> fetch the member value with matching key - @color[blue](name) </td> </tr>
+<table style="margin: unset; " class="mt30">
+<tr> <th> path </th> <th> value </th> </tr>
+<tr> <td>/users</td> <td class="text-07"> [ {"name": "joe", age: 20}, {"name": "jack", age: 30}, {"name": "jane", age: 25}  </td> </tr>
+<tr> <td>/users/0    </td> <td class="text-07"> {"name": "joe", age: 20}  </td> </tr>
+<tr> <td>/users/0/name </td> <td class="text-07"> "joe"  </td> </tr>
 </table>
 
 </div>
