@@ -8,13 +8,12 @@ use json::Json;
 /// * **key** is [String] type, defined by JSON spec.
 /// * **value** is JSON value.
 ///
-/// Implements [PartialEq] and [PartialOrd], where only the key component
-/// is considered for equality and ordering.
+/// Implements [PartialEq] and [PartialOrd] for equality and ordering.
 ///
 /// [string]: std::string::String
 /// [PartialEq]: std::cmp::PartialEq
 /// [PartialOrd]: std::cmp::PartialOrd
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd)]
 pub struct Property(String, Json);
 
 /// Following inherent methods are self explanatory, typically
@@ -57,22 +56,6 @@ impl Property {
     #[inline]
     pub fn set_value(&mut self, value: Json) {
         self.1 = value;
-    }
-}
-
-// Eq, PartialEq and PartialOrd
-
-impl Eq for Property {}
-
-impl PartialEq for Property {
-    fn eq(&self, other: &Property) -> bool {
-        self.0 == other.0 // compare only the key.
-    }
-}
-
-impl PartialOrd for Property {
-    fn partial_cmp(&self, other: &Property) -> Option<Ordering> {
-        self.0.partial_cmp(other.key_ref()) // compare only the key.
     }
 }
 

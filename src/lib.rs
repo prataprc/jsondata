@@ -115,3 +115,5 @@ pub use property::Property;
 mod jptr_test;
 #[cfg(test)]
 mod json_test;
+#[cfg(test)]
+mod ops_test;

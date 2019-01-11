@@ -216,11 +216,11 @@ fn test_json5_object() {
     json.compute().unwrap();
     let obj1 = Json::new::<Vec<Property>>(vec![
         Property::new("age", 27.into()),
-        Property::new("name", "joe".into()),
+        Property::new("name", "Joe".into()),
     ]);
     let obj2 = Json::new::<Vec<Property>>(vec![
         Property::new("age", 32.into()),
-        Property::new("name", "jane".into()),
+        Property::new("name", "Jane".into()),
     ]);
     let value = Json::new(vec![obj1, obj2]);
     assert_eq!(json, value);
@@ -532,7 +532,7 @@ fn test_partial_ord3() {
     assert!(value > Json::new(10.0));
     assert!(value > Json::new("hello world"));
     assert!(value > Json::new::<Vec<Json>>(vec![10.into()]));
-    assert!(value == Json::new::<Vec<Property>>(
+    assert!(value > Json::new::<Vec<Property>>(
         vec![Property::new("key1", 10.into()), Property::new("key2", 10.into())]
     ));
     assert!(value < Json::new::<Vec<Property>>(

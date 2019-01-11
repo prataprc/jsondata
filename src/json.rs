@@ -268,15 +268,13 @@ impl Json {
         let (json, frag) = jptr::lookup(self, path)?;
         let json = jptr::lookup_container(json, &frag)?;
         match json {
-            Json::String(s1) => {
-                if let Json::String(s2) = value {
-                    let mut s = String::new();
-                    s.push_str(&s1);
-                    s.push_str(&s2);
+            Json::String(j) => {
+                if let Json::String(s) = value {
+                    j.push_str(&s);
                     Ok(())
                 } else {
                     let tn = value.typename();
-                    Err(format!("jptr: cannot add {} to `{}`", tn, s1))
+                    Err(format!("jptr: cannot add {} to `{}`", tn, j))
                 }
             }
             Json::Array(arr) => {
@@ -719,7 +717,7 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 pub fn insert(json: &mut Json, item: Property) {
     if let Json::Object(obj) = json {
         match property::search_by_key(&obj, item.key_ref()) {
-            Ok(off) => obj.insert(off, item),
+            Ok(off) => {obj.push(item); obj.swap_remove(off);},
             Err(off) => obj.insert(off, item),
         }
     }

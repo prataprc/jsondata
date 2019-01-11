@@ -153,15 +153,15 @@ fn jptr_append_test() {
     let reft = r#"
        {
           "foo": ["barjek", "baz", "goz"],
-          "": true,
-          "a/b": true,
-          "c%d": true,
-          "e^f": null,
-          "g|h": null,
-          "i\\j": null,
-          "k\"l": null,
-          " ": "helloworld",
-          "m~n": "world",
+          "": 0,
+          "a/b": 1,
+          "c%d": 2,
+          "e^f": 3,
+          "g|h": 4,
+          "i\\j": 5,
+          "k\"l": 6,
+          " ": "helloworkd",
+          "m~n": 8,
           "d" : {"key1": [10,20, "workd"]}
        }
     "#;
@@ -196,13 +196,13 @@ fn jptr_delete_test() {
     let reft = r#"
        {
           "foo": ["bar"],
-          "a/b": true,
-          "c%d": true,
-          "e^f": null,
-          "g|h": null,
-          "i\\j": null,
-          "k\"l": null,
-          "m~n": "world",
+          "a/b": 1,
+          "c%d": 2,
+          "e^f": 3,
+          "g|h": 4,
+          "i\\j": 5,
+          "k\"l": 6,
+          "m~n": 8,
           "d" : {"key1": [20]}
        }
     "#;
