@@ -16,10 +16,18 @@ and document database.
 * [x] Sorted keys in property object.
 * [x] Streaming JSON parser.
 * [x] Support [JSON5](http://json5.org) standard.
-* [ ] Common arithmetic and logic operations.
+* [x] Common arithmetic and logic operations.
 * [x] Sortable JSON.
 
 **[API Documentation](https://docs.rs/jsondata)**
+
+Relevant site/articles:
+
+* [JSON Pointer][jptr].
+* [JSON5][json5].
+* Rust [internal discussion][rust1]  on f64 -> integer.
+* [Json sort order][json-sort-order].
+* [Json operations][json-ops].
 
 Deferred conversion for numbers
 ===============================
@@ -113,8 +121,18 @@ Sortable JSON
 - Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
   [issue#10184](https://github.com/rust-lang/rust/issues/10184),
   discussing saturating cast of f64 -> integer.
-- Rust [internal discussion](https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231)
-  on f64 -> integer.
+- Rust [internal discussion][rust1]  on f64 -> integer.
+
+Operations on JSON documents
+============================
+
+* Arithmetic operations, ADD, SUB, MUL, DIV, REM, NEG.
+* Bitwise operations, SHL, SHR, BITAND, BITOR, BITXOR.
+* Logical operations, NOT, AND, OR.
+* Index operations.
+* Range operations.
+
+**[Detailed description can be found here][json-ops].**
 
 Help wanted
 ===========
@@ -124,8 +142,11 @@ Help wanted
 * JSON5 implementation [#4][#4].
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
+[json5]: http://json5.org
 [jptr]: https://tools.ietf.org/html/rfc6901
 [#1]: https://github.com/bnclabs/jsondata/issues/1
 [#3]: https://github.com/bnclabs/jsondata/issues/3
 [#4]: https://github.com/bnclabs/jsondata/issues/4
 [json-sort-order]: https://prataprc.github.io/json-sort-order.html
+[json-ops]: https://prataprc.github.io/json-operations.html
+[rust1]: https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231

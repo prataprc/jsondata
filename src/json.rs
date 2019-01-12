@@ -4,6 +4,7 @@ use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::io;
 use std::str::FromStr;
+use std::ops::RangeBounds;
 use unicode_reader::CodePoints;
 
 use jptr;
@@ -11,6 +12,7 @@ use lex::Lex;
 use num::{Floating, Integral};
 use parse::parse_value;
 use property::{self, Property};
+use ops;
 
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
@@ -283,6 +285,31 @@ impl Json {
                 Ok(())
             }
             _ => Err(format!("jptr: not a container {} at {}", json, frag)),
+        }
+    }
+
+    pub fn range<R>(&self, range: R) -> Json where R: RangeBounds<isize> {
+        use std::ops::Bound::{Included, Excluded, Unbounded};
+
+        match self {
+            Json::__Error(_) => self.clone(),
+            Json::Array(arr) => {
+                let start = match range.start_bound() {
+                    Included(n) => ops::normalized_offset(*n, arr.len()),
+                    Excluded(n) => ops::normalized_offset((*n)+1, arr.len()),
+                    Unbounded => Some(0),
+                };
+                let end = match range.end_bound() {
+                    Included(n) => ops::normalized_offset((*n)+1, arr.len()),
+                    Excluded(n) => ops::normalized_offset(*n, arr.len()),
+                    Unbounded => Some(arr.len()),
+                };
+                match (start, end) {
+                    (Some(start), Some(end)) => arr[start..end].to_vec().into(),
+                    _ => ops::INDEX_OUTOFBOUND.clone(),
+                }
+            },
+            _ => ops::INDEX_ARRAY_ERROR.clone(),
         }
     }
 }

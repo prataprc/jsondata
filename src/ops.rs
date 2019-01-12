@@ -1,5 +1,5 @@
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
-use std::ops::{BitAnd, BitOr, BitXor};
+use std::ops::{BitAnd, BitOr, BitXor, Index};
 
 use json::Json;
 use property::{self, Property};
@@ -362,6 +362,44 @@ impl Not for Json {
     }
 }
 
+lazy_static! {
+    pub static ref INDEX_ARRAY_ERROR: Json = Json::__Error("cannot index non-array".to_string());
+    pub static ref INDEX_OUTOFBOUND: Json = Json::__Error("index out of bound".to_string());
+    pub static ref INDEX_OBJECT_ERROR: Json = Json::__Error("cannot index non-object".to_string());
+    pub static ref INDEX_MISSING_KEY: Json = Json::__Error("key not found".to_string());
+}
+impl Index<isize> for Json {
+    type Output=Json;
+
+    fn index(&self, index: isize) -> &Json {
+        match self {
+            Json::__Error(_) => self,
+            Json::Array(arr) => {
+                match normalized_offset(index, arr.len()) {
+                    Some(off) => &arr[off],
+                    None => &INDEX_OUTOFBOUND,
+                }
+            },
+            _ => &INDEX_ARRAY_ERROR,
+        }
+    }
+}
+
+impl Index<&str> for Json {
+    type Output=Json;
+
+    fn index(&self, index: &str) -> &Json {
+        match self {
+            Json::__Error(_) => self,
+            Json::Object(obj) => match property::search_by_key(obj, index) {
+                Ok(off) => obj[off].value_ref(),
+                Err(_) => &INDEX_MISSING_KEY,
+            },
+            _ => &INDEX_OBJECT_ERROR,
+        }
+    }
+}
+
 //// TODO: To handle || and && short-circuiting operations.
 ////impl And for Json {
 ////    type Output=Json;
@@ -396,4 +434,10 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
         }
     }
     this
+}
+
+pub fn normalized_offset(off: isize, len: usize) -> Option<usize> {
+    let len = len as isize;
+    let off = if off < 0 { off + len } else { off };
+    if off >= 0 && off < len { Some(off as usize) } else { None }
 }
