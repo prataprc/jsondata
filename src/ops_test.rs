@@ -369,4 +369,11 @@ fn test_range_arr() {
     assert_eq!(value.range(..), Json::new(arr[..].to_vec()));
     assert_eq!(value.range(1..=3), Json::new(arr[1..=3].to_vec()));
     assert_eq!(value.range(..=3), Json::new(arr[..=3].to_vec()));
+
+    assert_eq!(value.range(-5..), Json::new(arr[1..].to_vec()));
+    assert_eq!(value.range(-5..-3), Json::new(arr[1..3].to_vec()));
+    assert_eq!(value.range(..-3), Json::new(arr[..3].to_vec()));
+    assert_eq!(value.range(..), Json::new(arr[..].to_vec()));
+    assert_eq!(value.range(-5..=-3), Json::new(arr[1..=3].to_vec()));
+    assert_eq!(value.range(..=-3), Json::new(arr[..=3].to_vec()));
 }
