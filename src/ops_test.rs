@@ -1,6 +1,3 @@
-use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
-use std::ops::{BitAnd, BitOr, BitXor};
-
 use property::Property;
 use json::Json;
 
@@ -67,6 +64,7 @@ fn test_ops_add() {
 }
 
 #[test]
+#[allow(clippy::eq_op)]
 fn test_ops_sub() {
     // Null as lhs
     assert_eq!(Json::Null, Json::Null - Json::Null);
@@ -110,7 +108,7 @@ fn test_ops_sub() {
     assert_eq!(Json::new(10), Json::new(20) - 10.into());
     assert_eq!(Json::new(20.1-10.1), Json::new(20.1) - 10.1.into());
     assert_eq!(Json::new(9.8), Json::new(20) - 10.2.into());
-    assert_eq!(Json::new(10.2-(10 as f64)), Json::new(10.2) - 10.into());
+    assert_eq!(Json::new(10.2-(f64::from(10))), Json::new(10.2) - 10.into());
 
     // Array substraction
     let lhs: Json = vec![Json::new(1), 1.into(), 2.into(), 2.into(), 2.into()].into();
@@ -154,8 +152,8 @@ fn test_ops_mul() {
     // Integers and floats
     assert_eq!(Json::new(200), Json::new(20) * 10.into());
     assert_eq!(Json::new(20.1*10.1), Json::new(20.1) * 10.1.into());
-    assert_eq!(Json::new((20 as f64)*10.2), Json::new(20) * 10.2.into());
-    assert_eq!(Json::new(10.2*(10 as f64)), Json::new(10.2) * 10.into());
+    assert_eq!(Json::new((f64::from(20))*10.2), Json::new(20) * 10.2.into());
+    assert_eq!(Json::new(10.2*(f64::from(10))), Json::new(10.2) * 10.into());
 
     // String multiplication
     assert_eq!(Json::new("okokok"), Json::new("ok") * 3.into());
@@ -163,6 +161,7 @@ fn test_ops_mul() {
 }
 
 #[test]
+#[allow(clippy::eq_op)]
 fn test_ops_div() {
     // Null as lhs
     assert_eq!(Json::Null, Json::Null / Json::Null);
@@ -191,8 +190,8 @@ fn test_ops_div() {
     // Integers and floats
     assert_eq!(Json::new(2), Json::new(20) / 10.into());
     assert_eq!(Json::new(20.1/10.1), Json::new(20.1) / 10.1.into());
-    assert_eq!(Json::new((20 as f64)/10.2), Json::new(20) / 10.2.into());
-    assert_eq!(Json::new(10.2/(10 as f64)), Json::new(10.2) / 10.into());
+    assert_eq!(Json::new((f64::from(20))/10.2), Json::new(20) / 10.2.into());
+    assert_eq!(Json::new(10.2/(f64::from(10))), Json::new(10.2) / 10.into());
 }
 
 #[test]
@@ -224,8 +223,8 @@ fn test_ops_rem() {
     // Integers and floats
     assert_eq!(Json::new(2), Json::new(202) % 10.into());
     assert_eq!(Json::new(20.1%10.1), Json::new(20.1) % 10.1.into());
-    assert_eq!(Json::new((20 as f64)%10.2), Json::new(20) % 10.2.into());
-    assert_eq!(Json::new(10.2%(10 as f64)), Json::new(10.2) % 10.into());
+    assert_eq!(Json::new((f64::from(20))%10.2), Json::new(20) % 10.2.into());
+    assert_eq!(Json::new(10.2%(f64::from(10))), Json::new(10.2) % 10.into());
 }
 
 #[test]
@@ -236,4 +235,59 @@ fn test_ops_neg() {
     // Integers and floats
     assert_eq!(Json::new(-202), -Json::new(202));
     assert_eq!(Json::new(-20.1), -Json::new(20.1));
+}
+
+#[test]
+fn test_ops_shl() {
+    assert_eq!(Json::new(2), Json::new(1) << 1.into());
+    let v = -170_141_183_460_469_231_731_687_303_715_884_105_728;
+    assert_eq!(Json::new(v), Json::new(1) << 127.into());
+}
+
+#[test]
+fn test_ops_shr() {
+    assert_eq!(Json::new(0), Json::new(1) >> 1.into());
+    assert_eq!(Json::new(-1), (Json::new(1) << 127.into()) >> 127.into());
+}
+
+#[test]
+fn test_ops_bitand() {
+    assert_eq!(Json::new(0xABCD), Json::new(0xABCD) & 0xFFFF.into());
+    assert_eq!(Json::new(0), Json::new(0xABCD) & 0.into());
+}
+
+#[test]
+fn test_ops_bitor() {
+    assert_eq!(Json::new(0xFFFF), Json::new(0xABCD) | 0xFFFF.into());
+    assert_eq!(Json::new(0xABCD), Json::new(0xABCD) | 0.into());
+}
+
+#[test]
+fn test_ops_bitxor() {
+    assert_eq!(Json::new(0x5432), Json::new(0xABCD) ^ 0xFFFF.into());
+    assert_eq!(Json::new(0xABCD), Json::new(0xABCD) ^ 0.into());
+}
+
+#[test]
+fn test_ops_and() {
+    assert_eq!(Json::new(true), Json::new(true) & true.into());
+    assert_eq!(Json::new(false), Json::new(false) & true.into());
+    assert_eq!(Json::new(false), Json::new(true) & false.into());
+    assert_eq!(Json::new(false), Json::new(false) & false.into());
+}
+
+#[test]
+fn test_ops_or() {
+    assert_eq!(Json::new(true), Json::new(true) | true.into());
+    assert_eq!(Json::new(true), Json::new(false) | true.into());
+    assert_eq!(Json::new(true), Json::new(true) | false.into());
+    assert_eq!(Json::new(false), Json::new(false) | false.into());
+}
+
+#[test]
+fn test_ops_xor() {
+    assert_eq!(Json::new(false), Json::new(true) ^ true.into());
+    assert_eq!(Json::new(true), Json::new(false) ^ true.into());
+    assert_eq!(Json::new(true), Json::new(true) ^ false.into());
+    assert_eq!(Json::new(false), Json::new(false) ^ false.into());
 }

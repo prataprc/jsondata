@@ -438,7 +438,7 @@ impl Ord for Json {
                     }
                 } else {
                     let is = if fs.is_infinite() { fs.signum() as i32 } else { 2 };
-                    let io = if fo.is_infinite() { fs.signum() as i32 } else { 2 };
+                    let io = if fo.is_infinite() { fo.signum() as i32 } else { 2 };
                     is.cmp(&io)
                 }
             },
@@ -570,9 +570,19 @@ impl From<Vec<Property>> for Json {
 
 impl From<Json> for bool {
     fn from(val: Json) -> bool {
+        use json::Json::{Null, Bool, Integer, Float, String as S, Array, Object};
+
         match val {
-            Json::Null | Json::Bool(false) => false,
-            _ => true,
+            Null => false,
+            Bool(v) => v,
+            Integer(_) => val.integer().unwrap() != 0,
+            Float(_) => val.float().unwrap() != 0.0,
+            S(s) => !s.is_empty(),
+            Array(a) => !a.is_empty(),
+            Object(o) => !o.is_empty(),
+            Json::__Error(_) => false,
+            Json::__Minbound => true,
+            Json::__Maxbound => true,
         }
     }
 }
@@ -697,7 +707,7 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 
     let mut start = 0;
     for (i, byte) in val.bytes().enumerate() {
-        let escstr = ESCAPE[byte as usize];
+        let escstr = ESCAPE[usize::from(byte)];
         if escstr.is_empty() {
             continue;
         }

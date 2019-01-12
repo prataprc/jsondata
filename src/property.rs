@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use json::Json;
 
 /// Property type captures a single (key,value) pair in a JSON object.
@@ -85,7 +83,7 @@ pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize, usize> {
     if cmp == Equal {
         Ok(base)
     } else {
-        Err(base + (cmp == Less) as usize)
+        Err(base + usize::from(cmp == Less))
     }
 }
 

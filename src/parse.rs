@@ -159,12 +159,11 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json, String> {
                         let err = format!("parse: invalid codepoint {}", code2);
                         return Err(lex.format(&err));
                     }
-                    let code =
-                        (((code1 - 0xD800) as u32) << 10 | (code2 - 0xDC00) as u32) + 0x1_0000;
+                    let code = ((code1 - 0xD800) << 10) | ((code2 - 0xDC00) + 0x1_0000);
                     res.push(char::from_u32(code).unwrap());
                 }
 
-                n => match char::from_u32(n as u32) {
+                n => match char::from_u32(n) {
                     Some(ch) => res.push(ch),
                     None => {
                         lex.incr_col(i);
@@ -307,9 +306,9 @@ fn parse_identifier(text: &str, lex: &mut Lex) -> String {
 
 fn parse_whitespace(text: &str, lex: &mut Lex) {
     for (i, ch) in text[lex.off..].char_indices() {
-        //println!("{} {}", ch as u32, ch.is_whitespace());
+        //println!("{} {}", u32::from(ch), ch.is_whitespace());
         if ch.is_whitespace() {
-            if (ch as u32) < 256 && ch == '\n' {
+            if (u32::from(ch)) < 256 && ch == '\n' {
                 lex.row += 1;
                 lex.col = 0;
             } else {

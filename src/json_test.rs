@@ -572,6 +572,28 @@ fn test_bounds() {
     assert!(Json::maxbound() == Json::maxbound());
 }
 
+#[test]
+fn test_boolean_coersion() {
+    assert!(!bool::from(Json::Null));
+    assert!(!bool::from(Json::new(false)));
+    assert!(bool::from(Json::new(true)));
+    assert!(!bool::from(Json::new(0)));
+    assert!(!bool::from(Json::new(0.0)));
+    assert!(bool::from(Json::new(0.1)));
+    assert!(bool::from(Json::new(-0.1)));
+    assert!(bool::from(Json::new(-1)));
+    assert!(!bool::from(Json::new("")));
+    assert!(bool::from(Json::new("hello")));
+    let value: Vec<Json> = vec![];
+    assert!(!bool::from(Json::new(value)));
+    let value: Vec<Json> = vec![1.into()];
+    assert!(bool::from(Json::new(value)));
+    let value: Vec<Json> = vec![];
+    assert!(!bool::from(Json::new(value)));
+    let value: Vec<Property> = vec![Property::new("a", 10.into())];
+    assert!(bool::from(Json::new(value)));
+}
+
 #[bench]
 fn bench_null(b: &mut Bencher) {
     b.iter(|| "null".parse::<Json>().unwrap());

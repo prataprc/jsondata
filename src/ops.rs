@@ -1,22 +1,11 @@
 use std::ops::{Add, Sub, Mul, Div, Neg, Not, Rem, Shl, Shr};
 use std::ops::{BitAnd, BitOr, BitXor};
 
-use json::{self, Json};
+use json::{Json};
 use property::{self, Property};
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
 //       for Sub, Mul, Div, Neg.
-
-//impl Not for Json {
-//    type Output = Json;
-//
-//    fn not(self) -> Json {
-//        match self {
-//            Json::Bool(val) => Json::Bool(!val),
-//            _ => Json::Null,
-//        }
-//    }
-//}
 
 impl Add for Json {
     type Output = Json;
@@ -233,61 +222,100 @@ impl Neg for Json {
     }
 }
 
-//impl Shr for Json {
-//    type Output = Json;
-//
-//    fn shr(self, rhs: Json) -> Json {
-//        match (self.integer(), rhs.integer()) {
-//            (Some(l), Some(r)) => Json::new(l >> r),
-//            (_, _) => Json::Null,
-//        }
-//    }
-//}
-//
-//impl Shl for Json {
-//    type Output = Json;
-//
-//    fn shl(self, rhs: Json) -> Json {
-//        match (self.integer(), rhs.integer()) {
-//            (Some(l), Some(r)) => Json::new(l << r),
-//            (_, _) => Json::Null,
-//        }
-//    }
-//}
-//
-//impl BitAnd for Json {
-//    type Output = Json;
-//
-//    fn bitand(self, rhs: Json) -> Json {
-//        match (self.integer(), rhs.integer()) {
-//            (Some(l), Some(r)) => Json::new(l & r),
-//            (_, _) => Json::Null,
-//        }
-//    }
-//}
-//
-//impl BitXor for Json {
-//    type Output = Json;
-//
-//    fn bitxor(self, rhs: Json) -> Json {
-//        match (self.integer(), rhs.integer()) {
-//            (Some(l), Some(r)) => Json::new(l ^ r),
-//            (_, _) => Json::Null,
-//        }
-//    }
-//}
-//
-//impl BitOr for Json {
-//    type Output = Json;
-//
-//    fn bitor(self, rhs: Json) -> Json {
-//        match (self.integer(), rhs.integer()) {
-//            (Some(l), Some(r)) => Json::new(l | r),
-//            (_, _) => Json::Null,
-//        }
-//    }
-//}
-//
+impl Shl for Json {
+    type Output = Json;
+
+    fn shl(self, rhs: Json) -> Json {
+        match (self.integer(), rhs.integer()) {
+            (Some(l), Some(r)) => Json::new(l << r),
+            (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
+        }
+    }
+}
+
+impl Shr for Json {
+    type Output = Json;
+
+    fn shr(self, rhs: Json) -> Json {
+        match (self.integer(), rhs.integer()) {
+            (Some(l), Some(r)) => Json::new(l >> r),
+            (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
+        }
+    }
+}
+
+impl BitAnd for Json {
+    type Output = Json;
+
+    fn bitand(self, rhs: Json) -> Json {
+        use json::Json::Integer;
+
+        match (self, rhs) {
+            (x @ Json::__Error(_), _) => x,
+            (_, y @ Json::__Error(_)) => y,
+            (x @ Integer(_), y @ Integer(_)) => {
+                (x.integer().unwrap() & y.integer().unwrap()).into()
+            }
+            (x, y) => {
+                let (x, y): (bool, bool) = (x.into(), y.into());
+                (x & y).into()
+            }
+        }
+    }
+}
+
+impl BitOr for Json {
+    type Output = Json;
+
+    fn bitor(self, rhs: Json) -> Json {
+        use json::Json::Integer;
+
+        match (self, rhs) {
+            (x @ Json::__Error(_), _) => x,
+            (_, y @ Json::__Error(_)) => y,
+            (x @ Integer(_), y @ Integer(_)) => {
+                (x.integer().unwrap() | y.integer().unwrap()).into()
+            }
+            (x, y) => {
+                let (x, y): (bool, bool) = (x.into(), y.into());
+                (x | y).into()
+            }
+        }
+    }
+}
+
+impl BitXor for Json {
+    type Output = Json;
+
+    fn bitxor(self, rhs: Json) -> Json {
+        use json::Json::Integer;
+
+        match (self, rhs) {
+            (x @ Json::__Error(_), _) => x,
+            (_, y @ Json::__Error(_)) => y,
+            (x @ Integer(_), y @ Integer(_)) => {
+                (x.integer().unwrap() ^ y.integer().unwrap()).into()
+            }
+            (x, y) => {
+                let (x, y): (bool, bool) = (x.into(), y.into());
+                (x ^ y).into()
+            }
+        }
+    }
+}
+
+impl Not for Json {
+    type Output = Json;
+
+    fn not(self) -> Json {
+        if self.is_error() {
+            return self
+        }
+        let value: bool = self.into();
+        value.not().into()
+    }
+}
+
 //// TODO: To handle || and && short-circuiting operations.
 ////impl And for Json {
 ////    type Output=Json;
