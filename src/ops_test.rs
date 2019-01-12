@@ -319,8 +319,14 @@ fn test_ops_xor() {
 fn test_index_arr() {
     let item: Json = vec![Json::new(1), 2.into()].into();
     let value: Json = vec![
-        Json::new(1), 2.into(), true.into(), Json::Null, 3.4.into(), item.clone()
-    ].into();
+        Json::new(1),
+        2.into(),
+        true.into(),
+        Json::Null,
+        3.4.into(),
+        item.clone(),
+    ]
+    .into();
 
     assert_eq!(value[0], Json::new(1));
     assert_eq!(value[1], Json::new(2));
@@ -336,15 +342,25 @@ fn test_index_arr() {
 #[test]
 fn test_index_obj() {
     let value: Json = vec![
-        Property::new("a", 10.into()), Property::new("b", 10.into()), Property::new("c", 10.into()),
-    ].into();
+        Property::new("a", 10.into()),
+        Property::new("b", 10.into()),
+        Property::new("c", 10.into()),
+    ]
+    .into();
     assert_eq!(value["a"], Json::new(10));
     assert!(value["z"].is_error());
 }
 
 #[test]
 fn test_range_arr() {
-    let arr: Vec<Json> = vec![ Json::new(1), 2.into(), true.into(), Json::Null, 3.4.into(), 6.into() ].into();
+    let arr: Vec<Json> = vec![
+        Json::new(1),
+        2.into(),
+        true.into(),
+        Json::Null,
+        3.4.into(),
+        6.into(),
+    ];
     let value: Json = arr.clone().into();
 
     assert_eq!(value.range(1..), Json::new(arr[1..].to_vec()));

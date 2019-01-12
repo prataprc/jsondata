@@ -3,16 +3,16 @@ use std::convert::From;
 use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::io;
-use std::str::FromStr;
 use std::ops::RangeBounds;
+use std::str::FromStr;
 use unicode_reader::CodePoints;
 
 use jptr;
 use lex::Lex;
 use num::{Floating, Integral};
+use ops;
 use parse::parse_value;
 use property::{self, Property};
-use ops;
 
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
@@ -288,19 +288,22 @@ impl Json {
         }
     }
 
-    pub fn range<R>(&self, range: R) -> Json where R: RangeBounds<isize> {
-        use std::ops::Bound::{Included, Excluded, Unbounded};
+    pub fn range<R>(&self, range: R) -> Json
+    where
+        R: RangeBounds<isize>,
+    {
+        use std::ops::Bound::{Excluded, Included, Unbounded};
 
         match self {
             Json::__Error(_) => self.clone(),
             Json::Array(arr) => {
                 let start = match range.start_bound() {
                     Included(n) => ops::normalized_offset(*n, arr.len()),
-                    Excluded(n) => ops::normalized_offset((*n)+1, arr.len()),
+                    Excluded(n) => ops::normalized_offset((*n) + 1, arr.len()),
                     Unbounded => Some(0),
                 };
                 let end = match range.end_bound() {
-                    Included(n) => ops::normalized_offset((*n)+1, arr.len()),
+                    Included(n) => ops::normalized_offset((*n) + 1, arr.len()),
                     Excluded(n) => ops::normalized_offset(*n, arr.len()),
                     Unbounded => Some(arr.len()),
                 };
@@ -308,7 +311,7 @@ impl Json {
                     (Some(start), Some(end)) => arr[start..end].to_vec().into(),
                     _ => ops::INDEX_OUTOFBOUND.clone(),
                 }
-            },
+            }
             _ => ops::INDEX_ARRAY_ERROR.clone(),
         }
     }

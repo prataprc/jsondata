@@ -369,16 +369,14 @@ lazy_static! {
     pub static ref INDEX_MISSING_KEY: Json = Json::__Error("key not found".to_string());
 }
 impl Index<isize> for Json {
-    type Output=Json;
+    type Output = Json;
 
     fn index(&self, index: isize) -> &Json {
         match self {
             Json::__Error(_) => self,
-            Json::Array(arr) => {
-                match normalized_offset(index, arr.len()) {
-                    Some(off) => &arr[off],
-                    None => &INDEX_OUTOFBOUND,
-                }
+            Json::Array(arr) => match normalized_offset(index, arr.len()) {
+                Some(off) => &arr[off],
+                None => &INDEX_OUTOFBOUND,
             },
             _ => &INDEX_ARRAY_ERROR,
         }
@@ -386,7 +384,7 @@ impl Index<isize> for Json {
 }
 
 impl Index<&str> for Json {
-    type Output=Json;
+    type Output = Json;
 
     fn index(&self, index: &str) -> &Json {
         match self {
@@ -439,5 +437,9 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
 pub fn normalized_offset(off: isize, len: usize) -> Option<usize> {
     let len = len as isize;
     let off = if off < 0 { off + len } else { off };
-    if off >= 0 && off < len { Some(off as usize) } else { None }
+    if off >= 0 && off < len {
+        Some(off as usize)
+    } else {
+        None
+    }
 }
