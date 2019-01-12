@@ -1,7 +1,7 @@
-use std::ops::{Add, Sub, Mul, Div, Neg, Not, Rem, Shl, Shr};
+use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor};
 
-use json::{Json};
+use json::Json;
 use property::{self, Property};
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
@@ -14,36 +14,36 @@ impl Add for Json {
         use json::Json::{Array, Float, Integer, Null, Object, String as S};
 
         match (&self, &rhs) {
-            (Null, _) => rhs.clone(), // Identity operation
+            (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
                 Json::new(l + r)
-            },
+            }
             (Float(_), Float(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
                 Json::new(l + r)
-            },
+            }
             (Integer(_), Float(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
                 Json::new((l as f64) + r)
-            },
+            }
             (Float(_), Integer(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
                 Json::new(l + (r as f64))
-            },
+            }
             (S(l), S(r)) => {
                 let mut s = String::new();
                 s.push_str(l);
                 s.push_str(r);
                 S(s)
-            },
+            }
             (Array(l), Array(r)) => {
                 let mut a = vec![];
                 a.extend_from_slice(l);
                 a.extend_from_slice(r);
                 Array(a)
-            },
+            }
             (Object(l), Object(r)) => {
                 use json;
 
@@ -55,7 +55,7 @@ impl Add for Json {
                     .into_iter()
                     .for_each(|p| json::insert(&mut obj, p));
                 obj
-            },
+            }
             (_, _) => Json::__Error(format!("invalid {} + {}", self, rhs)),
         }
     }
@@ -65,10 +65,10 @@ impl Sub for Json {
     type Output = Json;
 
     fn sub(self, rhs: Json) -> Json {
-        use json::Json::{Null, Integer, Float, Array, Object};
+        use json::Json::{Array, Float, Integer, Null, Object};
 
         match (&self, &rhs) {
-            (Null, _) => rhs.clone(), // Identity operation
+            (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
@@ -88,12 +88,16 @@ impl Sub for Json {
             }
             (Array(lhs), Array(rhs)) => {
                 let mut res = lhs.clone();
-                rhs.iter().for_each(|x| { res.remove_item(x); });
+                rhs.iter().for_each(|x| {
+                    res.remove_item(x);
+                });
                 Array(res)
             }
             (Object(lhs), Object(rhs)) => {
                 let mut res = lhs.clone();
-                rhs.iter().for_each(|x| { res.remove_item(x); });
+                rhs.iter().for_each(|x| {
+                    res.remove_item(x);
+                });
                 Object(res)
             }
             (_, _) => Json::__Error(format!("invalid {} - {}", self, rhs)),
@@ -105,7 +109,7 @@ impl Mul for Json {
     type Output = Json;
 
     fn mul(self, rhs: Json) -> Json {
-        use json::Json::{Null, Integer, Float, String as S, Object};
+        use json::Json::{Float, Integer, Null, Object, String as S};
 
         match (&self, &rhs) {
             (Null, _) => Json::Null,
@@ -128,13 +132,22 @@ impl Mul for Json {
             }
             (S(s), Integer(_)) => {
                 let n = rhs.integer().unwrap();
-                if n == 0 { Null } else { S(s.repeat(n as usize)) }
+                if n == 0 {
+                    Null
+                } else {
+                    S(s.repeat(n as usize))
+                }
             }
             (Integer(_), S(s)) => {
                 let n = self.integer().unwrap();
-                if n == 0 { Null } else { S(s.repeat(n as usize)) }
+                if n == 0 {
+                    Null
+                } else {
+                    S(s.repeat(n as usize))
+                }
             }
-            (Object(this), Object(other)) => { // TODO: this is not well defined.
+            (Object(this), Object(other)) => {
+                // TODO: this is not well defined.
                 let mut obj = Vec::new();
                 obj = mixin_object(obj, this.to_vec());
                 obj = mixin_object(obj, other.to_vec());
@@ -149,28 +162,45 @@ impl Div for Json {
     type Output = Json;
 
     fn div(self, rhs: Json) -> Json {
-        use json::Json::{Null, Integer, Float, String as S};
+        use json::Json::{Float, Integer, Null, String as S};
 
         match (&self, &rhs) {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
-                if r == 0 { Null } else { Json::new(l / r) }
+                if r == 0 {
+                    Null
+                } else {
+                    Json::new(l / r)
+                }
             }
             (Integer(_), Float(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
-                if r == 0_f64 { Null } else { Json::new((l as f64) / r) }
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new((l as f64) / r)
+                }
             }
             (Float(_), Integer(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
-                if r == 0 { Null } else { Json::new(l / (r as f64)) }
+                if r == 0 {
+                    Null
+                } else {
+                    Json::new(l / (r as f64))
+                }
             }
             (Float(_), Float(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
-                if r == 0_f64 { Null } else { Json::new(l / r) }
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new(l / r)
+                }
             }
-            (S(s), S(patt)) => { // TODO: not yet defined
+            (S(s), S(patt)) => {
+                // TODO: not yet defined
                 let arr = s.split(patt).map(|s| S(s.to_string())).collect();
                 Json::Array(arr)
             }
@@ -190,19 +220,35 @@ impl Rem for Json {
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
-                if r == 0 { Null } else { Json::new(l % r) }
+                if r == 0 {
+                    Null
+                } else {
+                    Json::new(l % r)
+                }
             }
             (Integer(_), Float(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
-                if r == 0_f64 { Null } else { Json::new((l as f64) % r) }
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new((l as f64) % r)
+                }
             }
             (Float(_), Integer(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
-                if r == 0 { Null } else { Json::new(l % (r as f64)) }
+                if r == 0 {
+                    Null
+                } else {
+                    Json::new(l % (r as f64))
+                }
             }
             (Float(_), Float(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
-                if r == 0_f64 { Null } else { Json::new(l % r) }
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new(l % r)
+                }
             }
             (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
         }
@@ -309,7 +355,7 @@ impl Not for Json {
 
     fn not(self) -> Json {
         if self.is_error() {
-            return self
+            return self;
         }
         let value: bool = self.into();
         value.not().into()

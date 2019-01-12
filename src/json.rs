@@ -1,9 +1,9 @@
+use std::cmp::{Ord, Ordering, PartialOrd};
 use std::convert::From;
 use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::io;
 use std::str::FromStr;
-use std::cmp::{PartialOrd, Ord, Ordering};
 use unicode_reader::CodePoints;
 
 use jptr;
@@ -359,36 +359,36 @@ impl PartialEq for Json {
             (Bool(a), Bool(b)) => a == b,
             (Integer(_), Integer(_)) => self.integer() == other.integer(),
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
-                    (Some(x), Some(y)) => {
-                        let num = y as i128;
-                        if num == std::i128::MIN || num == std::i128::MAX || y.is_nan() {
-                            return false
-                        }
-                        x == num
-                    },
-                    _ => false,
+                (Some(x), Some(y)) => {
+                    let num = y as i128;
+                    if num == std::i128::MIN || num == std::i128::MAX || y.is_nan() {
+                        return false;
+                    }
+                    x == num
+                }
+                _ => false,
             },
             (Float(_), Float(_)) => {
                 let (fs, fo) = (self.float().unwrap(), other.float().unwrap());
                 if fs.is_finite() && fo.is_finite() {
-                    return fs == fo
+                    return fs == fo;
                 } else if fs.is_nan() && fo.is_nan() {
-                    return true
+                    return true;
                 } else if fs.is_infinite() && fo.is_infinite() {
-                    return fs.is_sign_positive() == fo.is_sign_positive()
+                    return fs.is_sign_positive() == fo.is_sign_positive();
                 }
                 false
-            },
+            }
             (Float(a), Integer(b)) => match (a.float(), b.integer()) {
-                    (Some(x), Some(y)) => {
-                        let num = x as i128;
-                        if num == std::i128::MIN || num == std::i128::MAX || x.is_nan() {
-                            return false
-                        }
-                        y == num
-                    },
-                    _ => false,
-                },
+                (Some(x), Some(y)) => {
+                    let num = x as i128;
+                    if num == std::i128::MIN || num == std::i128::MAX || x.is_nan() {
+                        return false;
+                    }
+                    y == num
+                }
+                _ => false,
+            },
             (S(a), S(b)) => a == b,
             (Array(a), Array(b)) => a == b,
             (Object(a), Object(b)) => a == b,
@@ -414,18 +414,19 @@ impl Ord for Json {
         match (self, other) {
             // typically we assume that value at same position is same type.
             (Null, Null) => Ordering::Equal,
-            (Bool(a), Bool(b)) =>
+            (Bool(a), Bool(b)) => {
                 if (*a) == (*b) {
                     Ordering::Equal
                 } else if !(*a) {
                     Ordering::Less
                 } else {
                     Ordering::Greater
-                },
+                }
+            }
             (Integer(a), Integer(b)) => {
                 let (x, y) = (a.integer().unwrap(), b.integer().unwrap());
                 x.cmp(&y)
-            },
+            }
             (Float(a), Float(b)) => {
                 let (fs, fo) = (a.float().unwrap(), b.float().unwrap());
                 if fs.is_finite() && fo.is_finite() {
@@ -437,11 +438,19 @@ impl Ord for Json {
                         Ordering::Equal
                     }
                 } else {
-                    let is = if fs.is_infinite() { fs.signum() as i32 } else { 2 };
-                    let io = if fo.is_infinite() { fo.signum() as i32 } else { 2 };
+                    let is = if fs.is_infinite() {
+                        fs.signum() as i32
+                    } else {
+                        2
+                    };
+                    let io = if fo.is_infinite() {
+                        fo.signum() as i32
+                    } else {
+                        2
+                    };
                     is.cmp(&io)
                 }
-            },
+            }
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
                 (Some(x), Some(y)) => x.cmp(&(y as i128)),
                 (Some(_), None) => Ordering::Greater,
@@ -458,11 +467,11 @@ impl Ord for Json {
             (Array(this), Array(that)) => {
                 for (i, a) in this.iter().enumerate() {
                     if i == that.len() {
-                        return Ordering::Greater
+                        return Ordering::Greater;
                     }
                     let cmp = a.cmp(&that[i]);
                     if cmp != Ordering::Equal {
-                        return cmp
+                        return cmp;
                     }
                 }
                 if this.len() == that.len() {
@@ -470,19 +479,19 @@ impl Ord for Json {
                 } else {
                     Ordering::Less
                 }
-            },
+            }
             (Object(this), Object(that)) => {
                 for (i, a) in this.iter().enumerate() {
                     if i == that.len() {
-                        return Ordering::Greater
+                        return Ordering::Greater;
                     }
                     let cmp = a.key_ref().cmp(that[i].key_ref());
                     if cmp != Ordering::Equal {
-                        return cmp
+                        return cmp;
                     }
                     let cmp = a.value_ref().cmp(that[i].value_ref());
                     if cmp != Ordering::Equal {
-                        return cmp
+                        return cmp;
                     }
                 }
                 if this.len() == that.len() {
@@ -490,7 +499,7 @@ impl Ord for Json {
                 } else {
                     Ordering::Less
                 }
-            },
+            }
             // handle error cases, error variants sort at the end.
             (_, Json::__Error(_)) => Ordering::Less,
             (Json::__Error(_), _) => Ordering::Greater,
@@ -570,7 +579,7 @@ impl From<Vec<Property>> for Json {
 
 impl From<Json> for bool {
     fn from(val: Json) -> bool {
-        use json::Json::{Null, Bool, Integer, Float, String as S, Array, Object};
+        use json::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
 
         match val {
             Null => false,
@@ -727,7 +736,10 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 pub fn insert(json: &mut Json, item: Property) {
     if let Json::Object(obj) = json {
         match property::search_by_key(&obj, item.key_ref()) {
-            Ok(off) => {obj.push(item); obj.swap_remove(off);},
+            Ok(off) => {
+                obj.push(item);
+                obj.swap_remove(off);
+            }
             Err(off) => obj.insert(off, item),
         }
     }
@@ -772,7 +784,7 @@ pub fn insert(json: &mut Json, item: Property) {
 /// [Read]: std::io::Read
 pub struct Jsons<R>
 where
-    R: io::Read
+    R: io::Read,
 {
     codes: CodePoints<io::Bytes<R>>,
     quant: String,
@@ -780,18 +792,21 @@ where
 
 impl<R> From<R> for Jsons<R>
 where
-    R: io::Read
+    R: io::Read,
 {
     fn from(input: R) -> Jsons<R> {
-        Jsons{codes: input.into(), quant: String::with_capacity(1024)}
+        Jsons {
+            codes: input.into(),
+            quant: String::with_capacity(1024),
+        }
     }
 }
 
 impl<R> Iterator for Jsons<R>
 where
-    R: io::Read
+    R: io::Read,
 {
-    type Item=Result<Json, io::Error>;
+    type Item = Result<Json, io::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut markers = String::new();
@@ -807,10 +822,10 @@ where
                         '}' | ']' => loop {
                             if let Some(m) = markers.pop() {
                                 if m == ch {
-                                    break
+                                    break;
                                 }
                             } else if markers.is_empty() {
-                                break
+                                break;
                             }
                         },
                         '"' => match Jsons::read_string(self)? {
@@ -821,7 +836,7 @@ where
                     }
                     //println!("loop {:?} {}", self.quant.as_bytes(), ch);
                     ch
-                },
+                }
                 Err(err) => break Some(Err(err)),
             };
             let eov = ch.is_whitespace() || ch == '}' || ch == ']' || ch == '"';
@@ -832,7 +847,7 @@ where
                 };
                 //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
                 self.quant.truncate(0);
-                break res
+                break res;
             }
             let res = self.codes.next();
             if res.is_none() && !self.quant.is_empty() {
@@ -842,9 +857,9 @@ where
                 };
                 //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
                 self.quant.truncate(0);
-                break res
+                break res;
             } else if res.is_none() {
-                break None
+                break None;
             }
             ok_ch = res.unwrap();
         }
@@ -853,15 +868,24 @@ where
 
 impl<R> Jsons<R>
 where
-    R: io::Read
+    R: io::Read,
 {
     fn read_string(&mut self) -> Option<Result<(), io::Error>> {
         let mut escape = false;
         loop {
             match self.codes.next() {
-                Some(Ok(ch)) if escape => { self.quant.push(ch); escape = false;},
-                Some(Ok('\\')) => { self.quant.push('\\'); escape = true; },
-                Some(Ok('"')) => { self.quant.push('"'); break Some(Ok(())); }
+                Some(Ok(ch)) if escape => {
+                    self.quant.push(ch);
+                    escape = false;
+                }
+                Some(Ok('\\')) => {
+                    self.quant.push('\\');
+                    escape = true;
+                }
+                Some(Ok('"')) => {
+                    self.quant.push('"');
+                    break Some(Ok(()));
+                }
                 Some(Ok(ch)) => self.quant.push(ch),
                 Some(Err(err)) => break Some(Err(err)),
                 None => break Some(Ok(())),

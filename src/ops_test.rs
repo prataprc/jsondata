@@ -1,5 +1,5 @@
-use property::Property;
 use json::Json;
+use property::Property;
 
 #[test]
 fn test_ops_add() {
@@ -106,9 +106,12 @@ fn test_ops_sub() {
 
     // Integers and floats
     assert_eq!(Json::new(10), Json::new(20) - 10.into());
-    assert_eq!(Json::new(20.1-10.1), Json::new(20.1) - 10.1.into());
+    assert_eq!(Json::new(20.1 - 10.1), Json::new(20.1) - 10.1.into());
     assert_eq!(Json::new(9.8), Json::new(20) - 10.2.into());
-    assert_eq!(Json::new(10.2-(f64::from(10))), Json::new(10.2) - 10.into());
+    assert_eq!(
+        Json::new(10.2 - (f64::from(10))),
+        Json::new(10.2) - 10.into()
+    );
 
     // Array substraction
     let lhs: Json = vec![Json::new(1), 1.into(), 2.into(), 2.into(), 2.into()].into();
@@ -151,9 +154,15 @@ fn test_ops_mul() {
 
     // Integers and floats
     assert_eq!(Json::new(200), Json::new(20) * 10.into());
-    assert_eq!(Json::new(20.1*10.1), Json::new(20.1) * 10.1.into());
-    assert_eq!(Json::new((f64::from(20))*10.2), Json::new(20) * 10.2.into());
-    assert_eq!(Json::new(10.2*(f64::from(10))), Json::new(10.2) * 10.into());
+    assert_eq!(Json::new(20.1 * 10.1), Json::new(20.1) * 10.1.into());
+    assert_eq!(
+        Json::new((f64::from(20)) * 10.2),
+        Json::new(20) * 10.2.into()
+    );
+    assert_eq!(
+        Json::new(10.2 * (f64::from(10))),
+        Json::new(10.2) * 10.into()
+    );
 
     // String multiplication
     assert_eq!(Json::new("okokok"), Json::new("ok") * 3.into());
@@ -189,9 +198,15 @@ fn test_ops_div() {
 
     // Integers and floats
     assert_eq!(Json::new(2), Json::new(20) / 10.into());
-    assert_eq!(Json::new(20.1/10.1), Json::new(20.1) / 10.1.into());
-    assert_eq!(Json::new((f64::from(20))/10.2), Json::new(20) / 10.2.into());
-    assert_eq!(Json::new(10.2/(f64::from(10))), Json::new(10.2) / 10.into());
+    assert_eq!(Json::new(20.1 / 10.1), Json::new(20.1) / 10.1.into());
+    assert_eq!(
+        Json::new((f64::from(20)) / 10.2),
+        Json::new(20) / 10.2.into()
+    );
+    assert_eq!(
+        Json::new(10.2 / (f64::from(10))),
+        Json::new(10.2) / 10.into()
+    );
 }
 
 #[test]
@@ -222,9 +237,15 @@ fn test_ops_rem() {
 
     // Integers and floats
     assert_eq!(Json::new(2), Json::new(202) % 10.into());
-    assert_eq!(Json::new(20.1%10.1), Json::new(20.1) % 10.1.into());
-    assert_eq!(Json::new((f64::from(20))%10.2), Json::new(20) % 10.2.into());
-    assert_eq!(Json::new(10.2%(f64::from(10))), Json::new(10.2) % 10.into());
+    assert_eq!(Json::new(20.1 % 10.1), Json::new(20.1) % 10.1.into());
+    assert_eq!(
+        Json::new((f64::from(20)) % 10.2),
+        Json::new(20) % 10.2.into()
+    );
+    assert_eq!(
+        Json::new(10.2 % (f64::from(10))),
+        Json::new(10.2) % 10.into()
+    );
 }
 
 #[test]

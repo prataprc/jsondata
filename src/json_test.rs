@@ -276,7 +276,6 @@ fn test_stream1() {
     assert_eq!(js.next().unwrap().unwrap().float(), Some(200.0));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
     assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
-
 }
 
 #[test]
@@ -325,19 +324,21 @@ fn test_stream2() {
     );
 
     assert_eq!(js.next().unwrap().unwrap(), Json::new::<Vec<Json>>(vec![]));
-    assert_eq!(
-        js.next().unwrap().unwrap(),
-        Json::new(vec![Json::new(10)])
-    );
+    assert_eq!(js.next().unwrap().unwrap(), Json::new(vec![Json::new(10)]));
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new(vec![
-            Json::Null, true.into(), false.into(), 10.into(), "tru\"e".into(),
+            Json::Null,
+            true.into(),
+            false.into(),
+            10.into(),
+            "tru\"e".into(),
         ])
     );
 
     assert_eq!(
-        js.next().unwrap().unwrap(), "汉语 / 漢語; Hàn\u{8} \tyǔ ".into()
+        js.next().unwrap().unwrap(),
+        "汉语 / 漢語; Hàn\u{8} \tyǔ ".into()
     );
 }
 
@@ -349,14 +350,19 @@ fn test_stream3() {
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new(vec![
-            Json::Null, true.into(), false.into(),
+            Json::Null,
+            true.into(),
+            false.into(),
             "hello\" \\ / \u{8} \u{c}\n\r\t".into()
         ])
     );
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new::<Vec<Json>>(vec![
-            102.into(), 10.2.into(), 0.2.into(), 0.into(),
+            102.into(),
+            10.2.into(),
+            0.2.into(),
+            0.into(),
             "helloȴ\\ 𝄞".into(),
         ])
     );
@@ -364,7 +370,10 @@ fn test_stream3() {
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new::<Vec<Json>>(vec![
-            100.into(), 1.into(), 0.0.into(), 2.0.into(),
+            100.into(),
+            1.into(),
+            0.0.into(),
+            2.0.into(),
             "汉语 / 漢語; Hàn\u{8} \tyǔ ".into()
         ])
     );
@@ -372,21 +381,31 @@ fn test_stream3() {
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new::<Vec<Json>>(vec![
-            0.2.into(), 0.02.into(), 0.0.into(), 0.2.into(), 0.2.into(),
+            0.2.into(),
+            0.02.into(),
+            0.0.into(),
+            0.2.into(),
+            0.2.into(),
         ])
     );
 
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new::<Vec<Json>>(vec![
-            (-102).into(), (-100).into(), (-0.0).into(), (-20.0).into(),
+            (-102).into(),
+            (-100).into(),
+            (-0.0).into(),
+            (-20.0).into(),
         ])
     );
 
-    assert_eq!(js.next().unwrap().unwrap(), Json::new::<Vec<Property>>(vec![]));
     assert_eq!(
         js.next().unwrap().unwrap(),
-        Json::new(vec![ Property::new("key1", "value1".into()) ])
+        Json::new::<Vec<Property>>(vec![])
+    );
+    assert_eq!(
+        js.next().unwrap().unwrap(),
+        Json::new(vec![Property::new("key1", "value1".into())])
     );
 
     assert_eq!(
@@ -509,7 +528,6 @@ fn test_partial_ord2() {
     assert!(value < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
 }
 
-
 #[test]
 fn test_partial_ord3() {
     let value: Json = "[10,20]".parse().unwrap();
@@ -532,18 +550,28 @@ fn test_partial_ord3() {
     assert!(value > Json::new(10.0));
     assert!(value > Json::new("hello world"));
     assert!(value > Json::new::<Vec<Json>>(vec![10.into()]));
-    assert!(value > Json::new::<Vec<Property>>(
-        vec![Property::new("key1", 10.into()), Property::new("key2", 10.into())]
-    ));
-    assert!(value < Json::new::<Vec<Property>>(
-        vec![Property::new("key1", 20.into()), Property::new("key2", 10.into())]
-    ));
-    assert!(value > Json::new::<Vec<Property>>(
-        vec![Property::new("key1", 5.into()), Property::new("key2", 10.into())]
-    ));
-    assert!(value > Json::new::<Vec<Property>>(
-        vec![Property::new("key1", 10.into())]
-    ));
+    assert!(
+        value
+            > Json::new::<Vec<Property>>(vec![
+                Property::new("key1", 10.into()),
+                Property::new("key2", 10.into())
+            ])
+    );
+    assert!(
+        value
+            < Json::new::<Vec<Property>>(vec![
+                Property::new("key1", 20.into()),
+                Property::new("key2", 10.into())
+            ])
+    );
+    assert!(
+        value
+            > Json::new::<Vec<Property>>(vec![
+                Property::new("key1", 5.into()),
+                Property::new("key2", 10.into())
+            ])
+    );
+    assert!(value > Json::new::<Vec<Property>>(vec![Property::new("key1", 10.into())]));
     assert!(Json::new::<Vec<Property>>(vec![Property::new("key1", 10.into())]) < value);
 }
 
