@@ -186,7 +186,7 @@ impl Json {
 ///
 /// [JSON Pointer]: https://tools.ietf.org/html/rfc6901
 impl Json {
-    /// get a json field, within the document, locatable by ``path``.
+    /// Get a json field, within the document, locatable by ``path``.
     pub fn get(&self, path: &str) -> Result<Json, String> {
         if path.is_empty() {
             Ok(self.clone())
@@ -198,7 +198,7 @@ impl Json {
         }
     }
 
-    /// set a json field, within the document, locatable by ``path``.
+    /// Set a json field, within the document, locatable by ``path``.
     pub fn set(&mut self, path: &str, value: Json) -> Result<(), String> {
         if path.is_empty() {
             return Ok(());
@@ -230,7 +230,7 @@ impl Json {
         }
     }
 
-    /// delete a json field, within the document, locatable by ``path``.
+    /// Delete a json field, within the document, locatable by ``path``.
     pub fn delete(&mut self, path: &str) -> Result<(), String> {
         if path.is_empty() {
             return Ok(());
@@ -259,7 +259,7 @@ impl Json {
         }
     }
 
-    /// append a string or array to a json field within the document that is
+    /// Append a string or array to a json field within the document that is
     /// either a string or array.
     pub fn append(&mut self, path: &str, value: Json) -> Result<(), String> {
         if path.is_empty() {
@@ -288,6 +288,17 @@ impl Json {
         }
     }
 
+
+    /// Range operation on Json array,
+    ///
+    /// * Range              ``[start..end]``.
+    /// * RangeFrom          ``[start..]``.
+    /// * RangeFull          ``[..]``.
+    /// * RangeInclusive     ``[start..=end]``.
+    /// * RangeTo            ``[..end]``.
+    /// * RangeToInclusive   ``[..=end]``.
+    ///
+    /// If range is called on non array Json, returns a Json Error.
     pub fn range<R>(&self, range: R) -> Json
     where
         R: RangeBounds<isize>,
