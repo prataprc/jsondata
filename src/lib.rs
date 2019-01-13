@@ -17,7 +17,6 @@
 //! To parse JSON text, use [parse]:
 //!
 //! ```
-//! extern crate jsondata;
 //! use jsondata::Json;
 //!
 //! let text = r#"[null,true,false,10,"true"]"#;
@@ -27,7 +26,6 @@
 //! To serialise [Json] type to JSON text:
 //!
 //! ```
-//! extern crate jsondata;
 //! use jsondata::Json;
 //!
 //! let text = r#"[null,true,false,10,"true"]"#;
@@ -43,7 +41,6 @@
 //! to compute the value every time,
 //!
 //! ```
-//! extern crate jsondata;
 //! use jsondata::Json;
 //!
 //! let mut json = "1000".parse::<Json>().unwrap();
@@ -59,7 +56,6 @@
 //! If JSON text is going to come from un-trusted parties,
 //!
 //! ```
-//! extern crate jsondata;
 //! use jsondata::Json;
 //!
 //! let mut json = r#"{"a": 1000}"#.parse::<Json>().unwrap();
@@ -82,10 +78,7 @@
 #![feature(exclusive_range_pattern)]
 #![plugin(quickcheck_macros)]
 
-#[cfg(test)]
-extern crate quickcheck;
 extern crate test;
-extern crate unicode_reader;
 
 mod json;
 mod lex;

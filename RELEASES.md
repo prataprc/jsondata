@@ -35,7 +35,7 @@ Release Checklist
   * cargo bench
   * cargo doc
   * cargo benchcmp between older version and new version.
-  * cargo clippy
+  * cargo clippy --all-targets --all-features
   * cargo deadlinks
   * cargo outdated
   * cargo fix --edition --all-targets

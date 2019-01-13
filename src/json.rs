@@ -285,7 +285,6 @@ impl Json {
         }
     }
 
-
     /// Range operation on Json array,
     ///
     /// * Range              ``[start..end]``.
