@@ -2,8 +2,8 @@
 //!
 //! [JSON Pointer RFC spec]: https://tools.ietf.org/html/rfc6901
 
-use json::Json;
-use property;
+use crate::json::Json;
+use crate::property;
 
 /// quote path fragment using backslash escape and tilde escape defined by the
 /// RFC spec.

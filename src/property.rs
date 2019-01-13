@@ -1,4 +1,4 @@
-use json::Json;
+use crate::json::Json;
 
 /// Property type captures a single (key,value) pair in a JSON object.
 ///

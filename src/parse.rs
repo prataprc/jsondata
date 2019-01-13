@@ -1,10 +1,10 @@
 use std::str::CharIndices;
 use std::{char, f64};
 
-use json::Json;
-use lex::Lex;
-use num::{Floating, Integral};
-use property::{self, Property};
+use crate::json::Json;
+use crate::lex::Lex;
+use crate::num::{Floating, Integral};
+use crate::property::{self, Property};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json, String> {
     parse_whitespace(text, lex);

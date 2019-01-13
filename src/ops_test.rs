@@ -1,5 +1,5 @@
-use json::Json;
-use property::Property;
+use crate::json::Json;
+use crate::property::Property;
 
 #[test]
 fn test_ops_add() {

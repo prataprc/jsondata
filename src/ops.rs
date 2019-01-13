@@ -1,8 +1,8 @@
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor, Index};
 
-use json::Json;
-use property::{self, Property};
+use crate::json::Json;
+use crate::property::{self, Property};
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
 //       for Sub, Mul, Div, Neg.
@@ -11,7 +11,7 @@ impl Add for Json {
     type Output = Json;
 
     fn add(self, rhs: Json) -> Json {
-        use json::Json::{Array, Float, Integer, Null, Object, String as S};
+        use crate::json::Json::{Array, Float, Integer, Null, Object, String as S};
 
         match (&self, &rhs) {
             (Null, _) => rhs.clone(),  // Identity operation
@@ -45,7 +45,7 @@ impl Add for Json {
                 Array(a)
             }
             (Object(l), Object(r)) => {
-                use json;
+                use crate::json;
 
                 let mut obj = Json::Object(Vec::new());
                 l.to_vec()
@@ -65,7 +65,7 @@ impl Sub for Json {
     type Output = Json;
 
     fn sub(self, rhs: Json) -> Json {
-        use json::Json::{Array, Float, Integer, Null, Object};
+        use crate::json::Json::{Array, Float, Integer, Null, Object};
 
         match (&self, &rhs) {
             (Null, _) => rhs.clone(),  // Identity operation
@@ -109,7 +109,7 @@ impl Mul for Json {
     type Output = Json;
 
     fn mul(self, rhs: Json) -> Json {
-        use json::Json::{Float, Integer, Null, Object, String as S};
+        use crate::json::Json::{Float, Integer, Null, Object, String as S};
 
         match (&self, &rhs) {
             (Null, _) => Json::Null,
@@ -162,7 +162,7 @@ impl Div for Json {
     type Output = Json;
 
     fn div(self, rhs: Json) -> Json {
-        use json::Json::{Float, Integer, Null, String as S};
+        use crate::json::Json::{Float, Integer, Null, String as S};
 
         match (&self, &rhs) {
             (Null, _) => Json::Null,
@@ -213,7 +213,7 @@ impl Rem for Json {
     type Output = Json;
 
     fn rem(self, rhs: Json) -> Json {
-        use json::Json::{Float, Integer, Null};
+        use crate::json::Json::{Float, Integer, Null};
 
         match (&self, &rhs) {
             (Null, _) => Json::Null,
@@ -294,7 +294,7 @@ impl BitAnd for Json {
     type Output = Json;
 
     fn bitand(self, rhs: Json) -> Json {
-        use json::Json::Integer;
+        use crate::json::Json::Integer;
 
         match (self, rhs) {
             (x @ Json::__Error(_), _) => x,
@@ -314,7 +314,7 @@ impl BitOr for Json {
     type Output = Json;
 
     fn bitor(self, rhs: Json) -> Json {
-        use json::Json::Integer;
+        use crate::json::Json::Integer;
 
         match (self, rhs) {
             (x @ Json::__Error(_), _) => x,
@@ -334,7 +334,7 @@ impl BitXor for Json {
     type Output = Json;
 
     fn bitxor(self, rhs: Json) -> Json {
-        use json::Json::Integer;
+        use crate::json::Json::Integer;
 
         match (self, rhs) {
             (x @ Json::__Error(_), _) => x,
@@ -420,7 +420,7 @@ impl Index<&str> for Json {
 ////}
 
 fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> {
-    use json::Json::Object;
+    use crate::json::Json::Object;
 
     for o in other.into_iter() {
         match property::search_by_key(&this, o.key_ref()) {

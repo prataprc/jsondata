@@ -1,6 +1,6 @@
-use jptr::{quote, unquote};
-use json::Json;
-use property::Property;
+use crate::jptr::{quote, unquote};
+use crate::json::Json;
+use crate::property::Property;
 
 #[test]
 fn quote_test() {

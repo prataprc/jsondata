@@ -7,12 +7,12 @@ use std::ops::RangeBounds;
 use std::str::FromStr;
 use unicode_reader::CodePoints;
 
-use jptr;
-use lex::Lex;
-use num::{Floating, Integral};
-use ops;
-use parse::parse_value;
-use property::{self, Property};
+use crate::jptr;
+use crate::lex::Lex;
+use crate::num::{Floating, Integral};
+use crate::ops;
+use crate::parse::parse_value;
+use crate::property::{self, Property};
 
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
@@ -98,7 +98,7 @@ impl Json {
     /// when used in database context, JSON documents are validated once
     /// but parsed multiple times.
     pub fn validate(&mut self) -> Result<(), String> {
-        use json::Json::{Array, Float, Integer, Object};
+        use crate::json::Json::{Array, Float, Integer, Object};
 
         match self {
             Array(items) => {
@@ -137,7 +137,7 @@ impl Json {
     /// // perform lookup and arithmetic operations on parsed document.
     /// ```
     pub fn compute(&mut self) -> Result<(), String> {
-        use json::Json::{Array, Float, Integer, Object};
+        use crate::json::Json::{Array, Float, Integer, Object};
 
         match self {
             Array(items) => {
@@ -393,7 +393,7 @@ impl Eq for Json {}
 
 impl PartialEq for Json {
     fn eq(&self, other: &Json) -> bool {
-        use Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+        use crate::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
 
         match (self, other) {
             (Null, Null) => true,
@@ -450,7 +450,7 @@ impl PartialOrd for Json {
 
 impl Ord for Json {
     fn cmp(&self, other: &Json) -> Ordering {
-        use Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+        use crate::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
 
         match (self, other) {
             // typically we assume that value at same position is same type.
@@ -620,7 +620,7 @@ impl From<Vec<Property>> for Json {
 
 impl From<Json> for bool {
     fn from(val: Json) -> bool {
-        use json::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+        use crate::json::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
 
         match val {
             Null => false,

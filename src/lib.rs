@@ -99,8 +99,8 @@ mod property; // TODO: should we rename this as "property"
 pub mod jptr;
 
 // Re-exports for API documentation.
-pub use json::{Json, Jsons};
-pub use property::Property;
+pub use crate::json::{Json, Jsons};
+pub use crate::property::Property;
 
 // TODO: Remove this once quickcheck is fully added for testing.
 //#[cfg(test)]

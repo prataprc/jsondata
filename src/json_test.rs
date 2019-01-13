@@ -2,9 +2,9 @@ use std::f64;
 use std::fmt::Write;
 use std::fs::File;
 
-use json::{Json, Jsons};
-use num::{Floating, Integral};
-use property::Property;
+use crate::json::{Json, Jsons};
+use crate::num::{Floating, Integral};
+use crate::property::Property;
 use test::Bencher;
 
 #[test]
