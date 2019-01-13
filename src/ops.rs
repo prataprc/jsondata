@@ -91,14 +91,18 @@ impl Sub for Json {
             (Array(lhs), Array(rhs)) => {
                 let mut res = lhs.clone();
                 rhs.iter().for_each(|x| {
-                    res.remove_item(x);
+                    if let Some(pos) = res.iter().position(|y| *x == *y) {
+                        res.remove(pos);
+                    }
                 });
                 Array(res)
             }
             (Object(lhs), Object(rhs)) => {
                 let mut res = lhs.clone();
                 rhs.iter().for_each(|x| {
-                    res.remove_item(x);
+                    if let Some(pos) = res.iter().position(|y| *x == *y) {
+                        res.remove(pos);
+                    }
                 });
                 Object(res)
             }

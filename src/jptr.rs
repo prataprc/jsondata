@@ -14,7 +14,7 @@ pub fn quote(fragment: &str) -> String {
     for ch in fragment.chars() {
         match ch {
             // backslash escape
-            '"' | '\\' | '\x00'..'\x1f' => {
+            '"' | '\\' | '\x00'..='\x1f' => {
                 outs.push('\\');
                 outs.push(ch)
             }

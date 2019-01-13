@@ -72,35 +72,18 @@
 //! [integer]: enum.Json.html#method.integer
 //! [float]: enum.Json.html#method.float
 
-#![feature(test)]
-#![feature(plugin)]
-#![feature(vec_remove_item)]
-#![feature(exclusive_range_pattern)]
-#![plugin(quickcheck_macros)]
-
-extern crate test;
-
 mod json;
 mod lex;
 mod num;
 mod ops;
 mod parse;
-mod property; // TODO: should we rename this as "property"
+mod property;
 
 pub mod jptr;
 
 // Re-exports for API documentation.
 pub use crate::json::{Json, Jsons};
 pub use crate::property::Property;
-
-// TODO: Remove this once quickcheck is fully added for testing.
-//#[cfg(test)]
-//mod tests {
-//    #[quickcheck]
-//    fn double_reversal_is_identity(_xs: i8) -> bool {
-//        true
-//    }
-//}
 
 #[cfg(test)]
 mod jptr_test;
