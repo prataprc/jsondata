@@ -21,7 +21,7 @@ and document database.
 
 **[API Documentation](https://docs.rs/jsondata)**
 
-Relevant site/articles:
+Relevant links:
 
 * [JSON Pointer][jptr].
 * [JSON5][json5].
