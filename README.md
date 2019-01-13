@@ -19,10 +19,9 @@ and document database.
 * [x] Common arithmetic and logic operations.
 * [x] Sortable JSON.
 
-**[API Documentation](https://docs.rs/jsondata)**
+**Useful links**
 
-Relevant links:
-
+* **[API Documentation](https://docs.rs/jsondata)**
 * [JSON Pointer][jptr].
 * [JSON5][json5].
 * Rust [internal discussion][rust1]  on f64 -> integer.
@@ -116,6 +115,8 @@ Sortable JSON
   * When one object is a subset of another object, as in, if one object
     contain all the (key,value) properties that the other object has
     then it shall sort before the other object.
+
+**Useful links**
 
 - **[A detailed description of JSON sort order][json-sort-order]**.
 - Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
