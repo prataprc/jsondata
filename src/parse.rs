@@ -1,6 +1,8 @@
 use std::str::CharIndices;
 use std::{char, f64};
 
+use lazy_static::lazy_static;
+
 use crate::json::Json;
 use crate::lex::Lex;
 use crate::num::{Floating, Integral};

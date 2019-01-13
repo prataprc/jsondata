@@ -1,6 +1,8 @@
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor, Index};
 
+use lazy_static::lazy_static;
+
 use crate::json::Json;
 use crate::property::{self, Property};
 

@@ -82,8 +82,6 @@
 #![feature(exclusive_range_pattern)]
 #![plugin(quickcheck_macros)]
 
-#[macro_use]
-extern crate lazy_static;
 #[cfg(test)]
 extern crate quickcheck;
 extern crate test;

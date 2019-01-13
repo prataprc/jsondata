@@ -38,6 +38,7 @@ Release Checklist
   * cargo clippy
   * cargo deadlinks
   * cargo outdated
+  * cargo fix --edition --all-targets
 * Create a git-tag for the new version.
 * Cargo publish the new version.
 * Badges
