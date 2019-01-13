@@ -141,6 +141,12 @@ Help wanted
 * Alternate parsing for non-unicode JSON string [#3][#3].
 * JSON5 implementation [#4][#4].
 
+**Compatibility policy**
+
+``jsondata`` shall officially support the latest version of rust stable
+compiler and nightly builds.
+
+
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [json5]: http://json5.org
 [jptr]: https://tools.ietf.org/html/rfc6901
