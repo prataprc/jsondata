@@ -1,11 +1,13 @@
 language: rust
 rust:
+  - stable
   - nightly
 before_script:
   - rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
 script:
-  - cargo +nightly clippy --all-targets --all-features -- -D warnings
+  - cargo +stable build --verbose
+  - cargo +stable doc
   - cargo +nightly build --verbose
+  - cargo +nightly clippy --all-targets --all-features -- -D warnings
   - cargo +nightly test --verbose
   - cargo +nightly bench --verbose
-  - cargo +nightly doc --verbose

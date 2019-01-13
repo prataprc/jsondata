@@ -32,8 +32,8 @@ Release Checklist
 * Travis-CI integration.
 * Cargo checklist
   * cargo +stable build; cargo +nightly build
+  * cargo +stable doc
   * cargo +nightly clippy --all-targets --all-features
-  * cargo doc
   * cargo +nightly test
   * cargo +nightly bench
   * cargo +nightly benchcmp <old> <new>
