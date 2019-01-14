@@ -123,6 +123,8 @@ Sortable JSON
   [issue#10184](https://github.com/rust-lang/rust/issues/10184),
   discussing saturating cast of f64 -> integer.
 - Rust [internal discussion][rust1]  on f64 -> integer.
+- Unicode collation [TR10](http://unicode.org/reports/tr10).
+- [ICU collation](http://userguide.icu-project.org/collation).
 
 Operations on JSON documents
 ============================
