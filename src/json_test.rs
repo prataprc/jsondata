@@ -574,6 +574,31 @@ fn test_partial_ord3() {
 }
 
 #[test]
+fn test_partial_ord4() {
+    let lhs: Json = "[]".parse().unwrap();
+    let rhs: Json = "[10]".parse().unwrap();
+    assert!(lhs < rhs);
+    assert!(rhs > lhs);
+
+    let lhs: Json = r#"{}"#.parse().unwrap();
+    let rhs: Json = r#"{"a": 10}"#.parse().unwrap();
+    assert!(lhs < rhs);
+    assert!(rhs > lhs);
+
+    let lhs: Json = r#"-1.0"#.parse().unwrap();
+    let rhs: Json = r#"1.0"#.parse().unwrap();
+    assert!(lhs < rhs);
+    assert!(rhs > lhs);
+    assert!(rhs != lhs);
+
+    let lhs: Json = r#"-0.0"#.parse().unwrap();
+    let rhs: Json = r#"0.0"#.parse().unwrap();
+    assert!(lhs < rhs);
+    assert!(rhs > lhs);
+    assert!(lhs == rhs);
+}
+
+#[test]
 fn test_bounds() {
     assert!(Json::minbound() == Json::minbound());
     assert!(Json::minbound() < Json::Null);

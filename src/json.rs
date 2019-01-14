@@ -83,12 +83,14 @@ impl Json {
     }
 
     /// minbound return a Json value that sort before every other [Json] type.
-    pub fn minbound() -> Json {
+    #[allow(dead_code)]
+    pub(crate) fn minbound() -> Json {
         Json::__Minbound
     }
 
     /// maxbound return a Json value that sort after every other [Json] type.
-    pub fn maxbound() -> Json {
+    #[allow(dead_code)]
+    pub(crate) fn maxbound() -> Json {
         Json::__Maxbound
     }
 
@@ -471,6 +473,14 @@ impl Ord for Json {
                         Ordering::Less
                     } else if fs > fo {
                         Ordering::Greater
+                    } else if fs == 0.0 || fo == 0.0 {
+                        if fs.is_sign_negative() {
+                            Ordering::Less
+                        } else if fo.is_sign_negative() {
+                            Ordering::Greater
+                        } else {
+                            Ordering::Equal
+                        }
                     } else {
                         Ordering::Equal
                     }
