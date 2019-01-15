@@ -129,6 +129,7 @@ Sortable JSON
 - Total ordering for floating point in [stackoverflow][sf1].
 - [Total ordering thread](https://users.rust-lang.org/t/sort-order-for-json/24166)
   in http://users.rust-lang.org.
+- A good [blog][blog1] on floating point, to get started.
 
 Operations on JSON documents
 ============================
@@ -166,3 +167,4 @@ compiler and nightly builds.
 [rust1]: https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231
 [sf1]: https://stackoverflow.com/questions/8341395/what-is-a-subnormal-floating-point-number)
 [fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
+[blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
