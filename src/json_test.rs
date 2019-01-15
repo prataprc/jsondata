@@ -596,6 +596,7 @@ fn test_partial_ord4() {
     assert!(lhs < rhs);
     assert!(rhs > lhs);
     assert!(lhs == rhs);
+    assert!(lhs <= rhs);
 }
 
 #[test]

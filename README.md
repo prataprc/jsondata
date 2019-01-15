@@ -125,6 +125,10 @@ Sortable JSON
 - Rust [internal discussion][rust1]  on f64 -> integer.
 - Unicode collation [TR10](http://unicode.org/reports/tr10).
 - [ICU collation](http://userguide.icu-project.org/collation).
+- Floating point [Total ordering][fp-total-order]
+- Total ordering for floating point in [stackoverflow][sf1].
+- [Total ordering thread](https://users.rust-lang.org/t/sort-order-for-json/24166)
+  in http://users.rust-lang.org.
 
 Operations on JSON documents
 ============================
@@ -143,6 +147,7 @@ Help wanted
 * Add readme badges [#1][#1].
 * Alternate parsing for non-unicode JSON string [#3][#3].
 * JSON5 implementation [#4][#4].
+* Unicode collation [#10][#10].
 
 **Compatibility policy**
 
@@ -159,3 +164,5 @@ compiler and nightly builds.
 [json-sort-order]: https://prataprc.github.io/json-sort-order.html
 [json-ops]: https://prataprc.github.io/json-operations.html
 [rust1]: https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231
+[sf1]: https://stackoverflow.com/questions/8341395/what-is-a-subnormal-floating-point-number)
+[fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
