@@ -7,7 +7,7 @@ use crate::json::Json;
 use crate::property::{self, Property};
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
-//       for Sub, Mul, Div, Neg.
+//       for Sub, Mul, Div, Neg ...
 
 impl Add for Json {
     type Output = Json;

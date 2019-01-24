@@ -72,6 +72,11 @@
 //! [integer]: enum.Json.html#method.integer
 //! [float]: enum.Json.html#method.float
 
+#![doc(html_favicon_url = "https://cdn4.iconfinder.com/data/icons/fugue/icon_shadowless/json.png")]
+#![doc(
+    html_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/1024px-JSON_vector_logo.svg.png"
+)]
+
 mod json;
 mod lex;
 mod num;
