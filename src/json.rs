@@ -17,12 +17,34 @@ use crate::property::{self, Property};
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
 ///
-/// * Numbers are implemented with deferred conversion, using
-///   ``Integral`` and ``Floating`` types.
+/// * JSON scalar types - Null, Number, Boolean, String, are supported.
+/// * JSON container types - Array, Object, are supported.
+/// * JSON numbers can be 128-bit integers or 64-bit floating point.
+/// * When document is known to contain lot of numbers and only one of
+///   them needs to be extracted, parsing the entire document can be
+///   inefficient just to get that one field. Numbers are implemented
+///   with deferred conversion, using ``Integral`` and ``Floating`` types.
 /// * Arrays are implemented as vector of Json values Vec<[Json]>.
 /// * Objects are implemented as vector of properties, Vec<[Property]>,
 ///   where each property is a tuple of (key, value). Here key is [String]
 ///   type and value is [Json] type.
+///
+/// **Parsing JSON text**:
+/// ```
+/// let json: jsondata::Json = "10".parse().unwrap();
+/// ```
+///
+/// return a [Json] enum type.
+///
+/// **Converting Rust native types to [Json] enum**:
+///
+/// Json supports conversion from [bool], [i128], [f64], [String], &str,
+/// Vec<Json> and Vec<Property> types using the [From] trait.
+/// ```
+/// let json: jsondata::Json = 10.into();
+/// let json: jsondata::Json = true.into();
+/// let json: jsondata::Json = "hello world".into();
+/// ```
 ///
 /// [string]: std::string::String
 #[derive(Clone, Debug)]

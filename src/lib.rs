@@ -17,19 +17,15 @@
 //! To parse JSON text, use [parse]:
 //!
 //! ```
-//! use jsondata::Json;
-//!
 //! let text = r#"[null,true,false,10,"true"]"#;
-//! let json = text.parse::<Json>().unwrap();
+//! let json = text.parse::<jsondata::Json>().unwrap();
 //! ```
 //!
 //! To serialise [Json] type to JSON text:
 //!
 //! ```
-//! use jsondata::Json;
-//!
 //! let text = r#"[null,true,false,10,"true"]"#;
-//! let json = text.parse::<Json>().unwrap();
+//! let json = text.parse::<jsondata::Json>().unwrap();
 //!
 //! let text1 = json.to_string();    // one way to serialize to JSON
 //! let text2 = format!("{}", json); // another way to serialize to JSON
@@ -41,9 +37,7 @@
 //! to compute the value every time,
 //!
 //! ```
-//! use jsondata::Json;
-//!
-//! let mut json = "1000".parse::<Json>().unwrap();
+//! let mut json = "1000".parse::<jsondata::Json>().unwrap();
 //! json.integer().unwrap(); // "1000" is parsed
 //! json.integer().unwrap(); // "1000" is parsed again
 //!
@@ -56,9 +50,7 @@
 //! If JSON text is going to come from un-trusted parties,
 //!
 //! ```
-//! use jsondata::Json;
-//!
-//! let mut json = r#"{"a": 1000}"#.parse::<Json>().unwrap();
+//! let mut json = r#"{"a": 1000}"#.parse::<jsondata::Json>().unwrap();
 //! match json.validate() { // validate
 //!     Ok(_) => (),
 //!     Err(s) => println!("{}", s),
