@@ -73,6 +73,8 @@ a JSON document. For Example, with below document:
 ```
 
 * **/age** shall point to value ``26``.
+* **/tags** shall point to value ``[ "officia", "reprehenderit", "magna" ]``.
+* **/tags/0** shall point to value ``"officia"``.
 * **/friends** shall point to value ``[{"id": 0, "name": "Glenda Chan"}]``.
 * **/friends/name** shall point to value ``"Glenda Chan"``.
 
