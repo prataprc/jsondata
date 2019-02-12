@@ -171,6 +171,7 @@ compiler and nightly builds.
 [#1]: https://github.com/bnclabs/jsondata/issues/1
 [#3]: https://github.com/bnclabs/jsondata/issues/3
 [#4]: https://github.com/bnclabs/jsondata/issues/4
+[#13]: https://github.com/bnclabs/jsondata/issues/13
 [json-sort-order]: https://prataprc.github.io/json-sort-order.html
 [json-ops]: https://prataprc.github.io/json-operations.html
 [rust1]: https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231
