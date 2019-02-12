@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 use std::f64;
 
 use crate::json::Json;

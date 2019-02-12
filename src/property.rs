@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 use crate::json::Json;
 
 /// Property type captures a single (key,value) pair in a JSON object.

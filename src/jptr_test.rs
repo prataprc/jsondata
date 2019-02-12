@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 use crate::jptr::{quote, unquote};
 use crate::json::Json;
 use crate::property::Property;

@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 use std::str::CharIndices;
 use std::{char, f64};
 

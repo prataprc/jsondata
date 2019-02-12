@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 #[derive(Debug)]
 pub struct Lex {
     pub off: usize,

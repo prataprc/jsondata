@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::convert::From;
 use std::default::Default;

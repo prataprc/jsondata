@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 //! module jptr implements [JSON Pointer RFC spec].
 //!
 //! [JSON Pointer RFC spec]: https://tools.ietf.org/html/rfc6901

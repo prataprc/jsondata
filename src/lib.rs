@@ -1,3 +1,5 @@
+// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+
 //! Jsondata is yet another [JSON] implementation in Rust, but tuned
 //! and optimized for bigdata and document-databases that store
 //! documents in [JSON] format. Following is the scope defined
