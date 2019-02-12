@@ -4,7 +4,7 @@ Why yet another JSON package in Rust ?
 [![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
 [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/bnclabs/jsondata/master?grs=github)
 [![Build Status](https://travis-ci.org/bnclabs/jsondata.svg?branch=master)](https://travis-ci.org/bnclabs/jsondata)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 
 This crate makes several trade-offs that are tuned for bigdata
@@ -29,6 +29,14 @@ and document database.
 * Rust [internal discussion][rust1]  on f64 -> integer.
 * [Json sort order][json-sort-order].
 * [Json operations][json-ops].
+
+**Licensing**
+
+Up till version 0.4.0, ``jsondata`` is released under [MIT license].
+Subsequent releases are under [AGPL-3.0 license], and going to be
+the default license for all future releases. For re-licensing this
+source, you can either contact the author(s) directly or post your
+request here [#13][#13].
 
 Deferred conversion for numbers
 ===============================
@@ -169,3 +177,5 @@ compiler and nightly builds.
 [sf1]: https://stackoverflow.com/questions/8341395/what-is-a-subnormal-floating-point-number
 [fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
 [blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
+[MIT license]: https://opensource.org/licenses/MIT
+[AGPL-3.0 license]: https://opensource.org/licenses/AGPL-3.0

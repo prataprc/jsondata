@@ -9,7 +9,7 @@ homepage = "https://github.com/bnclabs/jsondata"
 repository = "https://github.com/bnclabs/jsondata"
 keywords = ["json", "json5"]
 categories = ["encoding"]
-license = "MIT"
+license = "AGPL-3.0"
 exclude = ["template/**"]
 readme = "README.md"
 
