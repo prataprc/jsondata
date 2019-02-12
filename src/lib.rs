@@ -70,6 +70,7 @@
 )]
 
 mod json;
+mod jsons;
 mod lex;
 mod num;
 mod ops;
@@ -79,12 +80,15 @@ mod property;
 pub mod jptr;
 
 // Re-exports for API documentation.
-pub use crate::json::{Json, Jsons};
+pub use crate::json::Json;
+pub use crate::jsons::Jsons;
 pub use crate::property::Property;
 
 #[cfg(test)]
 mod jptr_test;
 #[cfg(test)]
 mod json_test;
+#[cfg(test)]
+mod jsons_test;
 #[cfg(test)]
 mod ops_test;

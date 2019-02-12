@@ -52,6 +52,11 @@ impl Property {
     }
 
     #[inline]
+    pub fn set_key(&mut self, key: String) {
+        self.0 = key;
+    }
+
+    #[inline]
     pub fn set_value(&mut self, value: Json) {
         self.1 = value;
     }

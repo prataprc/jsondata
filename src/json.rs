@@ -2,10 +2,8 @@ use std::cmp::{Ord, Ordering, PartialOrd};
 use std::convert::From;
 use std::default::Default;
 use std::fmt::{self, Display, Write};
-use std::io;
 use std::ops::RangeBounds;
 use std::str::FromStr;
-use unicode_reader::CodePoints;
 
 use crate::jptr;
 use crate::lex::Lex;
@@ -29,6 +27,22 @@ use crate::property::{self, Property};
 ///   where each property is a tuple of (key, value). Here key is [String]
 ///   type and value is [Json] type.
 ///
+/// [Json] enum type has documented variants and un-documented variants.
+/// Applications, when matching with Json, must use the catch-all variant:
+/// ```ignore
+/// match json {
+///     Json::Null => // handle null,
+///     Json::Bool(b) => // handle bool,
+///     Json::Integer(i) => // handle integer,
+///     Json::Float(f) => // handle float,
+///     Json::String(s) => // handle string,
+///     Json::Array(a) => // handle array,
+///     Json::Object(o) => // handle object,
+///     _ => // catch all.
+/// }
+/// ```
+///
+///
 /// **Parsing JSON text**:
 /// ```
 /// let json: jsondata::Json = "10".parse().unwrap();
@@ -39,14 +53,36 @@ use crate::property::{self, Property};
 /// **Converting Rust native types to [Json] enum**:
 ///
 /// Json supports conversion from [bool], [i128], [f64], [String], &str,
-/// Vec<Json> and Vec<Property> types using the [From] trait.
+/// Vec<[Json]> and Vec<[Property]> types using the [From] trait.
 /// ```
 /// let json: jsondata::Json = 10.into();
 /// let json: jsondata::Json = true.into();
 /// let json: jsondata::Json = "hello world".into();
 /// ```
 ///
+/// On the other direction, [Json] enum can be converted to Rust native
+/// types using the accessor methods,
+/// - is_null() to check wether [Json] is Null
+/// - boolean(), integer(), float(), string() methods return the
+///   underlying value as Option<`T`> where `T` is [bool] or [i128] or [f64] or
+///   [String].
+/// - array(), return JSON array as Vec<[Json]>.
+/// - object(), return JSON object as Vec<[Property]>.
+///
+/// Some of the properties implemented for [Json] are:
+/// - [Json] implements [total ordering].
+/// - Default value for Json is Null.
+/// - Json types are cloneable but do not implement [Copy].
+/// - [Json] value can be serialzed into JSON format using [Display] trait.
+///
+/// **Panics**
+///
+/// [Json] implements AsRef and AsMut traits for [str], Vec<[Json]>,
+/// Vec<[Property]> types. This means, call to as_ref() and as_mut() shall
+/// panic when underlying Json variant do not match with expected type.
+///
 /// [string]: std::string::String
+/// [total ordering]: https://en.wikipedia.org/wiki/Total_order
 #[derive(Clone, Debug)]
 pub enum Json {
     Null,
@@ -352,6 +388,13 @@ impl Json {
 /// The return value is always an [Option] because JSON
 /// follows a schemaless data representation.
 impl Json {
+    pub fn is_null(&self) -> bool {
+        match self {
+            Json::Null => true,
+            _ => false,
+        }
+    }
+
     pub fn boolean(&self) -> Option<bool> {
         match self {
             Json::Bool(s) => Some(*s),
@@ -810,164 +853,6 @@ pub fn insert(json: &mut Json, item: Property) {
                 obj.swap_remove(off);
             }
             Err(off) => obj.insert(off, item),
-        }
-    }
-}
-
-/// Jsons can parse a stream of JSON text supplied by any [Read] instance.
-///
-/// Any [Read] instance can be converted to Jsons instance and iterated.
-/// For Example:
-///
-/// ```
-/// use jsondata::{Json, Jsons};
-/// use std::fs::File;
-/// let file = File::open("testdata/stream1.jsons").unwrap();
-/// let mut iter: Jsons<File> = file.into();
-///
-/// for json in iter {
-///     println!("{:?}", json)
-/// }
-/// ```
-///
-/// Note that the iterated value is of type ``Result<Json, std::io::Error>``,
-/// where errors can be handled in following manner :
-///
-/// ```ignore
-/// for json in iter {
-///     match json {
-///         Ok(value) if value.integer() > 100 => {
-///             /* handle Json value*/
-///         },
-///         Ok(value) if value.is_error() => {
-///             /* value.error() to fetch the error String */
-///         },
-///         Err(err) => {
-///             /* handle std::io::Error returned by the Read instance */
-///         },
-///     }
-/// }
-/// ```
-///
-/// [Read]: std::io::Read
-pub struct Jsons<R>
-where
-    R: io::Read,
-{
-    codes: CodePoints<io::Bytes<R>>,
-    quant: String,
-}
-
-impl<R> From<R> for Jsons<R>
-where
-    R: io::Read,
-{
-    fn from(input: R) -> Jsons<R> {
-        Jsons {
-            codes: input.into(),
-            quant: String::with_capacity(1024),
-        }
-    }
-}
-
-impl<R> Iterator for Jsons<R>
-where
-    R: io::Read,
-{
-    type Item = Result<Json, io::Error>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut markers = String::new();
-        let mut ok_ch = self.read_whitespace()?;
-        loop {
-            let ch = match ok_ch {
-                Ok(ch) => {
-                    //println!("{}", ch);
-                    self.quant.push(ch);
-                    match ch {
-                        '{' => markers.push('}'),
-                        '[' => markers.push(']'),
-                        '}' | ']' => loop {
-                            if let Some(m) = markers.pop() {
-                                if m == ch {
-                                    break;
-                                }
-                            } else if markers.is_empty() {
-                                break;
-                            }
-                        },
-                        '"' => match Jsons::read_string(self)? {
-                            Ok(_) => (),
-                            Err(err) => break Some(Err(err)),
-                        },
-                        _ => (),
-                    }
-                    //println!("loop {:?} {}", self.quant.as_bytes(), ch);
-                    ch
-                }
-                Err(err) => break Some(Err(err)),
-            };
-            let eov = ch.is_whitespace() || ch == '}' || ch == ']' || ch == '"';
-            if markers.is_empty() && eov {
-                let res = match self.quant.parse() {
-                    Ok(json) => Some(Ok(json)),
-                    Err(s) => Some(Ok(Json::__Error(s))),
-                };
-                //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
-                self.quant.truncate(0);
-                break res;
-            }
-            let res = self.codes.next();
-            if res.is_none() && !self.quant.is_empty() {
-                let res = match self.quant.parse() {
-                    Ok(json) => Some(Ok(json)),
-                    Err(s) => Some(Ok(Json::__Error(s))),
-                };
-                //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
-                self.quant.truncate(0);
-                break res;
-            } else if res.is_none() {
-                break None;
-            }
-            ok_ch = res.unwrap();
-        }
-    }
-}
-
-impl<R> Jsons<R>
-where
-    R: io::Read,
-{
-    fn read_string(&mut self) -> Option<Result<(), io::Error>> {
-        let mut escape = false;
-        loop {
-            match self.codes.next() {
-                Some(Ok(ch)) if escape => {
-                    self.quant.push(ch);
-                    escape = false;
-                }
-                Some(Ok('\\')) => {
-                    self.quant.push('\\');
-                    escape = true;
-                }
-                Some(Ok('"')) => {
-                    self.quant.push('"');
-                    break Some(Ok(()));
-                }
-                Some(Ok(ch)) => self.quant.push(ch),
-                Some(Err(err)) => break Some(Err(err)),
-                None => break Some(Ok(())),
-            }
-        }
-    }
-
-    fn read_whitespace(&mut self) -> Option<Result<char, io::Error>> {
-        loop {
-            match self.codes.next()? {
-                Ok(ch) if !ch.is_whitespace() => break Some(Ok(ch)),
-                Ok(_) => (),
-                Err(err) => break Some(Err(err)),
-            }
         }
     }
 }

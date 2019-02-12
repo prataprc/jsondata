@@ -157,7 +157,6 @@ Help wanted
 ``jsondata`` shall officially support the latest version of rust stable
 compiler and nightly builds.
 
-
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [json5]: http://json5.org
 [jptr]: https://tools.ietf.org/html/rfc6901
@@ -167,6 +166,6 @@ compiler and nightly builds.
 [json-sort-order]: https://prataprc.github.io/json-sort-order.html
 [json-ops]: https://prataprc.github.io/json-operations.html
 [rust1]: https://internals.rust-lang.org/t/help-us-benchmark-saturating-float-casts/6231
-[sf1]: https://stackoverflow.com/questions/8341395/what-is-a-subnormal-floating-point-number)
+[sf1]: https://stackoverflow.com/questions/8341395/what-is-a-subnormal-floating-point-number
 [fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
 [blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
