@@ -5,7 +5,7 @@ use crate::json::Json;
 /// Property type captures a single (key,value) pair in a JSON object.
 ///
 /// Where,
-/// * **key** is [String] type, defined by JSON spec.
+/// * **key** is [String] type, defined by JSON specification.
 /// * **value** is JSON value.
 ///
 /// Implements [PartialEq] and [PartialOrd] for equality and ordering.

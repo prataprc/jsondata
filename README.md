@@ -7,7 +7,7 @@ Why yet another JSON package in Rust ?
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 
-This crate makes several trade-offs that are tuned for bigdata
+This crate makes several trade-offs that are tuned for big-data
 and document database.
 
 * [x] Support for 128-bit signed integers.
@@ -42,7 +42,7 @@ Deferred conversion for numbers
 ===============================
 
 Converting JSON numbers to Rust native type is not always desired.
-Especially in the context of bigdata where data is stored in JSON
+Especially in the context of big-data where data is stored in JSON
 format and we need to lookup, only, specific fields within the document.
 
 This implementation provides deferred conversion for JSON numbers
@@ -131,7 +131,7 @@ Sortable JSON
 **Useful links**
 
 - **[A detailed description of JSON sort order][json-sort-order]**.
-- Rust lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
+- Rust-lang [issue#46298](https://github.com/rust-lang/rust/issues/46298) and
   [issue#10184](https://github.com/rust-lang/rust/issues/10184),
   discussing saturating cast of f64 -> integer.
 - Rust [internal discussion][rust1]  on f64 -> integer.
@@ -158,7 +158,7 @@ Help wanted
 ===========
 
 * Add readme badges [#1][#1].
-* Alternate parsing for non-unicode JSON string [#3][#3].
+* Alternate parsing for Non-Unicode JSON string [#3][#3].
 * JSON5 implementation [#4][#4].
 * Unicode collation [#10][#10].
 

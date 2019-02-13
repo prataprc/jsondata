@@ -29,7 +29,7 @@ Inter-operability with several languages.
 @snapend
 
 @snap[mt30 fragment text-center text-black]
-Human friendly as apposed to machine friendly.
+Human friendly as opposed to machine friendly.
 @snapend
 
 ---
@@ -47,7 +47,7 @@ sevaral languages.
 @ul
 * **null**, equivalent of None, nil, null in many languages.
 * **number**, base 10 representation.
-* **bool**, true or false. Both represented in lowercase.
+* **bool**, true or false. Both represented in lower-case.
 * **string**, double quoted, utf8 encoded plain text.
 @ulend
 
@@ -56,8 +56,8 @@ sevaral languages.
 @snapend
 
 @ul
-* **Array**, heterogenous collection of other types, with number index.
-* **Object**, heterogenous collection of other types, with string index.
+* **Array**, heterogeneous collection of other types, with number index.
+* **Object**, heterogeneous collection of other types, with string index.
 @ulend
 
 
@@ -220,10 +220,10 @@ array    : "[" value \*(comma value) "]".
 
 +++
 
-Whitespace
-==========
+White space
+===========
 
-JSON has a free-form syntax, meaning all forms of whitespace
+JSON has a free-form syntax, meaning all forms of white space
 serve only to separate tokens in the grammar, and have no
 semantic significance.
 
@@ -260,7 +260,7 @@ Numbers: Deferred conversion
 @snap[mt30 fragment]
 When used in context of a document-database, parsing JSON data is a
 repeated operation, and many times only specific fields within
-a JSON document need to be lookedup.
+a JSON document need to be looked up.
 @snapend
 
 @snap[mt30 fragment]
@@ -387,7 +387,7 @@ escaped         = "~" ( "0" | "1" )
 ```
 
 @ul[mt30]
-* %x2F ('/') and %x7E ('~') are excluded from 'unescaped'
+* %x2F ('/') and %x7E ('~') are excluded from 'un-escaped'
 * @color[blue](~0) means @color[blue](~)
 * @color[blue](~1) means @color[blue](/).
 * @color[blue](~) escaping is not applied recursively. @color[blue](~01) literally becomes @color[blue](~1).
@@ -438,7 +438,7 @@ and
 }
 ```
 
-are equivalent.
+Are equivalent.
 
 +++
 
@@ -454,7 +454,7 @@ Trailing comma
 ]
 ```
 
-and
+And
 
 ```json
 [
@@ -463,7 +463,7 @@ and
 ]
 ```
 
-are equivalent.
+Are equivalent.
 
 +++
 
@@ -480,7 +480,7 @@ Single quoted strings
 }
 ```
 
-and
+And
 
 ```json
 {
@@ -492,7 +492,7 @@ and
 }
 ```
 
-are equivalent.
+Are equivalent.
 
 +++
 
@@ -506,13 +506,13 @@ Multi-line strings
 consectetur adipiscing elit."
 ```
 
-and
+And
 
 ```json
 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 ```
 
-are equivalent.
+Are equivalent.
 
 +++
 
@@ -554,7 +554,7 @@ Hexadecimal numbers
 }
 ```
 
-and
+And
 
 ```json
 {
@@ -563,7 +563,7 @@ and
 }
 ```
 
-are equivalent.
+Are equivalent.
 
 +++
 
@@ -632,7 +632,7 @@ Comments
 White space characters
 ======================
 
-Additional whitespace chars:
+Additional white space chars:
 
 Code Points          | Description
 ---------------------|-----------------
@@ -657,7 +657,7 @@ The need to a sort order JSON types and values arise because:
 
 @ul
 * Used as data model in many document databases.
-* Schemaless.
+* Schema less.
 * Building complex indexes on document fields.
 @ulend
 
@@ -682,7 +682,7 @@ Sort order for types
 Sort order for numerical values
 ===============================
 
-JSON spec does not define the type and precision for numbers.
+JSON specification does not define the type and precision for numbers.
 
 * Treat integers and floating point numbers uniformly as same type.
 * Integers are capped at i128 bit precision.
@@ -693,7 +693,7 @@ When comparing integer number and floating-point number:
 * f64 values that are <= -2^127 will sort before all i128 integers.
 * f64 values that are >= 2^127-1 will sort after all i128 integers.
 * f64 NaN, Not a Number, value shall sort after all i128 integers.
-* all other f64 values shall be casted to i128 number and compared.
+* All other f64 values shall be cast to i128 number and compared.
 * -Infinity shall sort before all numbers.
 * +Infinity shall sort after all numbers.
 * NaN shall sort after +Infinity.
@@ -703,7 +703,7 @@ When comparing integer number and floating-point number:
 Sort order for string
 =====================
 
-String values are not interpreted for codepoints are utf8 encoding.
+String values are not interpreted for code-points are utf8 encoding.
 They are just binary compared.
 
 +++

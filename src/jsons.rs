@@ -9,10 +9,8 @@ use unicode_reader::CodePoints;
 /// For Example:
 ///
 /// ```
-/// use jsondata::{Json, Jsons};
-/// use std::fs::File;
-/// let file = File::open("testdata/stream1.jsons").unwrap();
-/// let mut iter: Jsons<File> = file.into();
+/// let file = std::fs::File::open("testdata/stream1.jsons").unwrap();
+/// let mut iter: jsondata::Jsons<std::fs::File> = file.into();
 ///
 /// for json in iter {
 ///     println!("{:?}", json)

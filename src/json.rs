@@ -29,7 +29,7 @@ use crate::property::{self, Property};
 ///   where each property is a tuple of (key, value). Here key is [String]
 ///   type and value is [Json] type.
 ///
-/// [Json] enum type has documented variants and un-documented variants.
+/// [Json] enum type has documented variants and undocumented variants.
 /// Applications, when matching with Json, must use the catch-all variant:
 /// ```ignore
 /// match json {
@@ -63,8 +63,8 @@ use crate::property::{self, Property};
 /// ```
 ///
 /// On the other direction, [Json] enum can be converted to Rust native
-/// types using the accessor methods,
-/// - is_null() to check wether [Json] is Null
+/// types using accessor methods,
+/// - is_null() to check whether [Json] is Null
 /// - boolean(), integer(), float(), string() methods return the
 ///   underlying value as Option<`T`> where `T` is [bool] or [i128] or [f64] or
 ///   [String].
@@ -74,8 +74,8 @@ use crate::property::{self, Property};
 /// Some of the properties implemented for [Json] are:
 /// - [Json] implements [total ordering].
 /// - Default value for Json is Null.
-/// - Json types are cloneable but do not implement [Copy].
-/// - [Json] value can be serialzed into JSON format using [Display] trait.
+/// - Json types are clone-able but do not implement [Copy].
+/// - [Json] value can be serialized into JSON format using [Display] trait.
 ///
 /// **Panics**
 ///
@@ -118,7 +118,7 @@ impl Json {
     /// js.append("", Json::new("hello world".to_string()));
     /// ```
     ///
-    /// It is also possbile to construct the vector of Json outside
+    /// It is also possible to construct the vector of Json outside
     /// the append() method, and finally use Json::new() to construct
     /// the array.
     ///
@@ -132,7 +132,7 @@ impl Json {
     /// js.set("/key2", Json::new(true));
     /// ```
     ///
-    /// It is also possbile to construct the vector of properties outside
+    /// It is also possible to construct the vector of properties outside
     /// the set() method, and finally use Json::new() to construct
     /// the object.
     pub fn new<T>(value: T) -> Json
@@ -142,13 +142,13 @@ impl Json {
         value.into()
     }
 
-    /// minbound return a Json value that sort before every other [Json] type.
+    /// Minbound return a Json value that sort before every other [Json] type.
     #[allow(dead_code)]
     pub(crate) fn minbound() -> Json {
         Json::__Minbound
     }
 
-    /// maxbound return a Json value that sort after every other [Json] type.
+    /// Maxbound return a Json value that sort after every other [Json] type.
     #[allow(dead_code)]
     pub(crate) fn maxbound() -> Json {
         Json::__Maxbound
@@ -289,7 +289,7 @@ impl Json {
         }
     }
 
-    /// Delete a json field, within the document, locatable by ``path``.
+    /// Delete a JSON field, within the document, locatable by ``path``.
     pub fn delete(&mut self, path: &str) -> Result<(), String> {
         if path.is_empty() {
             return Ok(());
@@ -318,7 +318,7 @@ impl Json {
         }
     }
 
-    /// Append a string or array to a json field within the document that is
+    /// Append a string or array to a JSON field within the document that is
     /// either a string or array.
     pub fn append(&mut self, path: &str, value: Json) -> Result<(), String> {
         if path.is_empty() {
@@ -388,7 +388,7 @@ impl Json {
 
 /// Implementation clones underlying type for each Json variant.
 /// The return value is always an [Option] because JSON
-/// follows a schemaless data representation.
+/// follows a schema-less data representation.
 impl Json {
     pub fn is_null(&self) -> bool {
         match self {

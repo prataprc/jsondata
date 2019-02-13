@@ -23,9 +23,9 @@ Tip
 =====
 
 * JSON5 support. Most of JSON5 specification, especially those
-that are relavant for bigdata document database, are implemented.
+that are relevant for big-data document database, are implemented.
 * Added release-checklist
-* Bugfixes
+* Bug fixes
 * Implement AsRef and AsMut traits for Json type.
 * Travis-CI integration for ``clippy``.
 
@@ -54,11 +54,13 @@ Release Checklist
   * cargo +stable build; cargo +nightly build
   * cargo +stable doc
   * cargo +nightly clippy --all-targets --all-features
+  * cargo +nightly audit
   * cargo +nightly test
   * cargo +nightly bench
   * cargo +nightly benchcmp <old> <new>
   * cargo fix --edition --all-targets
 * Travis-CI integration.
+* Spell check.
 * Create a git-tag for the new version.
 * Cargo publish the new version.
 * Badges

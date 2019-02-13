@@ -1,7 +1,7 @@
 // Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
 
-//! Jsondata is yet another [JSON] implementation in Rust, but tuned
-//! and optimized for bigdata and document-databases that store
+//! Jsondata is yet another [JSON] implementation in Rust, but
+//! optimized for big-data and document-databases that store
 //! documents in [JSON] format. Following is the scope defined
 //! for this package:
 //!
@@ -49,7 +49,7 @@
 //! }
 //! ```
 //!
-//! If JSON text is going to come from un-trusted parties,
+//! If JSON text is going to come from untrusted parties,
 //!
 //! ```
 //! let mut json = r#"{"a": 1000}"#.parse::<jsondata::Json>().unwrap();

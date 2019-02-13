@@ -1,14 +1,14 @@
 // Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
 
-//! module jptr implements [JSON Pointer RFC spec].
+//! Module jptr implements [JSON Pointer RFC spec].
 //!
-//! [JSON Pointer RFC spec]: https://tools.ietf.org/html/rfc6901
+//! [JSON Pointer RFC specification]: https://tools.ietf.org/html/rfc6901
 
 use crate::json::Json;
 use crate::property;
 
 /// quote path fragment using backslash escape and tilde escape defined by the
-/// RFC spec.
+/// RFC specification.
 ///
 /// After escaping each path-fragment caller can join them with '/'.
 pub fn quote(fragment: &str) -> String {
@@ -36,7 +36,7 @@ pub fn quote(fragment: &str) -> String {
 }
 
 /// unquote path fragment for backslash and tilde escape defined by the
-/// RFC spec.
+/// RFC specification.
 ///
 /// After un-escaping each path-fragment caller can join them with '/'.
 pub fn unquote(fragment: &str) -> Result<String, String> {
