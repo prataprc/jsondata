@@ -1,4 +1,4 @@
-// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+// Copyright (c) 2018 R Pratap Chakravarthy.
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::convert::From;

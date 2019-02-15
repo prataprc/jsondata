@@ -1,4 +1,4 @@
-// Copyright (c) 2018 R Pratap Chakravarthy and AUTHORS
+// Copyright (c) 2018 R Pratap Chakravarthy.
 
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor, Index};
