@@ -38,6 +38,11 @@ the default license for all future releases. For re-licensing this
 source, you can either contact the author(s) directly or post your
 request here [#13][#13].
 
+**Compatibility policy**
+
+``jsondata`` shall officially support the latest version of rust stable
+compiler and nightly builds.
+
 Deferred conversion for numbers
 ===============================
 
@@ -153,19 +158,6 @@ Operations on JSON documents
 * Range operations.
 
 **[Detailed description can be found here][json-ops].**
-
-Help wanted
-===========
-
-* Add readme badges [#1][#1].
-* Alternate parsing for Non-Unicode JSON string [#3][#3].
-* JSON5 implementation [#4][#4].
-* Unicode collation [#10][#10].
-
-**Compatibility policy**
-
-``jsondata`` shall officially support the latest version of rust stable
-compiler and nightly builds.
 
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [json5]: http://json5.org
