@@ -1,8 +1,8 @@
 [package]
-edition = "2018"
 name = "jsondata"
 version = "0.5.1"
 authors = ["prataprc <prataprc@gmail.com>"]
+edition = "2018"
 description = "JSON processing package for document databases"
 documentation = "https://docs.rs/jsondata"
 homepage = "https://github.com/bnclabs/jsondata"
