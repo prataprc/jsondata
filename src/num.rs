@@ -19,23 +19,22 @@ impl Integral {
 
     pub fn integer(&self) -> Option<i128> {
         use std::str::from_utf8;
-        if self.val.is_none() {
-            let bs = &self.txt[0..self.len];
-            if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120
-            /*'x'*/
-            {
-                i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16).ok()
-            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120
-            /*'x'*/
-            {
-                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16)
-                    .map(|x| -x)
-                    .ok()
-            } else {
-                i128::from_str_radix(from_utf8(bs).unwrap(), 10).ok()
-            }
+        if self.val.is_some() {
+            return self.val;
+        }
+        let bs = &self.txt[0..self.len];
+        if bs.len() > 2 && bs[0] == 48 && bs[1] == 120
+        // "0x"
+        {
+            i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16).ok()
+        } else if bs.len() > 3 && bs[0] == 45 && bs[1] == 48 && bs[2] == 120
+        // "-0x"
+        {
+            i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16)
+                .map(|x| -x)
+                .ok()
         } else {
-            self.val
+            i128::from_str_radix(from_utf8(bs).unwrap(), 10).ok()
         }
     }
 
@@ -45,12 +44,12 @@ impl Integral {
         //println!("{:?}", self.txt);
         if self.val.is_none() {
             let bs = &self.txt[0..self.len];
-            let res = if bs.len() > 2 && bs[0] == 48 /*'0'*/ && bs[1] == 120
-            /*'x'*/
+            let res = if bs.len() > 2 && bs[0] == 48 && bs[1] == 120
+            // "0x"
             {
                 i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16)
-            } else if bs.len() > 3 && bs[0] == 45 /*'-'*/ && bs[1] == 48 /*'0'*/ && bs[2] == 120
-            /*'x'*/
+            } else if bs.len() > 3 && bs[0] == 45 && bs[1] == 48 && bs[2] == 120
+            // "-0x"
             {
                 i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x)
             } else {

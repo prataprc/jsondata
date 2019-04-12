@@ -66,13 +66,13 @@ fn parse_false(text: &str, lex: &mut Lex) -> Result<Json, String> {
 fn parse_num(text: &str, lex: &mut Lex) -> Result<Json, String> {
     let text = &text[lex.off..];
 
-    let mut doparse = |text: &str, i: usize, f: bool, h: bool| -> Result<Json, String> {
+    let mut dofn = |t: &str, i: usize, f: bool, h: bool| -> Result<Json, String> {
         lex.incr_col(i);
-        //println!("parse_num -- {}", text);
+        //println!("parse_num -- {}", t);
         if f && !h {
-            Ok(Json::Float(Floating::new(text)))
+            Ok(Json::Float(Floating::new(t)))
         } else {
-            Ok(Json::Integer(Integral::new(text)))
+            Ok(Json::Integer(Integral::new(t)))
         }
     };
 
@@ -80,17 +80,17 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json, String> {
     let mut is_hex = false;
     for (i, ch) in text.char_indices() {
         if ISNUMBER[ch as usize] == 0 {
-            return doparse(&text[..i], i, is_float, is_hex);
+            return dofn(&text[..i], i, is_float, is_hex);
         } else if !is_float && ISNUMBER[ch as usize] == 2 {
             is_float = true
         } else if ISNUMBER[ch as usize] == 3 {
             is_hex = true
         }
     }
-    doparse(text, text.len(), is_float, is_hex)
+    dofn(text, text.len(), is_float, is_hex)
 }
 
-fn parse_json5_float(text: &str, lex: &mut Lex, w: usize) -> Result<Json, String> {
+fn parse_json5_float(txt: &str, lex: &mut Lex, w: usize) -> Result<Json, String> {
     lazy_static! {
         static ref JSON5_FLOAT_LOOKUP: Vec<(String, usize, Json)> = vec![
             ("".to_string(), 0_usize, Json::Null),
@@ -100,8 +100,8 @@ fn parse_json5_float(text: &str, lex: &mut Lex, w: usize) -> Result<Json, String
         ];
     }
     let (token, l, res) = &JSON5_FLOAT_LOOKUP[w];
-    let text = &text[lex.off..];
-    if text.len() >= *l && token == &text[..*l] {
+    let txt = &txt[lex.off..];
+    if txt.len() >= *l && token == &txt[..*l] {
         lex.col += l;
         lex.off += l;
         Ok(res.clone())

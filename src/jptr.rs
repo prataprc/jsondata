@@ -5,7 +5,7 @@
 //! [JSON Pointer RFC specification]: https://tools.ietf.org/html/rfc6901
 
 use crate::json::Json;
-use crate::property;
+use crate::ops;
 
 /// quote path fragment using backslash escape and tilde escape defined by the
 /// RFC specification.
@@ -66,111 +66,71 @@ pub fn unquote(fragment: &str) -> Result<String, String> {
     Ok(outs)
 }
 
-// TODO: Can we fold lookup and g_lookup into a single implementation
-// using macros or somehow using the type parameters ? The main
-// different between the two is that lookup takes a mutable reference
-// and g_lookup takes a immutable reference.
-
-pub(crate) fn lookup<'a>(json: &'a mut Json, path: &str) -> Result<(&'a mut Json, String), String> {
+pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String), String> {
+    let mut frags: Vec<String> = vec![];
     let mut frag = String::new();
-    let (mut escaped, mut tilde) = (false, false);
-    let mut chars = path.chars();
-    loop {
-        let ch = match chars.next() {
-            Some(ch) => ch,
-            None => break Ok((json, frag)),
+    let mut state: (bool, bool) = (false, false); // (escaped, tilde)
+    for ch in path.chars() {
+        state = match ch {
+            ch if state.0 => {
+                frag.push(ch);
+                (false, state.1)
+            }
+            '0' if state.1 => {
+                frag.push('~');
+                (state.0, false)
+            }
+            '1' if state.1 => {
+                frag.push('/');
+                (state.0, false)
+            }
+            ch if state.1 => {
+                return Err(format!("jptr: invalid tilde escape {}", ch));
+            }
+            '/' => {
+                frags.push(frag.clone());
+                frag.truncate(0);
+                (state.0, state.1)
+            }
+            '\\' => (true, state.1),
+            '~' => (state.0, true),
+            ch => {
+                frag.push(ch);
+                (state.0, state.1)
+            }
         };
-        if escaped {
-            escaped = false;
-            frag.push(ch);
-            continue;
-        } else if tilde {
-            tilde = false;
-            match ch {
-                '0' => frag.push('~'),
-                '1' => frag.push('/'),
-                _ => return Err(format!("jptr: invalid tilde escape {}", ch)),
-            }
-            continue;
-        } else if ch != '/' {
-            match ch {
-                '\\' => escaped = true, // backslash escape
-                '~' => tilde = true,    // tilde escape
-                _ => frag.push(ch),
-            }
-            continue;
-        }
-        break lookup(lookup_container(json, &frag)?, chars.as_str());
     }
+    Ok((frags, frag))
 }
 
-pub(crate) fn lookup_container<'a>(json: &'a mut Json, frag: &str) -> Result<&'a mut Json, String> {
-    match json {
-        Json::Array(arr) => match frag.parse::<usize>() {
-            Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
-            Ok(n) => Ok(&mut arr[n]),
-            Err(err) => Err(format!("jptr: not array-index {}", err)),
-        },
-        Json::Object(props) => match property::search_by_key(props, &frag) {
-            Ok(n) => Ok(props[n].value_mut()),
-            Err(_) => Err(format!("jptr: key not found {}", frag)),
-        },
-        _ => Err(format!("jptr: not a container {} at {}", json, frag)),
+pub(crate) fn lookup_mut<'a>(
+    mut json: &'a mut Json,
+    path: &str,
+) -> Result<(&'a mut Json, String), String> {
+    let (frags, key) = fragments(path)?;
+    for frag in frags {
+        json = ops::index_mut(json, frag.as_str())?
     }
+    Ok((json, key))
 }
 
-pub(crate) fn g_lookup<'a>(json: &'a Json, path: &str) -> Result<(&'a Json, String), String> {
-    let mut frag = String::new();
-    let (mut escaped, mut tilde) = (false, false);
-    let mut chars = path.chars();
-    loop {
-        let ch = match chars.next() {
-            Some(ch) => ch,
-            None => break Ok((json, frag)),
-        };
-        if escaped {
-            escaped = false;
-            frag.push(ch);
-            continue;
-        } else if tilde {
-            tilde = false;
-            match ch {
-                '0' => frag.push('~'),
-                '1' => frag.push('/'),
-                _ => return Err(format!("jptr: invalid tilde escape {}", ch)),
-            }
-            continue;
-        } else if ch != '/' {
-            match ch {
-                '\\' => escaped = true, // backslash escape
-                '~' => tilde = true,    // tilde escape
-                _ => frag.push(ch),
-            }
-            continue;
-        }
-        break g_lookup(g_lookup_container(json, &frag)?, chars.as_str());
+pub(crate) fn lookup_ref<'a>(
+    mut json_doc: &'a Json,
+    path: &str,
+) -> Result<(&'a Json, String), String> {
+    let (frags, key) = fragments(path)?;
+    for frag in frags {
+        json_doc = json_doc[frag.as_str()].result()?;
     }
-}
-
-pub(crate) fn g_lookup_container<'a>(json: &'a Json, frag: &str) -> Result<&'a Json, String> {
-    match json {
-        Json::Array(arr) => match frag.parse::<usize>() {
-            Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
-            Ok(n) => Ok(&arr[n]),
-            Err(err) => Err(format!("jptr: not array-index {}", err)),
-        },
-        Json::Object(props) => match property::search_by_key(props, &frag) {
-            Ok(n) => Ok(props[n].value_ref()),
-            Err(_) => Err(format!("jptr: key not found {}", frag)),
-        },
-        _ => Err(format!("jptr: not a container {} at {}", json, frag)),
-    }
+    Ok((json_doc, key))
 }
 
 pub(crate) fn fix_prefix(path: &str) -> Result<&str, String> {
     let mut chars = path.chars();
-    if chars.next().unwrap() != '/' {
-        return Err("jptr: pointer should start with forward solidus".to_string());
+    if chars.next().unwrap() == '/' {
+        Ok(chars.as_str())
+    } else {
+        let msg = "jptr: pointer should start with forward solidus".to_string();
+        Err(msg)
     }
-    Ok(chars.as_str())
 }

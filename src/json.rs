@@ -7,12 +7,11 @@ use std::fmt::{self, Display, Write};
 use std::ops::RangeBounds;
 use std::str::FromStr;
 
-use crate::jptr;
 use crate::lex::Lex;
 use crate::num::{Floating, Integral};
-use crate::ops;
 use crate::parse::parse_value;
 use crate::property::{self, Property};
+use crate::{jptr, ops};
 
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
@@ -251,9 +250,8 @@ impl Json {
             Ok(self.clone())
         } else {
             let path = jptr::fix_prefix(path)?;
-            let (json, frag) = jptr::g_lookup(self, path)?;
-            let json = jptr::g_lookup_container(json, &frag)?;
-            Ok(json.clone())
+            let (json, key) = jptr::lookup_ref(self, path)?;
+            Ok(json[key.as_str()].result()?.clone())
         }
     }
 
@@ -265,10 +263,13 @@ impl Json {
 
         let path = jptr::fix_prefix(path)?;
 
-        let (json, frag) = jptr::lookup(self, path)?;
+        let (json, frag) = jptr::lookup_mut(self, path)?;
         match json {
             Json::Array(arr) => match frag.parse::<usize>() {
-                Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                Ok(n) if n >= arr.len() => {
+                    let msg = format!("jptr: index out of bound {}", n);
+                    Err(msg)
+                }
                 Ok(n) => {
                     arr[n] = value;
                     Ok(())
@@ -297,10 +298,13 @@ impl Json {
 
         let path = jptr::fix_prefix(path)?;
 
-        let (json, frag) = jptr::lookup(self, path)?;
+        let (json, frag) = jptr::lookup_mut(self, path)?;
         match json {
             Json::Array(arr) => match frag.parse::<usize>() {
-                Ok(n) if n >= arr.len() => Err(format!("jptr: index out of bound {}", n)),
+                Ok(n) if n >= arr.len() => {
+                    let msg = format!("jptr: index out of bound {}", n);
+                    Err(msg)
+                }
                 Ok(n) => {
                     arr.remove(n);
                     Ok(())
@@ -326,9 +330,8 @@ impl Json {
         }
         let path = jptr::fix_prefix(path)?;
 
-        let (json, frag) = jptr::lookup(self, path)?;
-        let json = jptr::lookup_container(json, &frag)?;
-        match json {
+        let (json, frag) = jptr::lookup_mut(self, path)?;
+        match ops::index_mut(json, frag.as_str())? {
             Json::String(j) => {
                 if let Json::String(s) = value {
                     j.push_str(&s);
@@ -452,6 +455,13 @@ impl Json {
             _ => None,
         }
     }
+
+    pub fn result(&self) -> Result<&Json, String> {
+        match self {
+            Json::__Error(err) => Err(err.clone()),
+            _ => Ok(self),
+        }
+    }
 }
 
 impl Eq for Json {}
@@ -459,6 +469,7 @@ impl Eq for Json {}
 impl PartialEq for Json {
     fn eq(&self, other: &Json) -> bool {
         use crate::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+        use std::i128;
 
         match (self, other) {
             (Null, Null) => true,
@@ -467,7 +478,7 @@ impl PartialEq for Json {
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
                 (Some(x), Some(y)) => {
                     let num = y as i128;
-                    if num == std::i128::MIN || num == std::i128::MAX || y.is_nan() {
+                    if num == i128::MIN || num == i128::MAX || y.is_nan() {
                         return false;
                     }
                     x == num
@@ -488,7 +499,7 @@ impl PartialEq for Json {
             (Float(a), Integer(b)) => match (a.float(), b.integer()) {
                 (Some(x), Some(y)) => {
                     let num = x as i128;
-                    if num == std::i128::MIN || num == std::i128::MAX || x.is_nan() {
+                    if num == i128::MIN || num == i128::MAX || x.is_nan() {
                         return false;
                     }
                     y == num
@@ -693,7 +704,8 @@ impl From<Vec<Property>> for Json {
 
 impl From<Json> for bool {
     fn from(val: Json) -> bool {
-        use crate::json::Json::{Array, Bool, Float, Integer, Null, Object, String as S};
+        use crate::json::Json::String as S;
+        use crate::json::Json::{Array, Bool, Float, Integer, Null, Object};
 
         match val {
             Null => false,
@@ -783,9 +795,15 @@ impl Display for Json {
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
             Integer(Integral { val: Some(v), .. }) => write!(f, "{}", v),
-            Integer(Integral { len, txt, .. }) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Integer(Integral { len, txt, .. }) => {
+                let arg = from_utf8(&txt[..*len]).unwrap();
+                write!(f, "{}", arg)
+            }
             Float(Floating { val: Some(v), .. }) => write!(f, "{:e}", v),
-            Float(Floating { len, txt, .. }) => write!(f, "{}", from_utf8(&txt[..*len]).unwrap()),
+            Float(Floating { len, txt, .. }) => {
+                let arg = from_utf8(&txt[..*len]).unwrap();
+                write!(f, "{}", arg)
+            }
             S(val) => {
                 encode_string(f, &val)?;
                 Ok(())

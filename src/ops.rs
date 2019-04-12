@@ -376,16 +376,17 @@ lazy_static! {
     pub static ref INDEX_OBJECT_ERROR: Json = Json::__Error("cannot index non-object".to_string());
     pub static ref INDEX_MISSING_KEY: Json = Json::__Error("key not found".to_string());
 }
+
 impl Index<isize> for Json {
     type Output = Json;
 
     fn index(&self, index: isize) -> &Json {
         match self {
-            Json::__Error(_) => self,
             Json::Array(arr) => match normalized_offset(index, arr.len()) {
                 Some(off) => &arr[off],
                 None => &INDEX_OUTOFBOUND,
             },
+            Json::__Error(_) => self,
             _ => &INDEX_ARRAY_ERROR,
         }
     }
@@ -396,13 +397,38 @@ impl Index<&str> for Json {
 
     fn index(&self, index: &str) -> &Json {
         match self {
-            Json::__Error(_) => self,
             Json::Object(obj) => match property::search_by_key(obj, index) {
                 Ok(off) => obj[off].value_ref(),
                 Err(_) => &INDEX_MISSING_KEY,
             },
+            Json::Array(arr) => match index.parse::<isize>() {
+                Ok(n) => match normalized_offset(n, arr.len()) {
+                    Some(off) => &arr[off],
+                    None => &INDEX_OUTOFBOUND,
+                },
+                Err(_) => &INDEX_OBJECT_ERROR,
+            },
+            Json::__Error(_) => self,
             _ => &INDEX_OBJECT_ERROR,
         }
+    }
+}
+
+pub fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json, String> {
+    match j {
+        Json::Object(obj) => match property::search_by_key(obj, i) {
+            Ok(off) => Ok(obj[off].value_mut()),
+            Err(_) => Err(format!("key not found {}", i)),
+        },
+        Json::Array(arr) => match i.parse::<isize>() {
+            Ok(n) => match normalized_offset(n, arr.len()) {
+                Some(off) => Ok(&mut arr[off]),
+                None => Err(format!("index {} out of bound", i)),
+            },
+            Err(_) => Err(format!("cannot index non-object")),
+        },
+        Json::__Error(_) => Ok(j),
+        _ => Err(format!("cannot index non-object")),
     }
 }
 
