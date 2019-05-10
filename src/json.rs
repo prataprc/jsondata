@@ -1,12 +1,13 @@
 // Copyright (c) 2018 R Pratap Chakravarthy.
 
 use std::cmp::{Ord, Ordering, PartialOrd};
-use std::convert::From;
+use std::convert::{From, TryInto};
 use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::ops::RangeBounds;
 use std::str::FromStr;
 
+use crate::error::{Error, Result};
 use crate::lex::Lex;
 use crate::num::{Floating, Integral};
 use crate::parse::parse_value;
@@ -95,7 +96,7 @@ pub enum Json {
     Object(Vec<Property>),
     // Hidden variants
     #[doc(hidden)]
-    __Error(String),
+    __Error(Error),
     #[doc(hidden)]
     __Minbound,
     #[doc(hidden)]
@@ -156,7 +157,7 @@ impl Json {
     /// Validate parts of JSON text that are not yet parsed. Typically,
     /// when used in database context, JSON documents are validated once
     /// but parsed multiple times.
-    pub fn validate(&mut self) -> Result<(), String> {
+    pub fn validate(&mut self) -> Result<()> {
         use crate::json::Json::{Array, Float, Integer, Object};
 
         match self {
@@ -194,7 +195,7 @@ impl Json {
     ///
     /// // perform lookup and arithmetic operations on parsed document.
     /// ```
-    pub fn compute(&mut self) -> Result<(), String> {
+    pub fn compute(&mut self) -> Result<()> {
         use crate::json::Json::{Array, Float, Integer, Object};
 
         match self {
@@ -219,7 +220,7 @@ impl Json {
         Ok(())
     }
 
-    fn typename(&self) -> String {
+    pub(crate) fn typename(&self) -> String {
         match self {
             Json::Null => "null".to_string(),
             Json::Bool(_) => "bool".to_string(),
@@ -245,7 +246,7 @@ impl Json {
 /// [JSON Pointer]: https://tools.ietf.org/html/rfc6901
 impl Json {
     /// Get a json field, within the document, locatable by ``path``.
-    pub fn get(&self, path: &str) -> Result<Json, String> {
+    pub fn get(&self, path: &str) -> Result<Json> {
         if path.is_empty() {
             Ok(self.clone())
         } else {
@@ -256,7 +257,7 @@ impl Json {
     }
 
     /// Set a json field, within the document, locatable by ``path``.
-    pub fn set(&mut self, path: &str, value: Json) -> Result<(), String> {
+    pub fn set(&mut self, path: &str, value: Json) -> Result<()> {
         if path.is_empty() {
             return Ok(());
         }
@@ -266,15 +267,15 @@ impl Json {
         let (json, frag) = jptr::lookup_mut(self, path)?;
         match json {
             Json::Array(arr) => match frag.parse::<usize>() {
-                Ok(n) if n >= arr.len() => {
-                    let msg = format!("jptr: index out of bound {}", n);
-                    Err(msg)
-                }
                 Ok(n) => {
-                    arr[n] = value;
-                    Ok(())
+                    if n >= arr.len() {
+                        Err(Error::IndexOutofBound(n.try_into().unwrap()))
+                    } else {
+                        arr[n] = value;
+                        Ok(())
+                    }
                 }
-                Err(err) => Err(format!("jptr: not array-index {}", err)),
+                Err(err) => Err(Error::NotAnIndex(err.to_string())),
             },
             Json::Object(props) => match property::search_by_key(&props, &frag) {
                 Ok(n) => {
@@ -286,12 +287,12 @@ impl Json {
                     Ok(())
                 }
             },
-            _ => Err(format!("jptr: not a container {} at {}", json, frag)),
+            _ => Err(Error::NotAContainer(json.typename())),
         }
     }
 
     /// Delete a JSON field, within the document, locatable by ``path``.
-    pub fn delete(&mut self, path: &str) -> Result<(), String> {
+    pub fn delete(&mut self, path: &str) -> Result<()> {
         if path.is_empty() {
             return Ok(());
         }
@@ -301,30 +302,27 @@ impl Json {
         let (json, frag) = jptr::lookup_mut(self, path)?;
         match json {
             Json::Array(arr) => match frag.parse::<usize>() {
-                Ok(n) if n >= arr.len() => {
-                    let msg = format!("jptr: index out of bound {}", n);
-                    Err(msg)
-                }
+                Ok(n) if n >= arr.len() => Err(Error::IndexOutofBound(n as isize)),
                 Ok(n) => {
                     arr.remove(n);
                     Ok(())
                 }
-                Err(err) => Err(format!("jptr: not array-index {}", err)),
+                Err(err) => Err(Error::NotAnIndex(err.to_string())),
             },
             Json::Object(props) => match property::search_by_key(&props, &frag) {
                 Ok(n) => {
                     props.remove(n);
                     Ok(())
                 }
-                Err(_) => Err(format!("jptr: key {} not found", frag)),
+                Err(_) => Err(Error::PropertyNotFound(frag)),
             },
-            _ => Err(format!("{} not a container type", json.typename())),
+            _ => Err(Error::NotAContainer(json.typename())),
         }
     }
 
     /// Append a string or array to a JSON field within the document that is
     /// either a string or array.
-    pub fn append(&mut self, path: &str, value: Json) -> Result<(), String> {
+    pub fn append(&mut self, path: &str, value: Json) -> Result<()> {
         if path.is_empty() {
             return Ok(());
         }
@@ -337,8 +335,7 @@ impl Json {
                     j.push_str(&s);
                     Ok(())
                 } else {
-                    let tn = value.typename();
-                    Err(format!("jptr: cannot add {} to `{}`", tn, j))
+                    Err(Error::AppendString(value.typename()))
                 }
             }
             Json::Array(arr) => {
@@ -346,7 +343,7 @@ impl Json {
                 arr.insert(n, value);
                 Ok(())
             }
-            _ => Err(format!("jptr: not a container {} at {}", json, frag)),
+            _ => Err(Error::NotAContainer(json.typename())),
         }
     }
 
@@ -369,22 +366,23 @@ impl Json {
         match self {
             Json::__Error(_) => self.clone(),
             Json::Array(arr) => {
-                let start = match range.start_bound() {
-                    Included(n) => ops::normalized_offset(*n, arr.len()),
-                    Excluded(n) => ops::normalized_offset((*n) + 1, arr.len()),
-                    Unbounded => Some(0),
+                let (start, s) = match range.start_bound() {
+                    Included(n) => (ops::normalized_offset(*n, arr.len()), *n),
+                    Excluded(n) => (ops::normalized_offset((*n) + 1, arr.len()), *n),
+                    Unbounded => (Some(0), 0),
                 };
-                let end = match range.end_bound() {
-                    Included(n) => ops::normalized_offset((*n) + 1, arr.len()),
-                    Excluded(n) => ops::normalized_offset(*n, arr.len()),
-                    Unbounded => Some(arr.len()),
+                let (end, e) = match range.end_bound() {
+                    Included(n) => (ops::normalized_offset((*n) + 1, arr.len()), *n),
+                    Excluded(n) => (ops::normalized_offset(*n, arr.len()), *n),
+                    Unbounded => (Some(arr.len()), arr.len().try_into().unwrap()),
                 };
                 match (start, end) {
                     (Some(start), Some(end)) => arr[start..end].to_vec().into(),
-                    _ => ops::INDEX_OUTOFBOUND.clone(),
+                    (None, _) => Json::__Error(Error::IndexOutofBound(s)),
+                    (_, None) => Json::__Error(Error::IndexOutofBound(e)),
                 }
             }
-            _ => ops::INDEX_ARRAY_ERROR.clone(),
+            _ => Json::__Error(Error::NotAnArray(format!("{}", self))),
         }
     }
 }
@@ -449,14 +447,14 @@ impl Json {
         }
     }
 
-    pub fn error(&self) -> Option<String> {
+    pub fn error(&self) -> Option<Error> {
         match self {
             Json::__Error(err) => Some(err.clone()),
             _ => None,
         }
     }
 
-    pub fn result(&self) -> Result<&Json, String> {
+    pub fn result(&self) -> Result<&Json> {
         match self {
             Json::__Error(err) => Err(err.clone()),
             _ => Ok(self),
@@ -723,9 +721,9 @@ impl From<Json> for bool {
 }
 
 impl FromStr for Json {
-    type Err = String;
+    type Err = Error;
 
-    fn from_str(text: &str) -> Result<Json, String> {
+    fn from_str(text: &str) -> Result<Json> {
         let mut lex = Lex::new(0, 1, 1);
         parse_value(&text, &mut lex)
     }
@@ -836,7 +834,7 @@ impl Display for Json {
                     write!(f, "}}")
                 }
             }
-            Json::__Error(err) => write!(f, "error: {}", err),
+            Json::__Error(err) => write!(f, "error: {:?}", err),
             Json::__Minbound => write!(f, "minbound"),
             Json::__Maxbound => write!(f, "maxbound"),
         }

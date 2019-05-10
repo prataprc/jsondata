@@ -4,6 +4,7 @@
 //!
 //! [JSON Pointer RFC specification]: https://tools.ietf.org/html/rfc6901
 
+use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::ops;
 
@@ -39,7 +40,7 @@ pub fn quote(fragment: &str) -> String {
 /// RFC specification.
 ///
 /// After un-escaping each path-fragment caller can join them with '/'.
-pub fn unquote(fragment: &str) -> Result<String, String> {
+pub fn unquote(fragment: &str) -> Result<String> {
     let mut outs = String::new();
     let (mut escaped, mut tilde) = (false, false);
     for ch in fragment.chars() {
@@ -52,7 +53,9 @@ pub fn unquote(fragment: &str) -> Result<String, String> {
             match ch {
                 '0' => outs.push('~'),
                 '1' => outs.push('/'),
-                _ => return Err(format!("jptr: invalid tilde escape {}", ch)),
+                _ => {
+                    return Err(Error::JptrFail(format!("invalid ~{}", ch)));
+                }
             }
             continue;
         }
@@ -66,7 +69,7 @@ pub fn unquote(fragment: &str) -> Result<String, String> {
     Ok(outs)
 }
 
-pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String), String> {
+pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String)> {
     let mut frags: Vec<String> = vec![];
     let mut frag = String::new();
     let mut state: (bool, bool) = (false, false); // (escaped, tilde)
@@ -85,7 +88,7 @@ pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String), String> {
                 (state.0, false)
             }
             ch if state.1 => {
-                return Err(format!("jptr: invalid tilde escape {}", ch));
+                return Err(Error::JptrFail(format!("invalid ~{}", ch)));
             }
             '/' => {
                 frags.push(frag.clone());
@@ -103,10 +106,7 @@ pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String), String> {
     Ok((frags, frag))
 }
 
-pub(crate) fn lookup_mut<'a>(
-    mut json: &'a mut Json,
-    path: &str,
-) -> Result<(&'a mut Json, String), String> {
+pub(crate) fn lookup_mut<'a>(mut json: &'a mut Json, path: &str) -> Result<(&'a mut Json, String)> {
     let (frags, key) = fragments(path)?;
     for frag in frags {
         json = ops::index_mut(json, frag.as_str())?
@@ -114,10 +114,7 @@ pub(crate) fn lookup_mut<'a>(
     Ok((json, key))
 }
 
-pub(crate) fn lookup_ref<'a>(
-    mut json_doc: &'a Json,
-    path: &str,
-) -> Result<(&'a Json, String), String> {
+pub(crate) fn lookup_ref<'a>(mut json_doc: &'a Json, path: &str) -> Result<(&'a Json, String)> {
     let (frags, key) = fragments(path)?;
     for frag in frags {
         json_doc = json_doc[frag.as_str()].result()?;
@@ -125,12 +122,12 @@ pub(crate) fn lookup_ref<'a>(
     Ok((json_doc, key))
 }
 
-pub(crate) fn fix_prefix(path: &str) -> Result<&str, String> {
+pub(crate) fn fix_prefix(path: &str) -> Result<&str> {
     let mut chars = path.chars();
     if chars.next().unwrap() == '/' {
         Ok(chars.as_str())
     } else {
-        let msg = "jptr: pointer should start with forward solidus".to_string();
-        Err(msg)
+        let msg = "pointer should start with forward solidus".to_string();
+        Err(Error::JptrFail(msg))
     }
 }

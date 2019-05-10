@@ -5,6 +5,7 @@ use std::ops::{BitAnd, BitOr, BitXor, Index};
 
 use lazy_static::lazy_static;
 
+use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::property::{self, Property};
 
@@ -30,11 +31,11 @@ impl Add for Json {
             }
             (Integer(_), Float(_)) => {
                 let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
-                Json::new((l as f64) + r)
+                Json::new(l as f64 + r)
             }
             (Float(_), Integer(_)) => {
                 let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
-                Json::new(l + (r as f64))
+                Json::new(l + r as f64)
             }
             (S(l), S(r)) => {
                 let mut s = String::new();
@@ -60,7 +61,7 @@ impl Add for Json {
                     .for_each(|p| json::insert(&mut obj, p));
                 obj
             }
-            (_, _) => Json::__Error(format!("invalid {} + {}", self, rhs)),
+            (_, _) => Json::__Error(Error::AddFail(format!("{} + {}", self, rhs))),
         }
     }
 }
@@ -108,7 +109,7 @@ impl Sub for Json {
                 });
                 Object(res)
             }
-            (_, _) => Json::__Error(format!("invalid {} - {}", self, rhs)),
+            (_, _) => Json::__Error(Error::SubFail(format!("{} - {}", self, rhs))),
         }
     }
 }
@@ -161,7 +162,7 @@ impl Mul for Json {
                 obj = mixin_object(obj, other.to_vec());
                 Json::Object(obj)
             }
-            (_, _) => Json::__Error(format!("invalid {} * {}", self, rhs)),
+            (_, _) => Json::__Error(Error::MulFail(format!("{} * {}", self, rhs))),
         }
     }
 }
@@ -212,7 +213,7 @@ impl Div for Json {
                 let arr = s.split(patt).map(|s| S(s.to_string())).collect();
                 Json::Array(arr)
             }
-            (_, _) => Json::__Error(format!("invalid {} / {}", self, rhs)),
+            (_, _) => Json::__Error(Error::DivFail(format!("invalid {} / {}", self, rhs))),
         }
     }
 }
@@ -258,7 +259,7 @@ impl Rem for Json {
                     Json::new(l % r)
                 }
             }
-            (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
+            (_, _) => Json::__Error(Error::RemFail(format!("invalid {} % {}", self, rhs))),
         }
     }
 }
@@ -271,7 +272,7 @@ impl Neg for Json {
             Json::Null => Json::Null,
             Json::Integer(_) => Json::new(-self.integer().unwrap()),
             Json::Float(_) => Json::new(-self.float().unwrap()),
-            _ => Json::__Error(format!("invalid -{}", self)),
+            _ => Json::__Error(Error::NegFail(format!("-{}", self.typename()))),
         }
     }
 }
@@ -282,7 +283,7 @@ impl Shl for Json {
     fn shl(self, rhs: Json) -> Json {
         match (self.integer(), rhs.integer()) {
             (Some(l), Some(r)) => Json::new(l << r),
-            (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
+            (_, _) => Json::__Error(Error::ShlFail(format!("{} << {}", self, rhs))),
         }
     }
 }
@@ -293,7 +294,7 @@ impl Shr for Json {
     fn shr(self, rhs: Json) -> Json {
         match (self.integer(), rhs.integer()) {
             (Some(l), Some(r)) => Json::new(l >> r),
-            (_, _) => Json::__Error(format!("invalid {} % {}", self, rhs)),
+            (_, _) => Json::__Error(Error::ShrFail(format!("{} >> {}", self, rhs))),
         }
     }
 }
@@ -371,10 +372,13 @@ impl Not for Json {
 }
 
 lazy_static! {
-    pub static ref INDEX_ARRAY_ERROR: Json = Json::__Error("cannot index non-array".to_string());
-    pub static ref INDEX_OUTOFBOUND: Json = Json::__Error("index out of bound".to_string());
-    pub static ref INDEX_OBJECT_ERROR: Json = Json::__Error("cannot index non-object".to_string());
-    pub static ref INDEX_MISSING_KEY: Json = Json::__Error("key not found".to_string());
+    pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(-1));
+    pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray("--na--".to_string()));
+    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::NotAnIndex("--na--".to_string()));
+    pub static ref NOT_A_CONTAINER: Json =
+        Json::__Error(Error::NotAContainer("--na--".to_string()));
+    pub static ref PROPERTY_NOT_FOUND: Json =
+        Json::__Error(Error::PropertyNotFound("--na--".to_string()));
 }
 
 impl Index<isize> for Json {
@@ -384,10 +388,10 @@ impl Index<isize> for Json {
         match self {
             Json::Array(arr) => match normalized_offset(index, arr.len()) {
                 Some(off) => &arr[off],
-                None => &INDEX_OUTOFBOUND,
+                None => &INDEX_OUT_OF_BOUND,
             },
             Json::__Error(_) => self,
-            _ => &INDEX_ARRAY_ERROR,
+            _ => &NOT_AN_ARRAY,
         }
     }
 }
@@ -399,36 +403,36 @@ impl Index<&str> for Json {
         match self {
             Json::Object(obj) => match property::search_by_key(obj, index) {
                 Ok(off) => obj[off].value_ref(),
-                Err(_) => &INDEX_MISSING_KEY,
+                Err(_) => &PROPERTY_NOT_FOUND,
             },
             Json::Array(arr) => match index.parse::<isize>() {
                 Ok(n) => match normalized_offset(n, arr.len()) {
                     Some(off) => &arr[off],
-                    None => &INDEX_OUTOFBOUND,
+                    None => &INDEX_OUT_OF_BOUND,
                 },
-                Err(_) => &INDEX_OBJECT_ERROR,
+                Err(_) => &NOT_AN_INDEX,
             },
             Json::__Error(_) => self,
-            _ => &INDEX_OBJECT_ERROR,
+            _ => &NOT_A_CONTAINER,
         }
     }
 }
 
-pub fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json, String> {
+pub fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json> {
     match j {
         Json::Object(obj) => match property::search_by_key(obj, i) {
             Ok(off) => Ok(obj[off].value_mut()),
-            Err(_) => Err(format!("key not found {}", i)),
+            Err(_) => Err(Error::PropertyNotFound(i.to_string())),
         },
         Json::Array(arr) => match i.parse::<isize>() {
             Ok(n) => match normalized_offset(n, arr.len()) {
                 Some(off) => Ok(&mut arr[off]),
-                None => Err(format!("index {} out of bound", i)),
+                None => Err(Error::IndexOutofBound(n)),
             },
-            Err(_) => Err(format!("cannot index non-object")),
+            Err(err) => Err(Error::NotAnIndex(err.to_string())),
         },
         Json::__Error(_) => Ok(j),
-        _ => Err(format!("cannot index non-object")),
+        _ => Err(Error::NotAContainer(j.typename())),
     }
 }
 

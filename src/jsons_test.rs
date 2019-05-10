@@ -2,6 +2,7 @@
 
 use std::fs::File;
 
+use crate::error::Error;
 use crate::json::Json;
 use crate::jsons::Jsons;
 use crate::property::Property;
@@ -22,7 +23,7 @@ fn test_stream0() {
     assert!(value.is_error());
     assert_eq!(
         value.error().unwrap(),
-        "parse: expected null at offset:0 line:1 col:1".to_string()
+        Error::ParseFail("expected null at offset:0 line:1 col:1".to_string())
     );
 }
 

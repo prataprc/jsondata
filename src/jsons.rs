@@ -2,8 +2,10 @@
 
 use std::io;
 
-use crate::json::Json;
 use unicode_reader::CodePoints;
+
+use crate::error::{Error, Result};
+use crate::json::Json;
 
 /// Jsons can parse a stream of JSON text supplied by any [Read] instance.
 /// For Example:
@@ -17,7 +19,7 @@ use unicode_reader::CodePoints;
 /// }
 /// ```
 ///
-/// Note that the iterated value is of type ``Result<Json, std::io::Error>``,
+/// Note that the iterated value is of type ``Result<Json, Error>``,
 /// where errors can be handled in following manner :
 ///
 /// ```ignore
@@ -30,7 +32,7 @@ use unicode_reader::CodePoints;
 ///             /* value.error() to fetch the error String */
 ///         },
 ///         Err(err) => {
-///             /* handle std::io::Error returned by the Read instance */
+///             /* handle error returned by the Read instance */
 ///         },
 ///     }
 /// }
@@ -61,7 +63,7 @@ impl<R> Iterator for Jsons<R>
 where
     R: io::Read,
 {
-    type Item = Result<Json, io::Error>;
+    type Item = Result<Json>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut markers = String::new();
@@ -116,7 +118,10 @@ where
             } else if res.is_none() {
                 break None;
             }
-            ok_ch = res.unwrap();
+            ok_ch = match res.unwrap() {
+                Ok(x) => Ok(x),
+                Err(err) => Err(Error::IoError(err.to_string())),
+            }
         }
     }
 }
@@ -125,7 +130,7 @@ impl<R> Jsons<R>
 where
     R: io::Read,
 {
-    fn read_string(&mut self) -> Option<Result<(), io::Error>> {
+    fn read_string(&mut self) -> Option<Result<()>> {
         let mut escape = false;
         loop {
             match self.codes.next() {
@@ -142,18 +147,18 @@ where
                     break Some(Ok(()));
                 }
                 Some(Ok(ch)) => self.quant.push(ch),
-                Some(Err(err)) => break Some(Err(err)),
+                Some(Err(err)) => break Some(Err(Error::IoError(err.to_string()))),
                 None => break Some(Ok(())),
             }
         }
     }
 
-    fn read_whitespace(&mut self) -> Option<Result<char, io::Error>> {
+    fn read_whitespace(&mut self) -> Option<Result<char>> {
         loop {
             match self.codes.next()? {
                 Ok(ch) if !ch.is_whitespace() => break Some(Ok(ch)),
                 Ok(_) => (),
-                Err(err) => break Some(Err(err)),
+                Err(err) => break Some(Err(Error::IoError(err.to_string()))),
             }
         }
     }

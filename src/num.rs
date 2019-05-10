@@ -2,6 +2,8 @@
 
 use std::cmp::Ordering;
 
+use crate::error::{Error, Result};
+
 #[derive(Clone, Debug)]
 pub struct Integral {
     pub len: usize,
@@ -38,7 +40,7 @@ impl Integral {
         }
     }
 
-    pub fn compute(&mut self) -> Result<(), String> {
+    pub fn compute(&mut self) -> Result<()> {
         use std::str::from_utf8;
 
         //println!("{:?}", self.txt);
@@ -57,7 +59,7 @@ impl Integral {
             };
             match res {
                 Ok(val) => self.val = Some(val),
-                Err(err) => return Err(format!("parse: {}", err)),
+                Err(err) => return Err(Error::InvalidNumber(format!("{}", err))),
             }
         }
         Ok(())
@@ -130,13 +132,13 @@ impl Floating {
         }
     }
 
-    pub fn compute(&mut self) -> Result<(), String> {
+    pub fn compute(&mut self) -> Result<()> {
         use std::str::from_utf8;
 
         if self.val.is_none() {
             match from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>() {
                 Ok(val) => self.val = Some(val),
-                Err(err) => return Err(format!("parse: {}", err)),
+                Err(err) => return Err(Error::InvalidNumber(format!("{}", err))),
             }
         }
         Ok(())

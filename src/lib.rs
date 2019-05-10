@@ -45,7 +45,7 @@
 //!
 //! match json.compute() { // pre-compute all numbers in the json document.
 //!     Ok(_) => (),
-//!     Err(s) => println!("{}", s),
+//!     Err(s) => println!("{:?}", s),
 //! }
 //! ```
 //!
@@ -55,7 +55,7 @@
 //! let mut json = r#"{"a": 1000}"#.parse::<jsondata::Json>().unwrap();
 //! match json.validate() { // validate
 //!     Ok(_) => (),
-//!     Err(s) => println!("{}", s),
+//!     Err(s) => println!("{:?}", s),
 //! }
 //! ```
 //!
@@ -71,6 +71,7 @@
     html_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/1024px-JSON_vector_logo.svg.png"
 )]
 
+mod error;
 mod json;
 mod jsons;
 mod lex;
@@ -82,6 +83,7 @@ mod property;
 pub mod jptr;
 
 // Re-exports for API documentation.
+pub use crate::error::{Error, Result};
 pub use crate::json::Json;
 pub use crate::jsons::Jsons;
 pub use crate::property::Property;
