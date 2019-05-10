@@ -371,6 +371,8 @@ impl Not for Json {
     }
 }
 
+// TODO: Explore whether it is better to panic!() instead of returning
+// lossy error message via Json::__Error
 lazy_static! {
     pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(-1));
     pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray("--na--".to_string()));
