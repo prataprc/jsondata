@@ -29,6 +29,7 @@ and document database.
 * Rust [internal discussion][rust1]  on f64 -> integer.
 * [Json sort order][json-sort-order].
 * [Json operations][json-ops].
+* [Release notes](./RELEASE.md).
 
 **Licensing**
 

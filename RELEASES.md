@@ -1,7 +1,11 @@
-Tip
-===
+0.6.0
+=====
 
-[On going development]
+Breaking API Change:
+
+Previously APIs returning Result had its Err variant as String type.
+Now we are implementing a proper Error type and returning that as the
+Err variant.
 
 0.5.0
 =====
