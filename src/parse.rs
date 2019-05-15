@@ -110,7 +110,9 @@ fn parse_json5_float(txt: &str, lex: &mut Lex, w: usize) -> Result<Json> {
         lex.off += l;
         Ok(res.clone())
     } else {
-        Err(Error::ParseFail(lex.format(&format!("expected {}", token))))
+        Err(Error::ParseFail(
+            lex.format(&format!("expected json5 float")),
+        ))
     }
 }
 
@@ -123,7 +125,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
 
     let (i, ch) = chars.next().unwrap(); // skip the opening quote
     if ch != '"' {
-        return Err(Error::ParseFail(lex.format("not a string")));
+        return Err(Error::ParseFail(lex.format("invalid string")));
     }
 
     while let Some((i, ch)) = chars.next() {
@@ -155,7 +157,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
             'u' => match decode_json_hex_code(&mut chars, lex)? {
                 code1 @ 0xDC00...0xDFFF => {
                     lex.incr_col(i);
-                    let msg = format!("invalid char codepoint {}", code1);
+                    let msg = format!("invalid codepoint {:x}", code1);
                     return Err(Error::ParseFail(lex.format(&msg)));
                 }
                 // Non-BMP characters are encoded as a sequence of
@@ -164,7 +166,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
                     let code2 = decode_json_hex_code2(&mut chars, lex)?;
                     if code2 < 0xDC00 || code2 > 0xDFFF {
                         lex.incr_col(i);
-                        let msg = format!("invalid codepoint {}", code2);
+                        let msg = format!("invalid codepoint surrogate {:x}", code2);
                         return Err(Error::ParseFail(lex.format(&msg)));
                     }
                     let code = ((code1 - 0xD800) << 10) | ((code2 - 0xDC00) + 0x1_0000);
@@ -175,14 +177,14 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
                     Some(ch) => res.push(ch),
                     None => {
                         lex.incr_col(i);
-                        let msg = format!("invalid escape code {:?}", n);
+                        let msg = format!("invalid unicode escape u{:x}", n);
                         return Err(Error::ParseFail(lex.format(&msg)));
                     }
                 },
             },
             _ => {
                 lex.incr_col(i);
-                let err = "invalid string string escape type";
+                let err = "invalid string escape type";
                 return Err(Error::ParseFail(lex.format(&err)));
             }
         }
@@ -272,7 +274,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
             }
             Some('"') => parse_string(text, lex)?.string().unwrap(),
             Some(ch) if ch.is_alphabetic() => parse_identifier(text, lex),
-            _ => break Err(Error::ParseFail(lex.format("expected valid key"))),
+            _ => break Err(Error::ParseFail(lex.format("invalid property key"))),
         };
         // colon
         parse_whitespace(text, lex);

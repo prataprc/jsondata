@@ -1,8 +1,8 @@
 // Copyright (c) 2018 R Pratap Chakravarthy.
 
-//! Module jptr implements [JSON Pointer RFC spec].
+//! Module jptr implements [JSON Pointer RFC spec.].
 //!
-//! [JSON Pointer RFC specification]: https://tools.ietf.org/html/rfc6901
+//! [JSON Pointer RFC spec.]: https://tools.ietf.org/html/rfc6901
 
 use crate::error::{Error, Result};
 use crate::json::Json;

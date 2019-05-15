@@ -7,16 +7,16 @@
 //!
 //! * Support for 128-bit signed integers.
 //! * Deferred conversion of numbers.
-//! * Serialization from Rust native type to JSON text.
+//! * Serialization from Rust native type, [`Json`], to JSON text.
 //! * De-serialization from JSON text to Rust native type.
 //! * [CRUD] operation on JSON documents, using [JSON Pointer].
 //! * Sorted keys in property object.
-//! * Streaming JSON parser.
-//! * Support JSON5 standard.
-//! * Common arithmetic and logic operations.
-//! * Sortable JSON.
+//! * Streaming JSON parser, using [`Jsons`].
+//! * Support [JSON5](http://json5.org) standard.
+//! * Common arithmetic and logical ops implemented for [`Json`].
+//! * [`Json`] objects can be compared and sorted.
 //!
-//! To parse JSON text, use [parse]:
+//! To parse JSON text, use [str::parse]:
 //!
 //! ```
 //! let text = r#"[null,true,false,10,"true"]"#;
@@ -59,10 +59,114 @@
 //! }
 //! ```
 //!
+//! Boolean table for [`Json`] data:
+//! ================================
+//!
+//! |  data type  | boolean value
+//! *-------------*--------------
+//! | null
+//!
+//! JSON operations:
+//! ================
+//!
+//! *Addition:*
+//!
+//! * Adding with Null, return the same value.
+//! * Integer addition and Float addition respectively follow
+//!   i128 and f64 rules. When adding mixed numbers, integers
+//!   are type casted to floats.
+//! * Adding two string, concatenate and return a new string.
+//! * Adding two array return a new array with first array's element
+//!   and later second array's element.
+//! * Adding two object is similar to adding two array except that if
+//!   both object have same property, then property from first object
+//!   is overwritten by property from second object.
+//!
+//! All other combination shall return [`Error::AddFail`].
+//!
+//! *Subraction:*
+//!
+//! * Subracting with Null, return the same value.
+//! * Integer subraction and Float subraction respectively follow
+//!   i128 and f64 rules. When subracting mixed numbers, integers
+//!   are type casted to floats.
+//! * Subracting an array from another array return a new array with
+//!   remaining items, after removing second array's item from the
+//!   the first array.
+//! * Subracting two object is similar to subracting two array.
+//!
+//! All other combination shall return [`Error::SubFail`].
+//!
+//! *Multiplication:*
+//!
+//! * Multiplying with Null, always return Null.
+//! * Integer multiplication and Float multiplication respectively
+//!   follow i128 and f64 rules. When multiplying mixed numbers,
+//!   integers are type casted to floats.
+//! * Multiplying integer with string or vice-versa, shall repeat
+//!   the string operand as many times specified by the integer value
+//!   and return a new string.
+//!
+//! All other combination shall return [`Error::MulFail`].
+//!
+//! *Division:*
+//!
+//! * Dividing with Null, always return Null.
+//! * Integer division and Float division respectively follow
+//!   i128 and f64 rules. When dividing with mixed numbers,
+//!   integers are type casted to floats.
+//!
+//! All other combination shall return [`Error::DivFail`].
+//!
+//! *Reminder:*
+//!
+//! * Finding reminder with Null, always return Null.
+//! * Integer reminder and Float reminder respectively follow
+//!   i128 and f64 rules. When dividing with mixed numbers,
+//!   integers are type casted to floats.
+//!
+//! All other combination shall return [`Error::RemFail`].
+//!
+//! *Negation:*
+//!
+//! * Negating Null, return Null.
+//! * Negating Integer and Float shall respectively follow
+//!   i128 and f64 rules.
+//!
+//! All other combination shall return [`Error::NegFail`].
+//!
+//! *Shift-right / Shift-left:*
+//!
+//! Applicable only for integers and follow the same behaviour as
+//! that of i128.
+//!
+//! All other combination shall return [`Error::ShrFail`] /
+//! [`Error::ShlFail`].
+//!
+//! *BitAnd:*
+//!
+//! * For integer operands, BitAnd follows normal integer bitwise-and
+//!   rules.
+//! * For other Json variant, operand is converted to boolean
+//!   version and performs logical AND.
+//!
+//! *BitOr:*
+//!
+//! * For integer operands, BitOr follows normal integer bitwise-or
+//!   rules.
+//! * For other Json variant, operand is converted to boolean
+//!   version and performs logical OR.
+//!
+//! *BitXor:*
+//!
+//! * For integer operands, BitXor follows normal integer bitwise-xor
+//!   rules.
+//! * For other Json variant, operand is converted to boolean
+//!   version and performs logical XOR.
+//!
 //! [JSON]: https://tools.ietf.org/html/rfc8259
 //! [CRUD]: https://en.wikipedia.org/wiki/Create,_read,_update_and_delete
 //! [JSON Pointer]: https://tools.ietf.org/html/rfc6901
-//! [parse]: str::method.parse
 //! [integer]: enum.Json.html#method.integer
 //! [float]: enum.Json.html#method.float
 

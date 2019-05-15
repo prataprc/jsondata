@@ -1,3 +1,7 @@
+/// Enumeration of all possible errors that shall be returned by
+/// methods and functions under this package. Refer to individual
+/// methods and functions, returning [Result] type, for specific
+/// error handling.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Error {
     /// Failed to parse JSON text.
@@ -43,4 +47,6 @@ pub enum Error {
     IoError(String),
 }
 
+/// Result type, for jsondata functions and methods, that require a
+/// success or failure variant.
 pub type Result<T> = std::result::Result<T, Error>;
