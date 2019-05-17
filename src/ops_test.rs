@@ -342,14 +342,23 @@ fn test_index_arr() {
 }
 
 #[test]
-fn test_index_obj() {
+fn test_index_obj1() {
     let value: Json = vec![
         Property::new("a", 10.into()),
         Property::new("b", 10.into()),
         Property::new("c", 10.into()),
-    ]
-    .into();
+    ].into();
     assert_eq!(value["a"], Json::new(10));
+}
+
+#[test]
+#[should_panic]
+fn test_index_obj2() {
+    let value: Json = vec![
+        Property::new("a", 10.into()),
+        Property::new("b", 10.into()),
+        Property::new("c", 10.into()),
+    ].into();
     assert!(value["z"].is_error());
 }
 
