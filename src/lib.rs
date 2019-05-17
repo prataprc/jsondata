@@ -16,14 +16,14 @@
 //! * Common arithmetic and logical ops implemented for [`Json`].
 //! * [`Json`] objects can be compared and sorted.
 //!
-//! To parse JSON text, use [str::parse]:
+//! To parse JSON text, use [`str::parse`]:
 //!
 //! ```
 //! let text = r#"[null,true,false,10,"true"]"#;
 //! let json = text.parse::<jsondata::Json>().unwrap();
 //! ```
 //!
-//! To serialise [Json] type to JSON text:
+//! To serialise [`Json`] type to JSON text:
 //!
 //! ```
 //! let text = r#"[null,true,false,10,"true"]"#;
@@ -62,9 +62,26 @@
 //! Boolean table for [`Json`] data:
 //! ================================
 //!
-//! |  data type  | boolean value
-//! *-------------*--------------
-//! | null
+//! In boolean expression context, like BitAnd, BitOr, BitXor and Not,
+//! [`Json`] value will be automatically converted to boolean value
+//! with following rules.
+//!
+//! |      data type    | boolean value |
+//! *-------------------*---------------*
+//! | null              | false         |
+//! | boolean true      | true          |
+//! | boolean false     | false         |
+//! | integer-zero      | false         |
+//! | integer-non-zero  | true          |
+//! | float-zero        | false         |
+//! | float-non-zero    | true          |
+//! | string-empty      | false         |
+//! | string            | true          |
+//! | array-empty       | false         |
+//! | array-non-empty   | true          |
+//! | object-empty      | false         |
+//! | object-non-empty  | true          |
+//!
 //!
 //! JSON operations:
 //! ================
