@@ -10,7 +10,10 @@ use crate::json::Json;
 use crate::property::{self, Property};
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
-//       for Sub, Mul, Div, Neg ...
+// for Sub, Mul, Div, Neg ...
+
+// TODO: Implement && || as short-circuiting logical operation. They are not
+// not implementable as `std` traits, hence figure out an apt API.
 
 impl Add for Json {
     type Output = Json;
@@ -397,9 +400,9 @@ impl Not for Json {
 lazy_static! {
     pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(-1));
     pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray("--na--".to_string()));
-    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::NotAnIndex("--na--".to_string()));
+    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::InvalidIndex("--na--".to_string()));
     pub static ref NOT_A_CONTAINER: Json =
-        Json::__Error(Error::NotAContainer("--na--".to_string()));
+        Json::__Error(Error::InvalidContainer("--na--".to_string()));
     pub static ref PROPERTY_NOT_FOUND: Json =
         Json::__Error(Error::PropertyNotFound("--na--".to_string()));
 }
@@ -452,10 +455,10 @@ pub(crate) fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json> {
                 Some(off) => Ok(&mut arr[off]),
                 None => Err(Error::IndexOutofBound(n)),
             },
-            Err(err) => Err(Error::NotAnIndex(err.to_string())),
+            Err(err) => Err(Error::InvalidIndex(err.to_string())),
         },
         Json::__Error(_) => Ok(j),
-        _ => Err(Error::NotAContainer(j.typename())),
+        _ => Err(Error::InvalidContainer(j.typename())),
     }
 }
 

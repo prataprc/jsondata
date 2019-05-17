@@ -22,19 +22,16 @@ pub enum Error {
     ShlFail(String),
     /// Failed to right shift Json value.
     ShrFail(String),
-    /// Failed to index into Json value.
-    IndexFail(String),
     /// When indexing a Json array with out of bound index.
     IndexOutofBound(isize),
-    /// When parsing an invalid array index.
-    NotAnIndex(String),
-    /// When Json value is expected to be an array, but it is not.
+    /// When attempting index an array with an invalid index.
+    InvalidIndex(String),
+    /// When attempting array operation, like range, index etc..,
+    /// on non-array value.
     NotAnArray(String),
-    /// When Json value is expected to be an object, but it is not.
-    NotAnObject(String),
-    /// When json-pointer is stuck with non-container type. Only array
-    /// and object are treated as container type.
-    NotAContainer(String),
+    /// When attempting lookup and indexing operations like, set, delete,
+    /// append, index, etc.. on values that are neither array nor object.
+    InvalidContainer(String),
     /// When trying to lookup a Json object with missing property.
     PropertyNotFound(String),
     /// While appending a non string value with Json string.
@@ -43,7 +40,8 @@ pub enum Error {
     InvalidNumber(String),
     /// Failed processing json-pointer.
     JptrFail(String),
-    /// std::io::Error
+    /// std::io::Error returned by string processing API, while iterating
+    /// on [`crate::Jsons`] stream of text.
     IoError(String),
 }
 

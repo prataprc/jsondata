@@ -67,7 +67,7 @@
 //! with following rules.
 //!
 //! |      data type    | boolean value |
-//! *-------------------*---------------*
+//! |-------------------|---------------|
 //! | null              | false         |
 //! | boolean true      | true          |
 //! | boolean false     | false         |
@@ -86,16 +86,21 @@
 //! JSON operations:
 //! ================
 //!
+//! [`Json`] implements common arithmetic and logical operations like
+//! [ops::Add], [ops::Sub], [ops::Mul], [ops::Div], [ops::Rem], [ops::Neg],
+//! [ops::Shl], [ops::Shr], [ops::BitAnd], [ops::BitOr], [ops::BitXor],
+//! [ops::Not], [ops::Index].
+//!
 //! *Addition:*
 //!
-//! * Adding with Null, return the same value.
+//! * Adding with Null, shall return the same value.
 //! * Integer addition and Float addition respectively follow
 //!   i128 and f64 rules. When adding mixed numbers, integers
 //!   are type casted to floats.
-//! * Adding two string, concatenate and return a new string.
-//! * Adding two array return a new array with first array's element
-//!   and later second array's element.
-//! * Adding two object is similar to adding two array except that if
+//! * Adding two string, shall concatenate and return a new string.
+//! * Adding two array, shall return a new array with first array's
+//!   element and later second array's element.
+//! * Adding two object, is similar to adding two array except that if
 //!   both object have same property, then property from first object
 //!   is overwritten by property from second object.
 //!
@@ -103,20 +108,20 @@
 //!
 //! *Subraction:*
 //!
-//! * Subracting with Null, return the same value.
+//! * Subracting with Null, shall return the same value.
 //! * Integer subraction and Float subraction respectively follow
 //!   i128 and f64 rules. When subracting mixed numbers, integers
 //!   are type casted to floats.
-//! * Subracting an array from another array return a new array with
-//!   remaining items, after removing second array's item from the
+//! * Subracting an array from another array, shall return a new array
+//!   with remaining items after removing second array's item from the
 //!   the first array.
-//! * Subracting two object is similar to subracting two array.
+//! * Subracting two object, is similar to subracting two array.
 //!
 //! All other combination shall return [`Error::SubFail`].
 //!
 //! *Multiplication:*
 //!
-//! * Multiplying with Null, always return Null.
+//! * Multiplying with Null, shall return Null.
 //! * Integer multiplication and Float multiplication respectively
 //!   follow i128 and f64 rules. When multiplying mixed numbers,
 //!   integers are type casted to floats.
@@ -128,7 +133,7 @@
 //!
 //! *Division:*
 //!
-//! * Dividing with Null, always return Null.
+//! * Dividing with Null, shall return Null.
 //! * Integer division and Float division respectively follow
 //!   i128 and f64 rules. When dividing with mixed numbers,
 //!   integers are type casted to floats.
@@ -137,7 +142,7 @@
 //!
 //! *Reminder:*
 //!
-//! * Finding reminder with Null, always return Null.
+//! * Finding reminder with Null, shall return Null.
 //! * Integer reminder and Float reminder respectively follow
 //!   i128 and f64 rules. When dividing with mixed numbers,
 //!   integers are type casted to floats.
@@ -146,7 +151,7 @@
 //!
 //! *Negation:*
 //!
-//! * Negating Null, return Null.
+//! * Negating Null, shall return Null.
 //! * Negating Integer and Float shall respectively follow
 //!   i128 and f64 rules.
 //!
@@ -155,7 +160,7 @@
 //! *Shift-right / Shift-left:*
 //!
 //! Applicable only for integers and follow the same behaviour as
-//! that of i128.
+//! that of [`i128`].
 //!
 //! All other combination shall return [`Error::ShrFail`] /
 //! [`Error::ShlFail`].

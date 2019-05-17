@@ -275,7 +275,7 @@ impl Json {
                         Ok(())
                     }
                 }
-                Err(err) => Err(Error::NotAnIndex(err.to_string())),
+                Err(err) => Err(Error::InvalidIndex(err.to_string())),
             },
             Json::Object(props) => match property::search_by_key(&props, &frag) {
                 Ok(n) => {
@@ -287,7 +287,7 @@ impl Json {
                     Ok(())
                 }
             },
-            _ => Err(Error::NotAContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.typename())),
         }
     }
 
@@ -307,7 +307,7 @@ impl Json {
                     arr.remove(n);
                     Ok(())
                 }
-                Err(err) => Err(Error::NotAnIndex(err.to_string())),
+                Err(err) => Err(Error::InvalidIndex(err.to_string())),
             },
             Json::Object(props) => match property::search_by_key(&props, &frag) {
                 Ok(n) => {
@@ -316,7 +316,7 @@ impl Json {
                 }
                 Err(_) => Err(Error::PropertyNotFound(frag)),
             },
-            _ => Err(Error::NotAContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.typename())),
         }
     }
 
@@ -343,7 +343,7 @@ impl Json {
                 arr.insert(n, value);
                 Ok(())
             }
-            _ => Err(Error::NotAContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.typename())),
         }
     }
 
