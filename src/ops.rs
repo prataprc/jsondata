@@ -399,6 +399,12 @@ impl Not for Json {
 // lossy error message via Json::__Error
 lazy_static! {
     pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(-1));
+    pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray("--na--".to_string()));
+    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::InvalidIndex("--na--".to_string()));
+    pub static ref NOT_A_CONTAINER: Json =
+        Json::__Error(Error::InvalidContainer("--na--".to_string()));
+    pub static ref PROPERTY_NOT_FOUND: Json =
+        Json::__Error(Error::PropertyNotFound("--na--".to_string()));
 }
 
 impl Index<isize> for Json {
@@ -411,10 +417,7 @@ impl Index<isize> for Json {
                 None => &INDEX_OUT_OF_BOUND,
             },
             Json::__Error(_) => self,
-            _ => {
-                let err = Error::NotAnArray(self.typename());
-                panic!("{:?}", err);
-            }
+            _ => &NOT_AN_ARRAY,
         }
     }
 }
@@ -426,26 +429,17 @@ impl Index<&str> for Json {
         match self {
             Json::Object(obj) => match property::search_by_key(obj, index) {
                 Ok(off) => obj[off].value_ref(),
-                Err(err) => {
-                    let err = Error::PropertyNotFound(err.to_string());
-                    panic!("{:?}", err);
-                }
+                Err(_) => &PROPERTY_NOT_FOUND,
             },
             Json::Array(arr) => match index.parse::<isize>() {
                 Ok(n) => match normalized_offset(n, arr.len()) {
                     Some(off) => &arr[off],
                     None => &INDEX_OUT_OF_BOUND,
                 },
-                Err(err) => {
-                    let err = Error::InvalidIndex(err.to_string());
-                    panic!("{:?}", err);
-                }
+                Err(_) => &NOT_AN_INDEX,
             },
             Json::__Error(_) => self,
-            _ => {
-                let err = Error::InvalidContainer(self.typename());
-                panic!("{:?}", err);
-            },
+            _ => &NOT_A_CONTAINER,
         }
     }
 }
@@ -467,6 +461,27 @@ pub(crate) fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json> {
         _ => Err(Error::InvalidContainer(j.typename())),
     }
 }
+
+//// TODO: To handle || and && short-circuiting operations.
+////impl And for Json {
+////    type Output=Json;
+////
+////    fn and(self, other: Json) -> Self::Output {
+////        let lhs = bool::from(self);
+////        let rhs = bool::from(other);
+////        Json::Bool(lhs & rhs)
+////    }
+////}
+////
+////impl Or for Json {
+////    type Output=Json;
+////
+////    fn or(self, other: Json) -> Self::Output {
+////        let lhs = bool::from(self);
+////        let rhs = bool::from(other);
+////        Json::Bool(lhs | rhs)
+////    }
+////}
 
 fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> {
     use crate::json::Json::Object;

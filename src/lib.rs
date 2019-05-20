@@ -186,11 +186,6 @@
 //! * For other Json variant, operand is converted to boolean
 //!   version and performs logical XOR.
 //!
-//! *Index:*
-//!
-//! * Index<isize> on non-array Json value shall panic.
-//! * Index<&str> on non-container Json value shall panic.
-//!
 //! [JSON]: https://tools.ietf.org/html/rfc8259
 //! [CRUD]: https://en.wikipedia.org/wiki/Create,_read,_update_and_delete
 //! [JSON Pointer]: https://tools.ietf.org/html/rfc6901

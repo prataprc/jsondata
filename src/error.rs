@@ -1,5 +1,3 @@
-// TODO: should we implement Display for Error for pretty printing ?
-
 /// Enumeration of all possible errors that shall be returned by
 /// methods and functions under this package. Refer to individual
 /// methods and functions, returning [Result] type, for specific
