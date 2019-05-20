@@ -1,5 +1,6 @@
 // Copyright (c) 2018 R Pratap Chakravarthy.
 
+use std::convert::TryInto;
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor, Index};
 
@@ -148,22 +149,14 @@ impl Mul for Json {
                 let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
                 Json::new(l * (r as f64))
             }
-            (S(s), Integer(_)) => {
-                let n = rhs.integer().unwrap();
-                if n == 0 {
-                    Null
-                } else {
-                    S(s.repeat(n as usize))
-                }
-            }
-            (Integer(_), S(s)) => {
-                let n = self.integer().unwrap();
-                if n == 0 {
-                    Null
-                } else {
-                    S(s.repeat(n as usize))
-                }
-            }
+            (S(s), Integer(_)) => match rhs.integer().unwrap() {
+                n if n <= 0 => Null,
+                n => S(s.repeat(n as usize)),
+            },
+            (Integer(_), S(s)) => match self.integer().unwrap() {
+                n if n <= 0 => Null,
+                n => S(s.repeat(n as usize)),
+            },
             (Object(this), Object(other)) => {
                 // TODO: this is not well defined.
                 let mut obj = Vec::new();
@@ -499,10 +492,10 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
 }
 
 pub fn normalized_offset(off: isize, len: usize) -> Option<usize> {
-    let len = len as isize;
+    let len = len.try_into().unwrap();
     let off = if off < 0 { off + len } else { off };
     if off >= 0 && off < len {
-        Some(off as usize)
+        Some(off.try_into().unwrap())
     } else {
         None
     }

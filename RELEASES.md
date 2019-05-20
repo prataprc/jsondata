@@ -59,14 +59,11 @@ Code Review checklist
 * [ ] Review and check for un-necessary copy, and allocations.
 * [ ] Review resize calls on `Vec`.
 * [ ] Review (as ...) type casting, to panic on data loss.
-* [ ] Check whether `try_into()` can be replaced with `into()`.
 * [ ] Reduce trait constraints for Type parameters on public APIs.
 * [ ] Public APIs can be as generic as possible. Check whether there
       is a scope for `AsRef` or `Borrow` constraints.
 * [ ] Document error variants.
 * [ ] Check for dangling links in rustdoc.
-* [ ] Keep test cases in separate file, and include them using macro
-      or import them as child module to the module being tested.
 
 Release Checklist
 =================

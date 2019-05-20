@@ -302,10 +302,13 @@ impl Json {
         let (json, frag) = jptr::lookup_mut(self, path)?;
         match json {
             Json::Array(arr) => match frag.parse::<usize>() {
-                Ok(n) if n >= arr.len() => Err(Error::IndexOutofBound(n as isize)),
                 Ok(n) => {
-                    arr.remove(n);
-                    Ok(())
+                    if n >= arr.len() {
+                        Err(Error::IndexOutofBound(n.try_into().unwrap()))
+                    } else {
+                        arr.remove(n);
+                        Ok(())
+                    }
                 }
                 Err(err) => Err(Error::InvalidIndex(err.to_string())),
             },
