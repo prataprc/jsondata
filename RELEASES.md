@@ -71,12 +71,10 @@ Release Checklist
   * __patch__: bug fixes.
 * Cargo checklist
   * cargo +stable build; cargo +nightly build
-  * cargo +stable doc
-  * cargo +nightly clippy --all-targets --all-features
-  * cargo +nightly audit
-  * cargo +nightly test
+  * cargo +stable doc; cargo +nightly doc
+  * cargo +stable test; cargo +nightly test
   * cargo +nightly bench
-  * cargo +nightly benchcmp <old> <new>
+  * cargo +nightly clippy --all-targets --all-features
   * cargo fix --edition --all-targets
 * Travis-CI integration.
 * Spell check.

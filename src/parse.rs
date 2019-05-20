@@ -110,9 +110,7 @@ fn parse_json5_float(txt: &str, lex: &mut Lex, w: usize) -> Result<Json> {
         lex.off += l;
         Ok(res.clone())
     } else {
-        Err(Error::ParseFail(
-            lex.format(&format!("expected json5 float")),
-        ))
+        Err(Error::ParseFail(lex.format("expected json5 float")))
     }
 }
 
