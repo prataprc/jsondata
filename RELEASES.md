@@ -1,3 +1,8 @@
+0.6.2 (Pending)
+===============
+
+- Fix "as ..." conversions to try_into().unwrap()
+
 0.6.1
 =====
 
