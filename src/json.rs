@@ -671,6 +671,27 @@ impl From<i128> for Json {
     }
 }
 
+impl From<usize> for Json {
+    fn from(val: usize) -> Json {
+        let val: i128 = val.try_into().unwrap();
+        Json::Integer(Integral::new(val))
+    }
+}
+
+impl From<u64> for Json {
+    fn from(val: u64) -> Json {
+        let val: i128 = val.try_into().unwrap();
+        Json::Integer(Integral::new(val))
+    }
+}
+
+impl From<i32> for Json {
+    fn from(val: i32) -> Json {
+        let val: i128 = val.try_into().unwrap();
+        Json::Integer(Integral::new(val))
+    }
+}
+
 impl From<f64> for Json {
     fn from(val: f64) -> Json {
         Json::Float(Floating::new(val))

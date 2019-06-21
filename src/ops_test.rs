@@ -265,7 +265,7 @@ fn test_ops_neg() {
 #[test]
 fn test_ops_shl() {
     assert_eq!(Json::new(2), Json::new(1) << 1.into());
-    let v = -170_141_183_460_469_231_731_687_303_715_884_105_728;
+    let v = -170_141_183_460_469_231_731_687_303_715_884_105_728_i128;
     assert_eq!(Json::new(v), Json::new(1) << 127.into());
 }
 
