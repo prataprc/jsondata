@@ -83,9 +83,9 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json> {
     let mut is_float = false;
     let mut is_hex = false;
     for (i, ch) in text.char_indices() {
-        if (ch as u32) > (ISNUMBER.len() as u32) {
-            return dofn(&text[..i], i, is_float, is_hex);
-        } else if ISNUMBER[ch as usize] == 0 {
+        let mut ok = (ch as u32) > (ISNUMBER.len() as u32);
+        ok = ok || ISNUMBER[ch as usize] == 0;
+        if ok {
             return dofn(&text[..i], i, is_float, is_hex);
         } else if !is_float && ISNUMBER[ch as usize] == 2 {
             is_float = true
