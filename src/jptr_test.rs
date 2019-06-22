@@ -5,7 +5,7 @@ use crate::json::Json;
 use crate::property::Property;
 
 #[test]
-fn quote_test() {
+fn test_quote() {
     let jptr = r#"data/~"\"#;
     let refv = r#"data~1~0\"\\"#.to_string();
     assert_eq!(quote(&jptr), refv);
@@ -24,7 +24,7 @@ fn quote_test() {
 }
 
 #[test]
-fn unquote_test() {
+fn test_unquote() {
     let jptr = r#"data/~"\"#.to_string();
     assert_eq!(unquote(&quote(&jptr)).unwrap(), jptr);
 
@@ -45,7 +45,7 @@ fn unquote_test() {
 }
 
 #[test]
-fn jptr_get_test() {
+fn test_jptr_get() {
     let text = r#"
        {
           "foo": ["bar", "baz"],
@@ -82,7 +82,7 @@ fn jptr_get_test() {
 }
 
 #[test]
-fn jptr_set_test() {
+fn test_jptr_set() {
     let text = r#"
        {
           "foo": ["bar", "baz"],
@@ -136,7 +136,7 @@ fn jptr_set_test() {
 }
 
 #[test]
-fn jptr_append_test() {
+fn test_jptr_append() {
     let text = r#"
        {
           "foo": ["bar", "baz"],
@@ -179,7 +179,7 @@ fn jptr_append_test() {
 }
 
 #[test]
-fn jptr_delete_test() {
+fn test_jptr_delete() {
     let text = r#"
        {
           "foo": ["bar", "baz"],

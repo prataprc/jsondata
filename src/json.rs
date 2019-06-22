@@ -816,16 +816,16 @@ impl Display for Json {
             Null => write!(f, "null"),
             Bool(true) => write!(f, "true"),
             Bool(false) => write!(f, "false"),
-            Integer(Integral { val: Some(v), .. }) => write!(f, "{}", v),
-            Integer(Integral { len, txt, .. }) => {
-                let arg = from_utf8(&txt[..*len]).unwrap();
+            Integer(Integral::Text { len, bytes }) => {
+                let arg = from_utf8(&bytes[..*len]).unwrap();
                 write!(f, "{}", arg)
             }
-            Float(Floating { val: Some(v), .. }) => write!(f, "{:e}", v),
-            Float(Floating { len, txt, .. }) => {
-                let arg = from_utf8(&txt[..*len]).unwrap();
+            Integer(Integral::Data { value: v }) => write!(f, "{}", v),
+            Float(Floating::Text { len, bytes }) => {
+                let arg = from_utf8(&bytes[..*len]).unwrap();
                 write!(f, "{}", arg)
             }
+            Float(Floating::Data { value: v }) => write!(f, "{:e}", v),
             S(val) => {
                 encode_string(f, &val)?;
                 Ok(())

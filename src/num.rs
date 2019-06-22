@@ -1,16 +1,16 @@
 // Copyright (c) 2018 R Pratap Chakravarthy.
 
-// TODO: Rewrite `struct Integral` as `enum Integral`.
+// TODO: replace [u8; 32] to [u8; 64] once constant generic is available
+// in rust.
 
 use std::cmp::Ordering;
 
 use crate::error::{Error, Result};
 
 #[derive(Clone, Debug)]
-pub struct Integral {
-    pub len: usize,
-    pub txt: [u8; 32],
-    pub val: Option<i128>,
+pub enum Integral {
+    Text { len: usize, bytes: [u8; 32] },
+    Data { value: i128 },
 }
 
 impl Integral {
@@ -23,72 +23,73 @@ impl Integral {
 
     pub fn integer(&self) -> Option<i128> {
         use std::str::from_utf8;
-        if self.val.is_some() {
-            return self.val;
-        }
-        let bs = &self.txt[0..self.len];
-        if bs.len() > 2 && bs[0] == 48 && bs[1] == 120
-        // "0x"
-        {
-            i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16).ok()
-        } else if bs.len() > 3 && bs[0] == 45 && bs[1] == 48 && bs[2] == 120
-        // "-0x"
-        {
-            i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16)
-                .map(|x| -x)
-                .ok()
-        } else {
-            i128::from_str_radix(from_utf8(bs).unwrap(), 10).ok()
+        match self {
+            Integral::Data { value } => Some(*value),
+            Integral::Text { len, bytes } => {
+                let s = &bytes[0..*len];
+                if s.len() > 2 && s[0] == 48 && s[1] == 120
+                // "0x"
+                {
+                    i128::from_str_radix(from_utf8(&s[2..]).unwrap(), 16).ok()
+                } else if s.len() > 3 && s[0] == 45 && s[1] == 48 && s[2] == 120
+                // "-0x"
+                {
+                    i128::from_str_radix(from_utf8(&s[3..]).unwrap(), 16)
+                        .map(|x| -x)
+                        .ok()
+                } else {
+                    i128::from_str_radix(from_utf8(s).unwrap(), 10).ok()
+                }
+            }
         }
     }
 
     pub fn compute(&mut self) -> Result<()> {
         use std::str::from_utf8;
 
-        //println!("{:?}", self.txt);
-        if self.val.is_none() {
-            let bs = &self.txt[0..self.len];
-            let res = if bs.len() > 2 && bs[0] == 48 && bs[1] == 120
-            // "0x"
-            {
-                i128::from_str_radix(from_utf8(&bs[2..]).unwrap(), 16)
-            } else if bs.len() > 3 && bs[0] == 45 && bs[1] == 48 && bs[2] == 120
-            // "-0x"
-            {
-                i128::from_str_radix(from_utf8(&bs[3..]).unwrap(), 16).map(|x| -x)
-            } else {
-                i128::from_str_radix(from_utf8(bs).unwrap(), 10)
-            };
-            match res {
-                Ok(val) => self.val = Some(val),
-                Err(err) => return Err(Error::InvalidNumber(format!("{}", err))),
+        match self {
+            Integral::Data { .. } => Ok(()),
+            Integral::Text { len, bytes } => {
+                let s = &bytes[0..*len];
+                let res = if s.len() > 2 && s[0] == 48 && s[1] == 120
+                // "0x"
+                {
+                    i128::from_str_radix(from_utf8(&s[2..]).unwrap(), 16)
+                } else if s.len() > 3 && s[0] == 45 && s[1] == 48 && s[2] == 120
+                // "-0x"
+                {
+                    let s = from_utf8(&s[3..]).unwrap();
+                    i128::from_str_radix(s, 16).map(|x| -x)
+                } else {
+                    i128::from_str_radix(from_utf8(s).unwrap(), 10)
+                };
+                match res {
+                    Ok(value) => {
+                        *self = Integral::Data { value };
+                        Ok(())
+                    }
+                    Err(err) => Err(Error::InvalidNumber(format!("{}", err))),
+                }
             }
         }
-        Ok(())
     }
 }
 
 impl From<i128> for Integral {
-    fn from(val: i128) -> Integral {
-        Integral {
-            len: 0,
-            txt: [0_u8; 32],
-            val: Some(val),
-        }
+    fn from(value: i128) -> Integral {
+        Integral::Data { value }
     }
 }
 
 impl<'a> From<&'a str> for Integral {
     fn from(val: &str) -> Integral {
-        let mut res = Integral {
+        let src = val.as_bytes();
+        let mut bytes = [0_u8; 32];
+        bytes[..src.len()].copy_from_slice(src);
+        Integral::Text {
             len: val.len(),
-            txt: [0_u8; 32],
-            val: None,
-        };
-        res.txt[..val.len()]
-            .as_mut()
-            .copy_from_slice(val.as_bytes());
-        res
+            bytes,
+        }
     }
 }
 
@@ -107,10 +108,9 @@ impl PartialOrd for Integral {
 }
 
 #[derive(Clone, Debug)]
-pub struct Floating {
-    pub len: usize,
-    pub txt: [u8; 32],
-    pub val: Option<f64>,
+pub enum Floating {
+    Text { len: usize, bytes: [u8; 32] },
+    Data { value: f64 },
 }
 
 impl Floating {
@@ -124,50 +124,47 @@ impl Floating {
     pub fn float(&self) -> Option<f64> {
         use std::str::from_utf8;
 
-        if self.val.is_none() {
-            from_utf8(&self.txt[0..self.len])
-                .unwrap()
-                .parse::<f64>()
-                .ok()
-        } else {
-            self.val
+        match self {
+            Floating::Data { value } => Some(*value),
+            Floating::Text { len, bytes } => {
+                from_utf8(&bytes[0..*len]).unwrap().parse::<f64>().ok()
+            }
         }
     }
 
     pub fn compute(&mut self) -> Result<()> {
         use std::str::from_utf8;
 
-        if self.val.is_none() {
-            match from_utf8(&self.txt[0..self.len]).unwrap().parse::<f64>() {
-                Ok(val) => self.val = Some(val),
-                Err(err) => return Err(Error::InvalidNumber(format!("{}", err))),
+        match self {
+            Floating::Data { .. } => Ok(()),
+            Floating::Text { len, bytes } => {
+                match from_utf8(&bytes[0..*len]).unwrap().parse::<f64>() {
+                    Ok(value) => {
+                        *self = Floating::Data { value };
+                        Ok(())
+                    }
+                    Err(err) => Err(Error::InvalidNumber(format!("{}", err))),
+                }
             }
         }
-        Ok(())
     }
 }
 
 impl From<f64> for Floating {
-    fn from(val: f64) -> Floating {
-        Floating {
-            len: 0,
-            txt: [0_u8; 32],
-            val: Some(val),
-        }
+    fn from(value: f64) -> Floating {
+        Floating::Data { value }
     }
 }
 
 impl<'a> From<&'a str> for Floating {
     fn from(val: &str) -> Floating {
-        let mut res = Floating {
+        let src = val.as_bytes();
+        let mut bytes = [0_u8; 32];
+        bytes[..src.len()].copy_from_slice(src);
+        Floating::Text {
             len: val.len(),
-            txt: [0_u8; 32],
-            val: None,
-        };
-        res.txt[..val.len()]
-            .as_mut()
-            .copy_from_slice(val.as_bytes());
-        res
+            bytes,
+        }
     }
 }
 
