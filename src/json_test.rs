@@ -3,14 +3,14 @@
 use std::f64;
 
 use crate::json::Json;
-use crate::num::{Floating, Integral};
+use crate::num;
 use crate::property::Property;
 
 #[test]
 fn test_json_constructor() {
     use self::Json;
 
-    assert_eq!(Json::new(10), Json::Integer(Integral::new("10")));
+    assert_eq!(Json::new(10), Json::Integer(num::Integral::new("10")));
 }
 
 #[test]
@@ -48,19 +48,25 @@ fn test_simple_jsons_ref() {
 #[test]
 fn test_convert() {
     let js: Json = true.into();
-    assert_eq!(js, Json::new(true));
+    assert_eq!(js, Json::Bool(true));
 
     let js: Json = 1024.into();
-    assert_eq!(js, Json::new(1024));
+    assert_eq!(js, Json::Integer(num::Integral::new(1024)));
 
     let js: Json = 1024.2.into();
-    assert_eq!(js, Json::new(1024.2));
+    assert_eq!(js, Json::Float(num::Floating::new(1024.2)));
 
     let js: Json = "hello world".to_string().into();
-    assert_eq!(js, Json::new("hello world"));
+    assert_eq!(js, Json::String("hello world".to_string()));
 
-    let js: Json = "hello world".into();
-    assert_eq!(js, Json::new("hello world"));
+    let js: Json = 10_usize.into();
+    assert_eq!(js, Json::Integer(num::Integral::new(10)));
+
+    let js: Json = 10_u64.into();
+    assert_eq!(js, Json::Integer(num::Integral::new(10)));
+
+    let js: Json = 10_i32.into();
+    assert_eq!(js, Json::Integer(num::Integral::new(10)));
 }
 
 #[test]
@@ -68,11 +74,11 @@ fn test_deferred() {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     let value: Json = inp.parse().unwrap();
     let refval = Json::Array(vec![
-        Json::Float(Floating::new("10123.1231")),
-        Json::Float(Floating::new("1231.123123")),
-        Json::Float(Floating::new("1233.123123")),
-        Json::Float(Floating::new("123.1231231")),
-        Json::Float(Floating::new("12312e10")),
+        Json::Float(num::Floating::new("10123.1231")),
+        Json::Float(num::Floating::new("1231.123123")),
+        Json::Float(num::Floating::new("1233.123123")),
+        Json::Float(num::Floating::new("123.1231231")),
+        Json::Float(num::Floating::new("12312e10")),
     ]);
     assert_eq!(value, refval);
 }

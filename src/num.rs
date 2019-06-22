@@ -1,5 +1,7 @@
 // Copyright (c) 2018 R Pratap Chakravarthy.
 
+// TODO: Rewrite `struct Integral` as `enum Integral`.
+
 use std::cmp::Ordering;
 
 use crate::error::{Error, Result};
