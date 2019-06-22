@@ -1,7 +1,11 @@
-0.6.2 (Pending)
-===============
+0.6.2
+=====
+
+Breaking type change.
+- Integral and Floating types are implemented as enum, instead of struct.
 
 - Fix "as ..." conversions to try_into().unwrap()
+- Implement From<usize>, From<u64>, From<u32> for Json type.
 
 0.6.1
 =====
