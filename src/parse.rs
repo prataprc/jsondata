@@ -155,14 +155,14 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
             'r' => res.push('\r'),
             't' => res.push('\t'),
             'u' => match decode_json_hex_code(&mut chars, lex)? {
-                code1 @ 0xDC00...0xDFFF => {
+                code1 @ 0xDC00..=0xDFFF => {
                     lex.incr_col(i);
                     let msg = format!("invalid codepoint {:x}", code1);
                     return Err(Error::ParseFail(lex.format(&msg)));
                 }
                 // Non-BMP characters are encoded as a sequence of
                 // two hex escapes, representing UTF-16 surrogates.
-                code1 @ 0xD800...0xDBFF => {
+                code1 @ 0xD800..=0xDBFF => {
                     let code2 = decode_json_hex_code2(&mut chars, lex)?;
                     if code2 < 0xDC00 || code2 > 0xDFFF {
                         lex.incr_col(i);

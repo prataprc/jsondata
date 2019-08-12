@@ -85,20 +85,27 @@ fn test_deferred() {
 
 #[test]
 fn test_validate_sorted() {
-    let json = r#"{"z":1,"a":[2, {"x":"y"}, true],"c":[null],"d":3}"#;
+    let json = r#"{"z":1.2,"a":[2, {"x":"y"}, true],"c":[null],"d":true}"#;
     let mut value: Json = json.parse().unwrap();
 
     assert_eq!(value.validate(), Ok(()));
 
     let mut props: Vec<Property> = Vec::new();
     let prop = vec![Property::new("x", Json::new("y"))];
-    let items = vec![Json::new(2), Json::new(prop), Json::new(true)];
-    props.push(Property::new("a", Json::new(items)));
+    props.push(Property::new(
+        "a",
+        Json::new(vec![Json::new(2), Json::new(prop), Json::new(true)]),
+    ));
     props.push(Property::new("c", Json::new(vec![Json::Null])));
-    props.push(Property::new("d", Json::new(3)));
+    props.push(Property::new("d", Json::new(true)));
     props.push(Property::new("z", Json::new(1)));
 
     assert_eq!(value, Json::new(props));
+
+    let json = r#"true"#;
+    let mut value: Json = json.parse().unwrap();
+    assert_eq!(value.validate(), Ok(()));
+    assert_eq!(value, Json::new(true));
 }
 
 #[test]
@@ -117,6 +124,23 @@ fn test_compute() {
     props.push(Property::new("z", Json::new(1)));
 
     assert_eq!(value, Json::new(props));
+}
+
+#[test]
+fn test_typename() {
+    assert_eq!(Json::Null.typename(), "null".to_string());
+    assert_eq!(Json::new(true).typename(), "bool".to_string());
+    assert_eq!(Json::new(false).typename(), "bool".to_string());
+    assert_eq!(Json::new(10).typename(), "integer".to_string());
+    assert_eq!(Json::new(10.2).typename(), "float".to_string());
+    assert_eq!(Json::new("hello").typename(), "string".to_string());
+
+    let items: Vec<Json> = vec![];
+    assert_eq!(Json::new(items).typename(), "array".to_string());
+
+    let mut props: Vec<Property> = Vec::new();
+    props.push(Property::new("a", Json::new(true)));
+    assert_eq!(Json::new(props).typename(), "object".to_string());
 }
 
 #[test]
