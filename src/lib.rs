@@ -213,12 +213,3 @@ pub use crate::error::{Error, Result};
 pub use crate::json::Json;
 pub use crate::jsons::Jsons;
 pub use crate::property::Property;
-
-#[cfg(test)]
-mod jptr_test;
-#[cfg(test)]
-mod json_test;
-#[cfg(test)]
-mod jsons_test;
-#[cfg(test)]
-mod ops_test;

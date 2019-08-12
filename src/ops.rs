@@ -500,3 +500,7 @@ pub fn normalized_offset(off: isize, len: usize) -> Option<usize> {
         None
     }
 }
+
+#[cfg(test)]
+#[path = "ops_test.rs"]
+mod ops_test;

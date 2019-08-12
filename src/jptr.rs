@@ -131,3 +131,7 @@ pub(crate) fn fix_prefix(path: &str) -> Result<&str> {
         Err(Error::JptrFail(msg))
     }
 }
+
+#[cfg(test)]
+#[path = "jptr_test.rs"]
+mod jptr_test;

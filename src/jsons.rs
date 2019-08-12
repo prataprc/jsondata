@@ -163,3 +163,7 @@ where
         }
     }
 }
+
+#[cfg(test)]
+#[path = "jsons_test.rs"]
+mod jsons_test;
