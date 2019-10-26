@@ -4,7 +4,8 @@ Why yet another JSON package in Rust ?
 [![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
 [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/bnclabs/jsondata/master?grs=github)
 [![Build Status](https://travis-ci.org/bnclabs/jsondata.svg?branch=master)](https://travis-ci.org/bnclabs/jsondata)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
 
 This crate makes several trade-offs that are tuned for big-data
@@ -34,10 +35,12 @@ and document database.
 **Licensing**
 
 Up till version 0.4.0, ``jsondata`` is released under [MIT license].
-Subsequent releases are under [AGPL-3.0 license], and going to be
-the default license for all future releases. For re-licensing this
-source, you can either contact the author(s) directly or post your
-request here [#13][#13].
+Up till version 0.6.2, ``jsondata`` is released under [AGPL-3.0 license].
+
+Subsequent releases are under [Creative Commons Attribution-NonCommercial-NoDerivatives
+4.0 International License][CC-4.0] going to be the default license for
+all future releases. For re-licensing this source, you can either contact
+the author(s) directly or post your request here [#13][#13].
 
 **Compatibility policy**
 
@@ -175,3 +178,4 @@ Operations on JSON documents
 [blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
 [MIT license]: https://opensource.org/licenses/MIT
 [AGPL-3.0 license]: https://opensource.org/licenses/AGPL-3.0
+[CC-4.0]: https://creativecommons.org/licenses/by-nc-nd/4.0/
