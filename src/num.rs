@@ -1,4 +1,4 @@
-// Copyright (c) 2018 R Pratap Chakravarthy.
+// Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
 // TODO: replace [u8; 32] to [u8; 64] once constant generic is available
 // in rust.

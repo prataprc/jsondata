@@ -1,4 +1,4 @@
-// Copyright (c) 2018 R Pratap Chakravarthy.
+// Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
 use std::f64;
 

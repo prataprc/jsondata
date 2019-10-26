@@ -1,3 +1,5 @@
+// Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
+
 /// Enumeration of all possible errors that shall be returned by
 /// methods and functions under this package. Refer to individual
 /// methods and functions, returning [Result] type, for specific
