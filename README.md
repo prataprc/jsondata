@@ -36,7 +36,6 @@ and document database.
 
 Up till version 0.4.0, ``jsondata`` is released under [MIT license].
 Up till version 0.6.2, ``jsondata`` is released under [AGPL-3.0 license].
-
 Subsequent releases are under [Creative Commons Attribution-NonCommercial-NoDerivatives
 4.0 International License][CC-4.0] going to be the default license for
 all future releases. For re-licensing this source, you can either contact
