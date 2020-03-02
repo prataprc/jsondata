@@ -220,7 +220,8 @@ impl Json {
         Ok(())
     }
 
-    pub(crate) fn typename(&self) -> String {
+    // TODO: rename this to type_name()
+    pub fn typename(&self) -> String {
         match self {
             Json::Null => "null".to_string(),
             Json::Bool(_) => "bool".to_string(),
