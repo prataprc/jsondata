@@ -1,5 +1,7 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
+use std::{fmt, result};
+
 /// Enumeration of all possible errors that shall be returned by
 /// methods and functions under this package. Refer to individual
 /// methods and functions, returning [Result] type, for specific
@@ -45,6 +47,31 @@ pub enum Error {
     /// std::io::Error returned by string processing API, while iterating
     /// on [`crate::Jsons`] stream of text.
     IoError(String),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
+        match self {
+            Error::ParseFail(m) => write!(f, "ParseFail:{}", m),
+            Error::AddFail(m) => write!(f, "AddFail:{}", m),
+            Error::SubFail(m) => write!(f, "SubFail:{}", m),
+            Error::MulFail(m) => write!(f, "MulFail:{}", m),
+            Error::DivFail(m) => write!(f, "DivFail:{}", m),
+            Error::RemFail(m) => write!(f, "RemFail:{}", m),
+            Error::NegFail(m) => write!(f, "NegFail:{}", m),
+            Error::ShlFail(m) => write!(f, "ShlFail:{}", m),
+            Error::ShrFail(m) => write!(f, "ShrFail:{}", m),
+            Error::IndexOutofBound(m) => write!(f, "IndexOutofBound:{}", m),
+            Error::InvalidIndex(m) => write!(f, "InvalidIndex:{}", m),
+            Error::NotAnArray(m) => write!(f, "NotAnArray:{}", m),
+            Error::InvalidContainer(m) => write!(f, "InvalidContainer:{}", m),
+            Error::PropertyNotFound(m) => write!(f, "PropertyNotFound:{}", m),
+            Error::AppendString(m) => write!(f, "AppendString:{}", m),
+            Error::InvalidNumber(m) => write!(f, "InvalidNumber:{}", m),
+            Error::JptrFail(m) => write!(f, "JptrFail:{}", m),
+            Error::IoError(m) => write!(f, "IoError:{}", m),
+        }
+    }
 }
 
 /// Result type, for jsondata functions and methods, that require a
