@@ -36,6 +36,8 @@ pub enum Error {
     /// When attempting lookup and indexing operations like, set, delete,
     /// append, index, etc.. on values that are neither array nor object.
     InvalidContainer(String),
+    /// Not an expected type, arugment gives the found type.
+    InvalidType(String),
     /// When trying to lookup a Json object with missing property.
     PropertyNotFound(String),
     /// While appending a non string value with Json string.
@@ -65,6 +67,7 @@ impl fmt::Display for Error {
             Error::InvalidIndex(m) => write!(f, "InvalidIndex:{}", m),
             Error::NotAnArray(m) => write!(f, "NotAnArray:{}", m),
             Error::InvalidContainer(m) => write!(f, "InvalidContainer:{}", m),
+            Error::InvalidType(m) => write!(f, "InvalidType:{}", m),
             Error::PropertyNotFound(m) => write!(f, "PropertyNotFound:{}", m),
             Error::AppendString(m) => write!(f, "AppendString:{}", m),
             Error::InvalidNumber(m) => write!(f, "InvalidNumber:{}", m),
