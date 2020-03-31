@@ -1,0 +1,21 @@
+[package]
+name = "jsondata-derive"
+version = "0.1.0"
+edition = "2018"
+authors = ["prataprc <prataprc@gmail.com>"]
+description = "Macros for jsondata types"
+documentation = "https://docs.rs/jsondata"
+repository = "https://github.com/bnclabs/jsondata"
+keywords = ["json", "json5"]
+categories = ["data", "encoding"]
+license = "AGPL-3.0"
+
+[dependencies]
+syn = { version = "1", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+heck = "0.3.0"
+proc-macro-error = "0.4.7"
+
+[lib]
+proc-macro = true

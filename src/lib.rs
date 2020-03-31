@@ -197,6 +197,9 @@
     html_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/1024px-JSON_vector_logo.svg.png"
 )]
 
+#[doc(hidden)]
+pub use jsondata_derive::*;
+
 mod error;
 mod json;
 mod jsons;
