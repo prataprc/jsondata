@@ -1,7 +1,7 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
 use std::cmp::{Ord, Ordering, PartialOrd};
-use std::convert::{From, TryInto};
+use std::convert::{From, TryFrom, TryInto};
 use std::default::Default;
 use std::fmt::{self, Display, Write};
 use std::ops::RangeBounds;
@@ -669,6 +669,20 @@ impl From<bool> for Json {
 impl From<i128> for Json {
     fn from(val: i128) -> Json {
         Json::Integer(Integral::new(val))
+    }
+}
+
+impl TryFrom<Json> for i128 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<i128> {
+        match val {
+            Json::Integer(item) => match item.integer() {
+                Some(num) => Ok(num),
+                None => Err(Error::InvalidNumber(format!("{:?}", item))),
+            },
+            _ => Err(Error::InvalidType(val.typename())),
+        }
     }
 }
 
