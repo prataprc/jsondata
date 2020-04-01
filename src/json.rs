@@ -14,6 +14,9 @@ use crate::parse::parse_value;
 use crate::property::{self, Property};
 use crate::{jptr, ops};
 
+// TODO: test case for all combination for JsonSerialize,
+// refer to examples/macro.rs
+
 /// Json type implements JavaScript Object Notation as per specification
 /// [RFC-8259](https://tools.ietf.org/html/rfc8259).
 ///
@@ -386,7 +389,7 @@ impl Json {
                     Unbounded => (Some(arr.len()), arr.len().try_into().unwrap()),
                 };
                 match (start, end) {
-                    (Some(start), Some(end)) => arr[start..end].to_vec().into(),
+                    (Some(start), Some(end)) => Json::Array(arr[start..end].to_vec()),
                     (None, _) => Json::__Error(Error::IndexOutofBound(s)),
                     (_, None) => Json::__Error(Error::IndexOutofBound(e)),
                 }
@@ -969,20 +972,79 @@ impl TryFrom<Json> for Vec<Property> {
     }
 }
 
-impl<T> TryFrom<Json> for Vec<(String, T)>
+impl<T> TryFrom<Json> for (T,)
 where
-    T: From<Json>,
+    T: TryFrom<Json, Error = Error>,
 {
     type Error = Error;
 
-    fn try_from(val: Json) -> Result<Vec<(String, T)>> {
-        match val.to_object() {
-            Some(val) => Ok(val
-                .into_iter()
-                .map(|p| (p.as_ref_key().clone(), p.into_value().into()))
-                .collect()),
+    fn try_from(val: Json) -> Result<(T,)> {
+        match val.to_array() {
+            Some(val) if val.len() == 1 => Ok((val[0].clone().try_into()?,)),
+            Some(v) => Err(Error::InvalidType(format!(
+                "{} tuple-arity-1 {}",
+                val.typename(),
+                v.len(),
+            ))),
             None => Err(Error::InvalidType(val.typename())),
         }
+    }
+}
+
+impl<U, V> TryFrom<Json> for (U, V)
+where
+    U: TryFrom<Json, Error = Error>,
+    V: TryFrom<Json, Error = Error>,
+{
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<(U, V)> {
+        match val.to_array() {
+            Some(val) if val.len() == 2 => {
+                Ok((val[0].clone().try_into()?, val[1].clone().try_into()?))
+            }
+            Some(v) => Err(Error::InvalidType(format!(
+                "{} tuple-arity-2 {}",
+                val.typename(),
+                v.len(),
+            ))),
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl<A, B, C> TryFrom<Json> for (A, B, C)
+where
+    A: TryFrom<Json, Error = Error>,
+    B: TryFrom<Json, Error = Error>,
+    C: TryFrom<Json, Error = Error>,
+{
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<(A, B, C)> {
+        match val.to_array() {
+            Some(val) if val.len() == 3 => Ok((
+                val[0].clone().try_into()?,
+                val[1].clone().try_into()?,
+                val[2].clone().try_into()?,
+            )),
+            Some(v) => Err(Error::InvalidType(format!(
+                "{} tuple-arity-3 {}",
+                val.typename(),
+                v.len()
+            ))),
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl<T> From<Vec<T>> for Json
+where
+    T: Into<Json>,
+{
+    fn from(val: Vec<T>) -> Json {
+        let inner: Vec<Json> = val.into_iter().map(|v| v.into()).collect();
+        Json::Array(inner)
     }
 }
 
@@ -1039,26 +1101,41 @@ impl From<Vec<Property>> for Json {
     }
 }
 
-impl<T> From<Vec<(String, T)>> for Json
+impl<T> From<(T,)> for Json
 where
     T: Into<Json>,
 {
-    fn from(val: Vec<(String, T)>) -> Json {
-        let mut obj = Json::Object(vec![]);
-        val.into_iter().for_each(|(k, v)| {
-            let v: Json = v.into();
-            insert(&mut obj, Property::new(k, v))
-        });
-        obj
+    fn from(val: (T,)) -> Json {
+        let mut inner = vec![];
+        inner.push(val.0.into());
+        Json::Array(inner)
     }
 }
 
-impl<T> From<Vec<T>> for Json
+impl<U, V> From<(U, V)> for Json
 where
-    T: Into<Json>,
+    U: Into<Json>,
+    V: Into<Json>,
 {
-    fn from(val: Vec<T>) -> Json {
-        let inner: Vec<Json> = val.into_iter().map(|v| v.into()).collect();
+    fn from(val: (U, V)) -> Json {
+        let mut inner = vec![];
+        inner.push(val.0.into());
+        inner.push(val.1.into());
+        Json::Array(inner)
+    }
+}
+
+impl<A, B, C> From<(A, B, C)> for Json
+where
+    A: Into<Json>,
+    B: Into<Json>,
+    C: Into<Json>,
+{
+    fn from(val: (A, B, C)) -> Json {
+        let mut inner = vec![];
+        inner.push(val.0.into());
+        inner.push(val.1.into());
+        inner.push(val.2.into());
         Json::Array(inner)
     }
 }

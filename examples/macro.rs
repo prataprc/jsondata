@@ -7,8 +7,11 @@ use jsondata::{Json, JsonSerialize};
 #[derive(JsonSerialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[allow(non_snake_case)]
 struct Parent {
+    #[json(try_into = "i128")]
     field1: u8,
+    #[json(from_str)]
     field2: i8,
+    #[json(to_string)]
     field3: u16,
     field4: i16,
     field5: u32,
@@ -29,6 +32,7 @@ struct Parent {
 #[allow(non_snake_case)]
 struct Child {
     fIeld1: i128,
+    another_fieldWithTuple: (String, i128),
 }
 
 #[derive(JsonSerialize, Default, Clone, Debug)]
@@ -40,7 +44,10 @@ struct Floats {
 
 fn main() {
     let p_ref = {
-        let c_ref = Child { fIeld1: 10 };
+        let c_ref = Child {
+            fIeld1: 10,
+            another_fieldWithTuple: ("hello".to_string(), 10000000),
+        };
         Parent {
             field1: 10,
             field2: -10,
@@ -64,12 +71,13 @@ fn main() {
     let ref_s = concat!(
         r#"{"field1":10,"field10":-1000000,"#,
         r#""field11":true,"field12":100,"field13":102,"field14":"hello world","#,
-        r#""field15":[1,2,3,4],"field16":{"field1":10},"#,
-        r#""field2":-10,"field3":100,"#,
+        r#""field15":[1,2,3,4],"#,
+        r#""field16":{"another_fieldwithtuple":["hello",10000000],"field1":10},"#,
+        r#""field2":"-10","field3":"100","#,
         r#""field4":-100,"field5":1000,"field6":-1000,"field7":10000,"#,
         r#""field8":-10000,"field9":1000000}"#
     );
-    let jval: Json = p_ref.clone().try_into().unwrap();
+    let jval: Json = p_ref.clone().into();
     let p: Parent = jval.clone().try_into().unwrap();
     assert_eq!(jval.to_string(), ref_s);
     assert_eq!(p, p_ref);
