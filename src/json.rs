@@ -69,11 +69,12 @@ use crate::{jptr, ops};
 /// On the other direction, [Json] enum can be converted to Rust native
 /// types using accessor methods,
 /// - is_null() to check whether [Json] is Null
-/// - boolean(), integer(), float(), string() methods return the
-///   underlying value as Option<`T`> where `T` is [bool] or [i128] or [f64] or
-///   [String].
-/// - array(), return JSON array as Vec<[Json]>.
-/// - object(), return JSON object as Vec<[Property]>.
+/// - to_bool(), to_integer(), to_float(), to_string() methods return the
+///   underlying value as Option<`T`> where `T` is [bool] or [i128] or [f64]
+///   or [String].
+/// - to_array(), return JSON array as Vec<[Json]>.
+/// - to_object(), return JSON object as Vec<[Property]>.
+/// - Refer to API list and conversion traits implementation for more details.
 ///
 /// Some of the properties implemented for [Json] are:
 /// - [Json] implements [total ordering].
@@ -257,7 +258,7 @@ impl Json {
         } else {
             let path = jptr::fix_prefix(path)?;
             let (json, key) = jptr::lookup_ref(self, path)?;
-            Ok(json[key.as_str()].result()?.clone())
+            Ok(json[key.as_str()].to_result()?.clone())
         }
     }
 
@@ -406,42 +407,42 @@ impl Json {
         }
     }
 
-    pub fn boolean(&self) -> Option<bool> {
+    pub fn to_bool(&self) -> Option<bool> {
         match self {
             Json::Bool(s) => Some(*s),
             _ => None,
         }
     }
 
-    pub fn integer(&self) -> Option<i128> {
+    pub fn to_integer(&self) -> Option<i128> {
         match self {
             Json::Integer(item) => item.integer(),
             _ => None,
         }
     }
 
-    pub fn float(&self) -> Option<f64> {
+    pub fn to_float(&self) -> Option<f64> {
         match self {
             Json::Float(item) => item.float(),
             _ => None,
         }
     }
 
-    pub fn string(&self) -> Option<String> {
+    pub fn as_str(&self) -> Option<&str> {
         match self {
-            Json::String(s) => Some(s.clone()),
+            Json::String(s) => Some(s),
             _ => None,
         }
     }
 
-    pub fn array(&self) -> Option<Vec<Json>> {
+    pub fn to_array(&self) -> Option<Vec<Json>> {
         match self {
             Json::Array(arr) => Some(arr.clone()),
             _ => None,
         }
     }
 
-    pub fn object(&self) -> Option<Vec<Property>> {
+    pub fn to_object(&self) -> Option<Vec<Property>> {
         match self {
             Json::Object(obj) => Some(obj.clone()),
             _ => None,
@@ -455,14 +456,14 @@ impl Json {
         }
     }
 
-    pub fn error(&self) -> Option<Error> {
+    pub fn to_error(&self) -> Option<Error> {
         match self {
             Json::__Error(err) => Some(err.clone()),
             _ => None,
         }
     }
 
-    pub fn result(&self) -> Result<&Json> {
+    pub fn to_result(&self) -> Result<&Json> {
         match self {
             Json::__Error(err) => Err(err.clone()),
             _ => Ok(self),
@@ -480,7 +481,7 @@ impl PartialEq for Json {
         match (self, other) {
             (Null, Null) => true,
             (Bool(a), Bool(b)) => a == b,
-            (Integer(_), Integer(_)) => self.integer() == other.integer(),
+            (Integer(_), Integer(_)) => self.to_integer() == other.to_integer(),
             (Integer(a), Float(b)) => match (a.integer(), b.float()) {
                 (Some(x), Some(y)) => {
                     let num = y as i128;
@@ -492,7 +493,7 @@ impl PartialEq for Json {
                 _ => false,
             },
             (Float(_), Float(_)) => {
-                let (fs, fo) = (self.float().unwrap(), other.float().unwrap());
+                let (fs, fo) = (self.to_float().unwrap(), other.to_float().unwrap());
                 if fs.is_finite() && fo.is_finite() {
                     return fs == fo;
                 } else if fs.is_nan() && fo.is_nan() {
@@ -743,11 +744,52 @@ impl TryFrom<Json> for i128 {
     type Error = Error;
 
     fn try_from(val: Json) -> Result<i128> {
-        match val {
-            Json::Integer(item) => match item.integer() {
-                Some(num) => Ok(num),
-                None => Err(Error::InvalidNumber(format!("{:?}", item))),
-            },
+        match val.to_integer() {
+            Some(val) => Ok(val),
+            _ => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for f64 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<f64> {
+        match val.to_float() {
+            Some(val) => Ok(val),
+            _ => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for String {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<String> {
+        match val.as_str() {
+            Some(s) => Ok(s.to_string()),
+            _ => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for Vec<Json> {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<Vec<Json>> {
+        match val.to_array() {
+            Some(val) => Ok(val),
+            _ => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for Vec<Property> {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<Vec<Property>> {
+        match val.to_object() {
+            Some(val) => Ok(val),
             _ => Err(Error::InvalidType(val.typename())),
         }
     }
@@ -807,8 +849,8 @@ impl From<Json> for bool {
         match val {
             Null => false,
             Bool(v) => v,
-            Integer(_) => val.integer().unwrap() != 0,
-            Float(_) => val.float().unwrap() != 0.0,
+            Integer(_) => val.to_integer().unwrap() != 0,
+            Float(_) => val.to_float().unwrap() != 0.0,
             S(s) => !s.is_empty(),
             Array(a) => !a.is_empty(),
             Object(o) => !o.is_empty(),

@@ -26,19 +26,19 @@ impl Add for Json {
             (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l + r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
                 Json::new(l + r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
                 Json::new(l as f64 + r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l + r as f64)
             }
             (S(l), S(r)) => {
@@ -83,19 +83,19 @@ impl Sub for Json {
             (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l - r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
                 Json::new(l - r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
                 Json::new((l as f64) - r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l - (r as f64))
             }
             (Array(lhs), Array(rhs)) => {
@@ -134,26 +134,26 @@ impl Mul for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l * r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
                 Json::new(l * r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
                 Json::new((l as f64) * r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
                 Json::new(l * (r as f64))
             }
-            (S(s), Integer(_)) => match rhs.integer().unwrap() {
+            (S(s), Integer(_)) => match rhs.to_integer().unwrap() {
                 n if n <= 0 => Null,
                 n => S(s.repeat(n as usize)),
             },
-            (Integer(_), S(s)) => match self.integer().unwrap() {
+            (Integer(_), S(s)) => match self.to_integer().unwrap() {
                 n if n <= 0 => Null,
                 n => S(s.repeat(n as usize)),
             },
@@ -182,7 +182,7 @@ impl Div for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
                 if r == 0 {
                     Null
                 } else {
@@ -190,7 +190,7 @@ impl Div for Json {
                 }
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -198,7 +198,7 @@ impl Div for Json {
                 }
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
                 if r == 0 {
                     Null
                 } else {
@@ -206,7 +206,7 @@ impl Div for Json {
                 }
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -236,7 +236,7 @@ impl Rem for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
                 if r == 0 {
                     Null
                 } else {
@@ -244,7 +244,7 @@ impl Rem for Json {
                 }
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.integer().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -252,7 +252,7 @@ impl Rem for Json {
                 }
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.integer().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
                 if r == 0 {
                     Null
                 } else {
@@ -260,7 +260,7 @@ impl Rem for Json {
                 }
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.float().unwrap(), rhs.float().unwrap());
+                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -281,8 +281,8 @@ impl Neg for Json {
     fn neg(self) -> Json {
         match self {
             Json::Null => Json::Null,
-            Json::Integer(_) => Json::new(-self.integer().unwrap()),
-            Json::Float(_) => Json::new(-self.float().unwrap()),
+            Json::Integer(_) => Json::new(-self.to_integer().unwrap()),
+            Json::Float(_) => Json::new(-self.to_float().unwrap()),
             _ => Json::__Error(Error::NegFail(format!("-{}", self.typename()))),
         }
     }
@@ -292,7 +292,7 @@ impl Shl for Json {
     type Output = Json;
 
     fn shl(self, rhs: Json) -> Json {
-        match (self.integer(), rhs.integer()) {
+        match (self.to_integer(), rhs.to_integer()) {
             (Some(l), Some(r)) => Json::new(l << r),
             (_, _) => {
                 let (x, y) = (self.typename(), rhs.typename());
@@ -306,7 +306,7 @@ impl Shr for Json {
     type Output = Json;
 
     fn shr(self, rhs: Json) -> Json {
-        match (self.integer(), rhs.integer()) {
+        match (self.to_integer(), rhs.to_integer()) {
             (Some(l), Some(r)) => Json::new(l >> r),
             (_, _) => {
                 let (x, y) = (self.typename(), rhs.typename());
@@ -326,7 +326,7 @@ impl BitAnd for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.integer().unwrap() & y.integer().unwrap()).into()
+                (x.to_integer().unwrap() & y.to_integer().unwrap()).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());
@@ -346,7 +346,7 @@ impl BitOr for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.integer().unwrap() | y.integer().unwrap()).into()
+                (x.to_integer().unwrap() | y.to_integer().unwrap()).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());
@@ -366,7 +366,7 @@ impl BitXor for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.integer().unwrap() ^ y.integer().unwrap()).into()
+                (x.to_integer().unwrap() ^ y.to_integer().unwrap()).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());

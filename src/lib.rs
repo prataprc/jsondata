@@ -40,8 +40,8 @@
 //!
 //! ```
 //! let mut json = "1000".parse::<jsondata::Json>().unwrap();
-//! json.integer().unwrap(); // "1000" is parsed
-//! json.integer().unwrap(); // "1000" is parsed again
+//! json.to_integer().unwrap(); // "1000" is parsed
+//! json.to_integer().unwrap(); // "1000" is parsed again
 //!
 //! match json.compute() { // pre-compute all numbers in the json document.
 //!     Ok(_) => (),

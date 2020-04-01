@@ -117,7 +117,7 @@ pub(crate) fn lookup_mut<'a>(mut json: &'a mut Json, path: &str) -> Result<(&'a 
 pub(crate) fn lookup_ref<'a>(mut json_doc: &'a Json, path: &str) -> Result<(&'a Json, String)> {
     let (frags, key) = fragments(path)?;
     for frag in frags {
-        json_doc = json_doc[frag.as_str()].result()?;
+        json_doc = json_doc[frag.as_str()].to_result()?;
     }
     Ok((json_doc, key))
 }

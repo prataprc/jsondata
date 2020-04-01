@@ -148,7 +148,7 @@ fn test_json5_whitespace() {
     let text = "\u{0009} \u{000a} \u{000b} \u{000c} ".to_string()
         + &("\u{00a0} \r \t \n 0x1234".to_string());
     let json: Json = text.parse().unwrap();
-    assert_eq!(json.integer(), Json::new(0x1234).integer());
+    assert_eq!(json.to_integer(), Json::new(0x1234).to_integer());
 }
 
 #[test]
@@ -159,7 +159,7 @@ fn test_json5_num() {
 
     let mut json: Json = "1234.".parse().unwrap();
     json.compute().unwrap();
-    assert_eq!(json.float(), Json::new(1234.0).float());
+    assert_eq!(json.to_float(), Json::new(1234.0).to_float());
 
     let mut json: Json = ".1234".parse().unwrap();
     json.compute().unwrap();
@@ -167,7 +167,7 @@ fn test_json5_num() {
 
     let mut json: Json = ".1234.".parse().unwrap();
     json.compute().unwrap_err();
-    assert_eq!(json.float(), None);
+    assert_eq!(json.to_float(), None);
 
     let mut json: Json = "[Infinity, -Infinity, NaN]".parse().unwrap();
     json.compute().unwrap();

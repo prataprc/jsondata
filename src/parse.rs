@@ -272,7 +272,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
                 lex.incr_col(1);
                 break Ok(Json::Object(m));
             }
-            Some('"') => parse_string(text, lex)?.string().unwrap(),
+            Some('"') => parse_string(text, lex)?.as_str().unwrap().to_string(),
             Some(ch) if ch.is_alphabetic() => parse_identifier(text, lex),
             _ => break Err(Error::ParseFail(lex.format("invalid property key"))),
         };

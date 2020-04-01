@@ -22,7 +22,7 @@ fn test_stream0() {
     let value = js.next().unwrap().unwrap();
     assert!(value.is_error());
     assert_eq!(
-        value.error().unwrap(),
+        value.to_error().unwrap(),
         Error::ParseFail("expected null at offset:0 line:1 col:1".to_string())
     );
 }
@@ -38,25 +38,25 @@ fn test_stream1() {
     assert_eq!(js.next().unwrap().unwrap(), Json::new(true));
     assert_eq!(js.next().unwrap().unwrap(), Json::new(false));
 
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(102));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(10.2));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(102));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(10.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.2));
 
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(0));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(100));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(1));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(0));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(100));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(1));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.0));
 
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(2.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.02));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(20.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(20.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(200.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(2.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.02));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(20.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(20.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(200.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.2));
 }
 
 #[test]
@@ -64,24 +64,24 @@ fn test_stream11() {
     let file = File::open("testdata/stream11.jsons").unwrap();
     let mut js: Jsons<File> = file.into();
 
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(2.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(0.2));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-102));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-10.2));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.2));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(2.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(-102));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-10.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(-0));
 
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-100));
-    assert_eq!(js.next().unwrap().unwrap().integer(), Some(-1));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-00.00));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-2.00));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(-100));
+    assert_eq!(js.next().unwrap().unwrap().to_integer(), Some(-1));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-00.00));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-2.00));
 
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.2));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.02));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-0.0));
-    assert_eq!(js.next().unwrap().unwrap().float(), Some(-20.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-0.2));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-0.02));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-0.0));
+    assert_eq!(js.next().unwrap().unwrap().to_float(), Some(-20.0));
 }
 
 #[test]
@@ -89,19 +89,13 @@ fn test_stream2() {
     let file = File::open("testdata/stream2.jsons").unwrap();
     let mut js: Jsons<File> = file.into();
 
-    assert_eq!(
-        js.next().unwrap().unwrap().string(),
-        Some("hello\"  \r\t".to_string())
-    );
+    assert_eq!(js.next().unwrap().unwrap().as_str(), Some("hello\"  \r\t"));
+
+    assert_eq!(js.next().unwrap().unwrap().as_str(), Some("helloȴ\\ 𝄞"));
 
     assert_eq!(
-        js.next().unwrap().unwrap().string(),
-        Some("helloȴ\\ 𝄞".to_string())
-    );
-
-    assert_eq!(
-        js.next().unwrap().unwrap().string(),
-        Some("\'é\' character is one Unicode code point é while \'é\' e\u{301} ".to_string())
+        js.next().unwrap().unwrap().as_str(),
+        Some("\'é\' character is one Unicode code point é while \'é\' e\u{301} ")
     );
 
     assert_eq!(js.next().unwrap().unwrap(), Json::new::<Vec<Json>>(vec![]));
