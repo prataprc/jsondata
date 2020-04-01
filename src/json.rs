@@ -173,7 +173,7 @@ impl Json {
             }
             Object(props) => {
                 for prop in props.iter_mut() {
-                    prop.value_mut().validate()?
+                    prop.as_mut_value().validate()?
                 }
             }
             Integer(item) => {
@@ -211,7 +211,7 @@ impl Json {
             }
             Object(props) => {
                 for prop in props.iter_mut() {
-                    prop.value_mut().compute()?
+                    prop.as_mut_value().compute()?
                 }
             }
             Integer(item) => {
@@ -617,11 +617,11 @@ impl Ord for Json {
                     if i == that.len() {
                         return Ordering::Greater;
                     }
-                    let cmp = a.key_ref().cmp(that[i].key_ref());
+                    let cmp = a.as_ref_key().cmp(that[i].as_ref_key());
                     if cmp != Ordering::Equal {
                         return cmp;
                     }
-                    let cmp = a.value_ref().cmp(that[i].value_ref());
+                    let cmp = a.as_ref_value().cmp(that[i].as_ref_value());
                     if cmp != Ordering::Equal {
                         return cmp;
                     }
@@ -740,13 +740,198 @@ impl From<i128> for Json {
     }
 }
 
+impl From<usize> for Json {
+    fn from(num: usize) -> Json {
+        let inum: i128 = num.try_into().unwrap();
+        Json::Integer(Integral::new(inum))
+    }
+}
+
+impl From<isize> for Json {
+    fn from(num: isize) -> Json {
+        let inum: i128 = num.try_into().unwrap();
+        Json::Integer(Integral::new(inum))
+    }
+}
+
+impl TryFrom<Json> for u8 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<u8> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for i8 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<i8> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for u16 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<u16> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for i16 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<i16> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for u32 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<u32> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for i32 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<i32> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for u64 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<u64> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for i64 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<i64> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for u128 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<u128> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
 impl TryFrom<Json> for i128 {
     type Error = Error;
 
     fn try_from(val: Json) -> Result<i128> {
         match val.to_integer() {
             Some(val) => Ok(val),
-            _ => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for usize {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<usize> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for isize {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<isize> {
+        match val.to_integer() {
+            Some(val) => match val.try_into() {
+                Ok(val) => Ok(val),
+                Err(err) => Err(Error::InvalidNumber(err.to_string())),
+            },
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl TryFrom<Json> for f32 {
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<f32> {
+        match val.to_float() {
+            Some(val) => {
+                if ((val as f32) as f64) != val {
+                    Err(Error::InvalidNumber(val.to_string()))
+                } else {
+                    Ok(val as f32)
+                }
+            }
+            None => Err(Error::InvalidType(val.typename())),
         }
     }
 }
@@ -757,7 +942,7 @@ impl TryFrom<Json> for f64 {
     fn try_from(val: Json) -> Result<f64> {
         match val.to_float() {
             Some(val) => Ok(val),
-            _ => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.typename())),
         }
     }
 }
@@ -768,18 +953,7 @@ impl TryFrom<Json> for String {
     fn try_from(val: Json) -> Result<String> {
         match val.as_str() {
             Some(s) => Ok(s.to_string()),
-            _ => Err(Error::InvalidType(val.typename())),
-        }
-    }
-}
-
-impl TryFrom<Json> for Vec<Json> {
-    type Error = Error;
-
-    fn try_from(val: Json) -> Result<Vec<Json>> {
-        match val.to_array() {
-            Some(val) => Ok(val),
-            _ => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.typename())),
         }
     }
 }
@@ -790,15 +964,45 @@ impl TryFrom<Json> for Vec<Property> {
     fn try_from(val: Json) -> Result<Vec<Property>> {
         match val.to_object() {
             Some(val) => Ok(val),
-            _ => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.typename())),
         }
     }
 }
 
-impl From<usize> for Json {
-    fn from(val: usize) -> Json {
-        let val: i128 = val.try_into().unwrap();
-        Json::Integer(Integral::new(val))
+impl<T> TryFrom<Json> for Vec<(String, T)>
+where
+    T: From<Json>,
+{
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<Vec<(String, T)>> {
+        match val.to_object() {
+            Some(val) => Ok(val
+                .into_iter()
+                .map(|p| (p.as_ref_key().clone(), p.into_value().into()))
+                .collect()),
+            None => Err(Error::InvalidType(val.typename())),
+        }
+    }
+}
+
+impl<T> TryFrom<Json> for Vec<T>
+where
+    T: TryFrom<Json, Error = Error>,
+{
+    type Error = Error;
+
+    fn try_from(val: Json) -> Result<Vec<T>> {
+        match val.to_array() {
+            Some(val) => {
+                let mut out = vec![];
+                for v in val.into_iter() {
+                    out.push(v.try_into()?);
+                }
+                Ok(out)
+            }
+            None => Err(Error::InvalidType(val.typename())),
+        }
     }
 }
 
@@ -827,17 +1031,35 @@ impl From<&str> for Json {
     }
 }
 
-impl From<Vec<Json>> for Json {
-    fn from(val: Vec<Json>) -> Json {
-        Json::Array(val)
-    }
-}
-
 impl From<Vec<Property>> for Json {
     fn from(val: Vec<Property>) -> Json {
         let mut obj = Json::Object(vec![]);
         val.into_iter().for_each(|item| insert(&mut obj, item));
         obj
+    }
+}
+
+impl<T> From<Vec<(String, T)>> for Json
+where
+    T: Into<Json>,
+{
+    fn from(val: Vec<(String, T)>) -> Json {
+        let mut obj = Json::Object(vec![]);
+        val.into_iter().for_each(|(k, v)| {
+            let v: Json = v.into();
+            insert(&mut obj, Property::new(k, v))
+        });
+        obj
+    }
+}
+
+impl<T> From<Vec<T>> for Json
+where
+    T: Into<Json>,
+{
+    fn from(val: Vec<T>) -> Json {
+        let inner: Vec<Json> = val.into_iter().map(|v| v.into()).collect();
+        Json::Array(inner)
     }
 }
 
@@ -966,8 +1188,8 @@ impl Display for Json {
                 } else {
                     write!(f, "{{")?;
                     for (i, prop) in val.iter().enumerate() {
-                        encode_string(f, prop.key_ref())?;
-                        write!(f, ":{}", prop.value_ref())?;
+                        encode_string(f, prop.as_ref_key())?;
+                        write!(f, ":{}", prop.as_ref_value())?;
                         if i < (val_len - 1) {
                             write!(f, ",")?;
                         }
@@ -1006,7 +1228,7 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 
 pub fn insert(json: &mut Json, item: Property) {
     if let Json::Object(obj) = json {
-        match property::search_by_key(&obj, item.key_ref()) {
+        match property::search_by_key(&obj, item.as_ref_key()) {
             Ok(off) => {
                 obj.push(item);
                 obj.swap_remove(off);

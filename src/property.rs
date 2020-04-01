@@ -29,27 +29,27 @@ impl Property {
     }
 
     #[inline]
-    pub fn key(self) -> String {
+    pub fn into_key(self) -> String {
         self.0
     }
 
     #[inline]
-    pub fn key_ref(&self) -> &String {
+    pub fn as_ref_key(&self) -> &String {
         &self.0
     }
 
     #[inline]
-    pub fn value(self) -> Json {
+    pub fn into_value(self) -> Json {
         self.1
     }
 
     #[inline]
-    pub fn value_ref(&self) -> &Json {
+    pub fn as_ref_value(&self) -> &Json {
         &self.1
     }
 
     #[inline]
-    pub fn value_mut(&mut self) -> &mut Json {
+    pub fn as_mut_value(&mut self) -> &mut Json {
         &mut self.1
     }
 
@@ -79,13 +79,13 @@ pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize, usize> {
         // mid is always in [0, size), that means mid is >= 0 and < size.
         // mid >= 0: by definition
         // mid < size: mid = size / 2 + size / 4 + size / 8 ...
-        let item: &str = obj[mid].key_ref();
+        let item: &str = obj[mid].as_ref_key();
         let cmp = item.cmp(key);
         base = if cmp == Greater { base } else { mid };
         size -= half;
     }
     // base is always in [0, size) because base <= mid.
-    let item: &str = obj[base].key_ref();
+    let item: &str = obj[base].as_ref_key();
     let cmp = item.cmp(key);
     if cmp == Equal {
         Ok(base)
@@ -95,7 +95,7 @@ pub fn search_by_key(obj: &[Property], key: &str) -> Result<usize, usize> {
 }
 
 pub fn upsert_object_key(obj: &mut Vec<Property>, prop: Property) {
-    match search_by_key(obj, prop.key_ref()) {
+    match search_by_key(obj, prop.as_ref_key()) {
         Ok(off) => obj[off] = prop,
         Err(off) => obj.insert(off, prop),
     }

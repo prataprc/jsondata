@@ -39,9 +39,13 @@ fn from_type_to_json(name: &Ident, fields: &FieldsNamed) -> TokenStream {
             Some(field_name) => field_name,
             None => continue,
         };
-        let key = field_name.to_string();
+        let key = field_name.to_string().to_lowercase();
         let prop = quote! {
-            props.push(::jsondata::Property::new(#key, value.#field_name.into()));
+            let v = match value.#field_name.try_into() {
+                Ok(v) => Ok(v),
+                Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+            }?;
+            props.push(::jsondata::Property::new(#key, v));
         };
         token_builder.extend(prop);
     }
@@ -65,9 +69,12 @@ fn from_json_to_type(name: &Ident, fields: &FieldsNamed) -> TokenStream {
             Some(field_name) => field_name,
             None => continue,
         };
-        let key = field_name.to_string();
+        let key = field_name.to_string().to_lowercase();
         token_builder.extend(quote! {
-            #field_name: value.get(&("/".to_string() + #key))?.try_into()?,
+            #field_name: match value.get(&("/".to_string() + #key))?.try_into() {
+                Ok(v) => Ok(v),
+                Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+            }?,
         });
     }
     quote! {

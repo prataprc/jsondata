@@ -421,7 +421,7 @@ impl Index<&str> for Json {
     fn index(&self, index: &str) -> &Json {
         match self {
             Json::Object(obj) => match property::search_by_key(obj, index) {
-                Ok(off) => obj[off].value_ref(),
+                Ok(off) => obj[off].as_ref_value(),
                 Err(_) => &PROPERTY_NOT_FOUND,
             },
             Json::Array(arr) => match index.parse::<isize>() {
@@ -440,7 +440,7 @@ impl Index<&str> for Json {
 pub(crate) fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json> {
     match j {
         Json::Object(obj) => match property::search_by_key(obj, i) {
-            Ok(off) => Ok(obj[off].value_mut()),
+            Ok(off) => Ok(obj[off].as_mut_value()),
             Err(_) => Err(Error::PropertyNotFound(i.to_string())),
         },
         Json::Array(arr) => match i.parse::<isize>() {
@@ -480,8 +480,8 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
     use crate::json::Json::Object;
 
     for o in other.into_iter() {
-        match property::search_by_key(&this, o.key_ref()) {
-            Ok(off) => match (this[off].clone().value(), o.clone().value()) {
+        match property::search_by_key(&this, o.as_ref_key()) {
+            Ok(off) => match (this[off].clone().into_value(), o.clone().into_value()) {
                 (Object(val), Object(val2)) => this[off].set_value(Object(mixin_object(val, val2))),
                 _ => this.insert(off, o),
             },
