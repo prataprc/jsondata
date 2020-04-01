@@ -6,10 +6,10 @@ use quote::quote;
 use syn::*;
 
 // TODO: handle generic-types and generic-lifetimes in struct.
-// TODO: implement JsonData for enums.
-// TODO: implement JsonData for tuple-struct.
+// TODO: implement JsonSerialize for enums.
+// TODO: implement JsonSerialize for tuple-struct.
 
-#[proc_macro_derive(JsonData, attributes(json))]
+#[proc_macro_derive(JsonSerialize, attributes(json))]
 #[proc_macro_error]
 pub fn jsonize_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input: DeriveInput = syn::parse(input).unwrap();
@@ -53,7 +53,9 @@ fn from_type_to_json(name: &Ident, fields: &FieldsNamed) -> TokenStream {
         impl ::std::convert::TryFrom<#name> for ::jsondata::Json {
             type Error = ::jsondata::Error;
 
-            fn try_from(value: #name) -> Result<::jsondata::Json, Self::Error> {
+            fn try_from(value: #name) -> ::std::result::Result<::jsondata::Json, Self::Error> {
+                use ::std::convert::TryInto;
+
                 let mut props: Vec<::jsondata::Property> = vec![];
                 #token_builder;
                 Ok(::jsondata::Json::new(props))
@@ -81,7 +83,9 @@ fn from_json_to_type(name: &Ident, fields: &FieldsNamed) -> TokenStream {
         impl ::std::convert::TryFrom<::jsondata::Json> for #name {
             type Error = ::jsondata::Error;
 
-            fn try_from(value: ::jsondata::Json) -> Result<#name, Self::Error> {
+            fn try_from(value: ::jsondata::Json) -> ::std::result::Result<#name, Self::Error> {
+                use ::std::convert::TryInto;
+
                 Ok(#name {
                     #token_builder
                 })

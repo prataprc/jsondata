@@ -2,9 +2,9 @@
 
 use std::convert::TryInto;
 
-use jsondata::{Json, JsonData};
+use jsondata::{Json, JsonSerialize};
 
-#[derive(JsonData, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(JsonSerialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[allow(non_snake_case)]
 struct Parent {
     field1: u8,
@@ -25,13 +25,13 @@ struct Parent {
     field16: Child,
 }
 
-#[derive(JsonData, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(JsonSerialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[allow(non_snake_case)]
 struct Child {
     fIeld1: i128,
 }
 
-#[derive(JsonData, Default, Clone, Debug)]
+#[derive(JsonSerialize, Default, Clone, Debug)]
 #[allow(non_snake_case)]
 struct Floats {
     field1: f32,
