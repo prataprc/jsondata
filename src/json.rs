@@ -54,8 +54,12 @@ use crate::{jptr, ops};
 ///
 /// **Converting Rust native types to [Json] enum**:
 ///
-/// Json supports conversion from [bool], [i128], [f64], [String], &str,
+/// Json supports conversion from [bool], [u8], [i8], [u16], [i16], [u32],
+/// [i32], [u64], [i64], [i128], [i128], [f32], [f64], [String], [str],
 /// Vec<[Json]> and Vec<[Property]> types using the [From] trait.
+/// Converting from u128 shall cause panic if value is larger than
+/// `i128::max()`.
+///
 /// ```
 /// let json: jsondata::Json = 10.into();
 /// let json: jsondata::Json = true.into();
@@ -666,6 +670,69 @@ impl From<bool> for Json {
     }
 }
 
+impl From<u8> for Json {
+    fn from(num: u8) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<i8> for Json {
+    fn from(num: i8) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<u16> for Json {
+    fn from(num: u16) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<i16> for Json {
+    fn from(num: i16) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<u32> for Json {
+    fn from(num: u32) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<i32> for Json {
+    fn from(num: i32) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<u64> for Json {
+    fn from(num: u64) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<i64> for Json {
+    fn from(num: i64) -> Json {
+        let num: i128 = num.into();
+        Json::Integer(Integral::new(num))
+    }
+}
+
+impl From<u128> for Json {
+    fn from(num: u128) -> Json {
+        let inum: i128 = num.try_into().unwrap();
+        Json::Integer(Integral::new(inum))
+    }
+}
+
 impl From<i128> for Json {
     fn from(val: i128) -> Json {
         Json::Integer(Integral::new(val))
@@ -693,23 +760,16 @@ impl From<usize> for Json {
     }
 }
 
-impl From<u64> for Json {
-    fn from(val: u64) -> Json {
-        let val: i128 = val.try_into().unwrap();
-        Json::Integer(Integral::new(val))
-    }
-}
-
-impl From<i32> for Json {
-    fn from(val: i32) -> Json {
-        let val: i128 = val.try_into().unwrap();
-        Json::Integer(Integral::new(val))
+impl From<f32> for Json {
+    fn from(num: f32) -> Json {
+        let num: f64 = num.into();
+        Json::Float(Floating::new(num))
     }
 }
 
 impl From<f64> for Json {
-    fn from(val: f64) -> Json {
-        Json::Float(Floating::new(val))
+    fn from(num: f64) -> Json {
+        Json::Float(Floating::new(num))
     }
 }
 
