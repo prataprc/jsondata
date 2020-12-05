@@ -1,9 +1,8 @@
 [package]
 name = "jsondata"
 version = "0.6.2"
-authors = ["prataprc <prataprc@gmail.com>"]
-edition = "2018"
 description = "JSON processing package for document databases"
+authors = ["prataprc <prataprc@gmail.com>"]
 documentation = "https://docs.rs/jsondata"
 homepage = "https://github.com/bnclabs/jsondata"
 repository = "https://github.com/bnclabs/jsondata"
@@ -12,6 +11,7 @@ categories = ["data", "encoding"]
 license = "AGPL-3.0"
 exclude = ["template/**"]
 readme = "README.md"
+edition = "2018"
 
 [dependencies]
 lazy_static = "1.2.0"
