@@ -87,9 +87,8 @@
 //! ================
 //!
 //! [`Json`] implements common arithmetic and logical operations like
-//! [ops::Add], [ops::Sub], [ops::Mul], [ops::Div], [ops::Rem], [ops::Neg],
-//! [ops::Shl], [ops::Shr], [ops::BitAnd], [ops::BitOr], [ops::BitXor],
-//! [ops::Not], [ops::Index].
+//! [Add], [Sub], [Mul], [Div], [Rem], [Neg], [Shl], [Shr], [BitAnd],
+//! [BitOr], [BitXor], [Not], [Index].
 //!
 //! *Addition:*
 //!
@@ -192,10 +191,17 @@
 //! [integer]: enum.Json.html#method.integer
 //! [float]: enum.Json.html#method.float
 
-#![doc(html_favicon_url = "https://cdn4.iconfinder.com/data/icons/fugue/icon_shadowless/json.png")]
+#![doc(
+    html_favicon_url = "https://cdn4.iconfinder.com/data/icons/fugue/icon_shadowless/json.png"
+)]
 #![doc(
     html_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/1024px-JSON_vector_logo.svg.png"
 )]
+
+#[allow(unused_imports)]
+use std::ops::{
+    Add, BitAnd, BitOr, BitXor, Div, Index, Mul, Neg, Not, Rem, Shl, Shr, Sub,
+};
 
 #[doc(hidden)]
 pub use jsondata_derive::*;
