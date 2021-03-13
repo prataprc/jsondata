@@ -138,8 +138,7 @@ fn test_typename() {
     let items: Vec<Json> = vec![];
     assert_eq!(Json::new(items).typename(), "array".to_string());
 
-    let mut props: Vec<Property> = Vec::new();
-    props.push(Property::new("a", Json::new(true)));
+    let props: Vec<Property> = vec![Property::new("a", Json::new(true))];
     assert_eq!(Json::new(props).typename(), "object".to_string());
 }
 
@@ -227,9 +226,10 @@ fn test_json5_object() {
     ]);
     assert_eq!(json, value);
 
-    let mut json: Json = r#"{ image: { width: 1920, height: 1080, "aspect-ratio": "16:9", } }"#
-        .parse()
-        .unwrap();
+    let mut json: Json =
+        r#"{ image: { width: 1920, height: 1080, "aspect-ratio": "16:9", } }"#
+            .parse()
+            .unwrap();
     json.compute().unwrap();
     let props = Json::new(vec![
         Property::new("aspect-ratio", "16:9".into()),
@@ -289,7 +289,9 @@ fn test_partial_ord1() {
     assert!(Json::Null < Json::new(1.0));
     assert!(Json::Null < Json::new("hello world"));
     assert!(Json::Null < Json::new::<Vec<Json>>(vec![10.into()]));
-    assert!(Json::Null < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())]));
+    assert!(
+        Json::Null < Json::new::<Vec<Property>>(vec![Property::new("key", 10.into())])
+    );
 
     let value = Json::new(false);
     assert!(value > Json::Null);

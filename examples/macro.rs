@@ -85,7 +85,7 @@ fn main() {
     println!("{}", jval.to_string());
 
     let f_ref = Floats {
-        field1: 10.2345678,
+        field1: 10.234_567,
         field2: -10.12312312312311,
     };
 
@@ -95,8 +95,8 @@ fn main() {
     let f: Floats = jval.clone().try_into().unwrap();
 
     assert_eq!(jval.to_string(), ref_s);
-    assert!(f.field1 == f_ref.field1);
-    assert!(f.field2 == f_ref.field2);
+    assert!((f.field1 - f_ref.field1).abs() < f32::EPSILON);
+    assert!((f.field2 - f_ref.field2).abs() < f64::EPSILON);
 
     println!("{}", jval.to_string());
 }

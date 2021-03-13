@@ -38,7 +38,7 @@ impl Integral {
                         .map(|x| -x)
                         .ok()
                 } else {
-                    i128::from_str_radix(from_utf8(s).unwrap(), 10).ok()
+                    from_utf8(s).unwrap().parse::<i128>().ok()
                 }
             }
         }
@@ -61,7 +61,7 @@ impl Integral {
                     let s = from_utf8(&s[3..]).unwrap();
                     i128::from_str_radix(s, 16).map(|x| -x)
                 } else {
-                    i128::from_str_radix(from_utf8(s).unwrap(), 10)
+                    from_utf8(s).unwrap().parse::<i128>()
                 };
                 match res {
                     Ok(value) => {
