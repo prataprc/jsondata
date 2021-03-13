@@ -1,11 +1,11 @@
 [package]
 name = "jsondata"
-version = "0.6.2"
+version = "0.7.0"
 description = "JSON processing package for document databases"
 repository = "https://github.com/bnclabs/jsondata"
 documentation = "https://docs.rs/jsondata"
 keywords = ["json", "json5"]
-categories = ["data", "encoding"]
+categories = ["parsing", "encoding"]
 authors = ["prataprc <prataprc@gmail.com>"]
 license = "MIT"
 edition = "2018"

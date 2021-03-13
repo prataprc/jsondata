@@ -1,7 +1,14 @@
-0.6.3
+0.7.0
 =====
 
 * move license back to MIT
+* Json type: export typename() API.
+* implement conversion traits from primitive types to Json.
+* Error type: implement Display trait.
+* Error type: add InvalidType enum-variant.
+* JsonSerialize: procedural macro.
+* idiomatic rust API.
+* clippy fixes.
 
 0.6.2
 =====

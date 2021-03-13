@@ -5,11 +5,11 @@ description = "Macros for jsondata types"
 repository = "https://github.com/bnclabs/jsondata"
 documentation = "https://docs.rs/jsondata"
 keywords = ["json", "json5"]
-categories = ["data", "encoding"]
+categories = ["parsing", "encoding"]
 authors = ["prataprc <prataprc@gmail.com>"]
 license = "MIT"
 edition = "2018"
-readme = "README.md"
+readme = "../README.md"
 
 [profile.release]
 debug = true
