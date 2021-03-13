@@ -4,7 +4,6 @@ Why yet another JSON package in Rust ?
 [![Rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/jsondata)
 [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/bnclabs/jsondata/master?grs=github)
 [![Build Status](https://travis-ci.org/bnclabs/jsondata.svg?branch=master)](https://travis-ci.org/bnclabs/jsondata)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 This crate makes several trade-offs that are tuned for big-data
 and document database.
@@ -29,19 +28,6 @@ and document database.
 * [Json sort order][json-sort-order].
 * [Json operations][json-ops].
 * [Release notes](./RELEASE.md).
-
-**Licensing**
-
-Up till version 0.4.0, ``jsondata`` is released under [MIT license].
-Subsequent releases are under [AGPL-3.0 license], going to be the
-default license for all future releases. For re-licensing this
-source, you can either contact the author(s) directly or post
-your request here [#13][#13].
-
-**Compatibility policy**
-
-``jsondata`` shall officially support the latest version of rust stable
-compiler and nightly builds.
 
 Deferred conversion for numbers
 ===============================
@@ -159,6 +145,18 @@ Operations on JSON documents
 
 **[Detailed description can be found here][json-ops].**
 
+Contribution
+------------
+
+* Simple workflow. Fork - Modify - Pull request.
+* Before creating a PR,
+  * Run `make build` to confirm all versions of build is passing with
+    0 warnings and 0 errors.
+  * Run `check.sh` with 0 warnings, 0 errors and all testcases passing.
+  * Run `perf.sh` with 0 warnings, 0 errors and all testcases passing.
+  * [Install][spellcheck] and run `cargo spellcheck` to remove common spelling mistakes.
+* [Developer certificate of origin][dco] is preferred.
+
 [commit-deferred]: https://github.com/bnclabs/jsondata/commit/70e6dedf0121f16e130f224daaa23948f5a5d782
 [json5]: http://json5.org
 [jptr]: https://tools.ietf.org/html/rfc6901
@@ -173,4 +171,3 @@ Operations on JSON documents
 [fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
 [blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
 [MIT license]: https://opensource.org/licenses/MIT
-[AGPL-3.0 license]: https://opensource.org/licenses/AGPL-3.0

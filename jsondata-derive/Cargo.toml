@@ -1,14 +1,21 @@
 [package]
 name = "jsondata-derive"
 version = "0.1.0"
-edition = "2018"
-authors = ["prataprc <prataprc@gmail.com>"]
 description = "Macros for jsondata types"
-documentation = "https://docs.rs/jsondata"
 repository = "https://github.com/bnclabs/jsondata"
+documentation = "https://docs.rs/jsondata"
 keywords = ["json", "json5"]
 categories = ["data", "encoding"]
-license = "AGPL-3.0"
+authors = ["prataprc <prataprc@gmail.com>"]
+license = "MIT"
+edition = "2018"
+readme = "README.md"
+
+[profile.release]
+debug = true
+
+[profile.bench]
+debug = true
 
 [dependencies]
 syn = { version = "1", features = ["full"] }
