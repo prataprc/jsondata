@@ -8,10 +8,10 @@
 //! * Support for 128-bit signed integers.
 //! * Deferred conversion of numbers.
 //! * Serialization from Rust native type, [`Json`], to JSON text.
-//! * De-serialization from JSON text to Rust native type.
+//! * De-serialization from JSON text to Rust native [`Json`] type.
 //! * [CRUD] operation on JSON documents, using [JSON Pointer].
 //! * Sorted keys in property object.
-//! * Streaming JSON parser, using [`Jsons`].
+//! * Streaming JSON parser, using [`Jsons`] type.
 //! * Support [JSON5](http://json5.org) standard.
 //! * Common arithmetic and logical ops implemented for [`Json`].
 //! * [`Json`] objects can be compared and sorted.

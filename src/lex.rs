@@ -1,5 +1,6 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
+// This is local type, useful to pinpoint position of lex-failures.
 #[derive(Debug)]
 pub struct Lex {
     pub off: usize,
