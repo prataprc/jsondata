@@ -1,12 +1,12 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
-use std::{fmt, result};
+use std::{error, fmt, result};
 
-/// Enumeration of all possible errors that shall be returned by
-/// methods and functions under this package. Refer to individual
-/// methods and functions, returning [Result] type, for specific
-/// error handling.
-#[derive(Clone, Debug, PartialEq)]
+/// Enumeration of all possible errors that shall be returned by this package.
+///
+/// Refer to individual methods and functions, returning [Result] type, for
+/// specific error handling.
+#[derive(Clone, PartialEq)]
 pub enum Error {
     /// Failed to parse JSON text.
     ParseFail(String),
@@ -76,6 +76,14 @@ impl fmt::Display for Error {
         }
     }
 }
+
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
+        write!(f, "{}", self)
+    }
+}
+
+impl error::Error for Error {}
 
 /// Result type, for jsondata functions and methods, that require a
 /// success or failure variant.
