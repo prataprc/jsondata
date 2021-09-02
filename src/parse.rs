@@ -14,7 +14,7 @@ use crate::property::{self, Property};
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     parse_whitespace(text, lex);
 
-    check_eof(text, lex)?;
+    not_eof(text, lex)?;
 
     //println!("text -- {:?}", &text[lex.off..].as_bytes());
     let bs = (&text[lex.off..]).as_bytes();
@@ -37,6 +37,7 @@ pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     //println!("valu -- {:?}", v);
 }
 
+#[inline]
 fn parse_null(text: &str, lex: &mut Lex) -> Result<Json> {
     let text = &text[lex.off..];
     if text.len() >= 4 && &text[..4] == "null" {
@@ -47,6 +48,7 @@ fn parse_null(text: &str, lex: &mut Lex) -> Result<Json> {
     }
 }
 
+#[inline]
 fn parse_true(text: &str, lex: &mut Lex) -> Result<Json> {
     let text = &text[lex.off..];
     if text.len() >= 4 && &text[..4] == "true" {
@@ -57,6 +59,7 @@ fn parse_true(text: &str, lex: &mut Lex) -> Result<Json> {
     }
 }
 
+#[inline]
 fn parse_false(text: &str, lex: &mut Lex) -> Result<Json> {
     let text = &text[lex.off..];
     if text.len() >= 5 && &text[..5] == "false" {
@@ -70,18 +73,17 @@ fn parse_false(text: &str, lex: &mut Lex) -> Result<Json> {
 fn parse_num(text: &str, lex: &mut Lex) -> Result<Json> {
     let text = &text[lex.off..];
 
-    let mut dofn = |t: &str, i: usize, f: bool, h: bool| -> Result<Json> {
+    let mut dofn = |t: &str, i: usize, is_float: bool, is_hex: bool| -> Result<Json> {
         lex.incr_col(i);
         //println!("parse_num -- {}", t);
-        if f && !h {
+        if is_float && !is_hex {
             Ok(Json::Float(Floating::new(t)))
         } else {
             Ok(Json::Integer(Integral::new(t)))
         }
     };
 
-    let mut is_float = false;
-    let mut is_hex = false;
+    let (mut is_float, mut is_hex) = (false, false);
     for (i, ch) in text.char_indices() {
         let mut ok = (ch as u32) > (ISNUMBER.len() as u32);
         ok = ok || ISNUMBER[ch as usize] == 0;
@@ -300,19 +302,21 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
     }
 }
 
+#[inline]
 fn parse_identifier(text: &str, lex: &mut Lex) -> String {
-    let mut ident = String::new();
+    let (off, mut n) = (lex.off, 0);
     for (i, ch) in text[lex.off..].char_indices() {
         if ch.is_alphanumeric() {
-            ident.push(ch);
             continue;
         }
-        lex.off += i;
+        n = i;
         break;
     }
-    ident
+    lex.off += n;
+    text[off..off + n].to_string()
 }
 
+#[inline]
 fn parse_whitespace(text: &str, lex: &mut Lex) {
     for (i, ch) in text[lex.off..].char_indices() {
         //println!("{} {}", u32::from(ch), ch.is_whitespace());
@@ -330,6 +334,7 @@ fn parse_whitespace(text: &str, lex: &mut Lex) {
     }
 }
 
+#[inline]
 fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
     let progbytes = (&text[lex.off..]).as_bytes();
 
@@ -337,16 +342,19 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
         let msg = lex.format(&format!("missing token {}", b));
         return Err(Error::ParseFail(msg));
     }
+
     if progbytes[0] != b {
         let msg = lex.format(&format!("invalid byte {}, {}", b, progbytes[0]));
         return Err(Error::ParseFail(msg));
     }
+
     lex.incr_col(1);
 
     Ok(())
 }
 
-fn check_eof(text: &str, lex: &mut Lex) -> Result<()> {
+#[inline]
+fn not_eof(text: &str, lex: &mut Lex) -> Result<()> {
     if (&text[lex.off..]).is_empty() {
         Err(Error::ParseFail(lex.format("unexpected eof")))
     } else {
@@ -369,6 +377,7 @@ static HEXNUM: [u8; 256] = [
     20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
 ];
 
+// These days, with unicode, white-spaces have become more complicated :/.
 static _WS_LOOKUP: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
