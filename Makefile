@@ -17,8 +17,8 @@ flamegraph:
 	echo "no executable"
 
 prepare:
-	check.sh
-	perf.sh
+	check.sh check.out
+	perf.sh perf.out
 
 clean:
 	cargo clean
