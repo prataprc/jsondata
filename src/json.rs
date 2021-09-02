@@ -671,83 +671,83 @@ impl From<bool> for Json {
 impl From<u8> for Json {
     fn from(num: u8) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<i8> for Json {
     fn from(num: i8) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<u16> for Json {
     fn from(num: u16) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<i16> for Json {
     fn from(num: i16) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<u32> for Json {
     fn from(num: u32) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<i32> for Json {
     fn from(num: i32) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<u64> for Json {
     fn from(num: u64) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<i64> for Json {
     fn from(num: i64) -> Json {
         let num: i128 = num.into();
-        Json::Integer(Integral::new(num))
+        Json::Integer(num.into())
     }
 }
 
 impl From<u128> for Json {
     fn from(num: u128) -> Json {
         let inum: i128 = num.try_into().unwrap();
-        Json::Integer(Integral::new(inum))
+        Json::Integer(inum.into())
     }
 }
 
 impl From<i128> for Json {
     fn from(val: i128) -> Json {
-        Json::Integer(Integral::new(val))
+        Json::Integer(val.into())
     }
 }
 
 impl From<usize> for Json {
     fn from(num: usize) -> Json {
         let inum: i128 = num.try_into().unwrap();
-        Json::Integer(Integral::new(inum))
+        Json::Integer(inum.into())
     }
 }
 
 impl From<isize> for Json {
     fn from(num: isize) -> Json {
         let inum: i128 = num.try_into().unwrap();
-        Json::Integer(Integral::new(inum))
+        Json::Integer(inum.into())
     }
 }
 
@@ -1062,13 +1062,13 @@ where
 impl From<f32> for Json {
     fn from(num: f32) -> Json {
         let num: f64 = num.into();
-        Json::Float(Floating::new(num))
+        Json::Float(num.into())
     }
 }
 
 impl From<f64> for Json {
     fn from(num: f64) -> Json {
-        Json::Float(Floating::new(num))
+        Json::Float(num.into())
     }
 }
 

@@ -191,6 +191,7 @@
 //! [integer]: enum.Json.html#method.integer
 //! [float]: enum.Json.html#method.float
 
+#![feature(total_cmp)]
 #![doc(
     html_favicon_url = "https://cdn4.iconfinder.com/data/icons/fugue/icon_shadowless/json.png"
 )]

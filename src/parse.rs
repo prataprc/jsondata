@@ -8,7 +8,6 @@ use lazy_static::lazy_static;
 use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::lex::Lex;
-use crate::num::{Floating, Integral};
 use crate::property::{self, Property};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
@@ -77,9 +76,9 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json> {
         lex.incr_col(i);
         //println!("parse_num -- {}", t);
         if is_float && !is_hex {
-            Ok(Json::Float(Floating::new(t)))
+            Ok(Json::Float(t.into()))
         } else {
-            Ok(Json::Integer(Integral::new(t)))
+            Ok(Json::Integer(t.into()))
         }
     };
 

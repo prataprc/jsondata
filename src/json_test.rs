@@ -3,14 +3,13 @@
 use std::f64;
 
 use crate::json::Json;
-use crate::num;
 use crate::property::Property;
 
 #[test]
 fn test_json_constructor() {
     use self::Json;
 
-    assert_eq!(Json::new(10), Json::Integer(num::Integral::new("10")));
+    assert_eq!(Json::new(10), Json::Integer("10".into()));
 }
 
 #[test]
@@ -51,22 +50,22 @@ fn test_convert() {
     assert_eq!(js, Json::Bool(true));
 
     let js: Json = 1024.into();
-    assert_eq!(js, Json::Integer(num::Integral::new(1024)));
+    assert_eq!(js, Json::Integer(1024.into()));
 
     let js: Json = 1024.2.into();
-    assert_eq!(js, Json::Float(num::Floating::new(1024.2)));
+    assert_eq!(js, Json::Float(1024.2.into()));
 
     let js: Json = "hello world".to_string().into();
     assert_eq!(js, Json::String("hello world".to_string()));
 
     let js: Json = 10_usize.into();
-    assert_eq!(js, Json::Integer(num::Integral::new(10)));
+    assert_eq!(js, Json::Integer(10.into()));
 
     let js: Json = 10_u64.into();
-    assert_eq!(js, Json::Integer(num::Integral::new(10)));
+    assert_eq!(js, Json::Integer(10.into()));
 
     let js: Json = 10_i32.into();
-    assert_eq!(js, Json::Integer(num::Integral::new(10)));
+    assert_eq!(js, Json::Integer(10.into()));
 }
 
 #[test]
@@ -74,11 +73,11 @@ fn test_deferred() {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     let value: Json = inp.parse().unwrap();
     let refval = Json::Array(vec![
-        Json::Float(num::Floating::new("10123.1231")),
-        Json::Float(num::Floating::new("1231.123123")),
-        Json::Float(num::Floating::new("1233.123123")),
-        Json::Float(num::Floating::new("123.1231231")),
-        Json::Float(num::Floating::new("12312e10")),
+        Json::Float("10123.1231".into()),
+        Json::Float("1231.123123".into()),
+        Json::Float("1233.123123".into()),
+        Json::Float("123.1231231".into()),
+        Json::Float("12312e10".into()),
     ]);
     assert_eq!(value, refval);
 }

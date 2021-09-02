@@ -5,74 +5,40 @@
 
 use std::cmp::Ordering;
 
-use crate::error::{Error, Result};
+use crate::{Error, Result};
+
+#[inline]
+fn parse_integer(text: &[u8]) -> Result<i128> {
+    use std::str::from_utf8_unchecked;
+
+    let res = unsafe {
+        if text.len() > 2 && text[0] == 48 && text[1] == 120
+        // "0x"
+        {
+            i128::from_str_radix(from_utf8_unchecked(&text[2..]), 16)
+        } else if text.len() > 3 && text[0] == 45 && text[1] == 48 && text[2] == 120
+        // "-0x"
+        {
+            i128::from_str_radix(from_utf8_unchecked(&text[3..]), 16).map(|x| -x)
+        } else {
+            from_utf8_unchecked(text).parse::<i128>()
+        }
+    };
+    res.map_err(|e| Error::InvalidNumber(e.to_string()))
+}
+
+#[inline]
+fn parse_float(text: &[u8]) -> Result<f64> {
+    use std::str::from_utf8_unchecked;
+
+    let res = unsafe { from_utf8_unchecked(text).parse::<f64>() };
+    res.map_err(|e| Error::InvalidNumber(e.to_string()))
+}
 
 #[derive(Clone, Debug)]
 pub enum Integral {
     Text { len: usize, bytes: [u8; 32] },
     Data { value: i128 },
-}
-
-impl Integral {
-    pub fn new<T>(val: T) -> Integral
-    where
-        Self: From<T>,
-    {
-        val.into()
-    }
-
-    pub fn integer(&self) -> Option<i128> {
-        use std::str::from_utf8;
-        match self {
-            Integral::Data { value } => Some(*value),
-            Integral::Text { len, bytes } => {
-                let s = &bytes[0..*len];
-                if s.len() > 2 && s[0] == 48 && s[1] == 120
-                // "0x"
-                {
-                    i128::from_str_radix(from_utf8(&s[2..]).unwrap(), 16).ok()
-                } else if s.len() > 3 && s[0] == 45 && s[1] == 48 && s[2] == 120
-                // "-0x"
-                {
-                    i128::from_str_radix(from_utf8(&s[3..]).unwrap(), 16)
-                        .map(|x| -x)
-                        .ok()
-                } else {
-                    from_utf8(s).unwrap().parse::<i128>().ok()
-                }
-            }
-        }
-    }
-
-    pub fn compute(&mut self) -> Result<()> {
-        use std::str::from_utf8;
-
-        match self {
-            Integral::Data { .. } => Ok(()),
-            Integral::Text { len, bytes } => {
-                let s = &bytes[0..*len];
-                let res = if s.len() > 2 && s[0] == 48 && s[1] == 120
-                // "0x"
-                {
-                    i128::from_str_radix(from_utf8(&s[2..]).unwrap(), 16)
-                } else if s.len() > 3 && s[0] == 45 && s[1] == 48 && s[2] == 120
-                // "-0x"
-                {
-                    let s = from_utf8(&s[3..]).unwrap();
-                    i128::from_str_radix(s, 16).map(|x| -x)
-                } else {
-                    from_utf8(s).unwrap().parse::<i128>()
-                };
-                match res {
-                    Ok(value) => {
-                        *self = Integral::Data { value };
-                        Ok(())
-                    }
-                    Err(err) => Err(Error::InvalidNumber(format!("{}", err))),
-                }
-            }
-        }
-    }
 }
 
 impl From<i128> for Integral {
@@ -97,13 +63,85 @@ impl Eq for Integral {}
 
 impl PartialEq for Integral {
     fn eq(&self, other: &Integral) -> bool {
-        self.integer() == other.integer()
+        use Integral::{Data, Text};
+
+        match (self, other) {
+            (Data { value: a }, Data { value: b }) => a.eq(b),
+            (Text { len, bytes }, Data { value: b }) => {
+                parse_integer(&bytes[..*len]).map(|a| a.eq(b)).unwrap()
+            }
+            (Data { value: a }, Text { len, bytes }) => {
+                parse_integer(&bytes[..*len]).map(|b| a.eq(&b)).unwrap()
+            }
+            (
+                Text {
+                    len: a_len,
+                    bytes: a_bytes,
+                },
+                Text {
+                    len: b_len,
+                    bytes: b_bytes,
+                },
+            ) => {
+                let a = parse_integer(&a_bytes[..*a_len]).unwrap();
+                let b = parse_integer(&b_bytes[..*b_len]).unwrap();
+                a.eq(&b)
+            }
+        }
     }
 }
 
 impl PartialOrd for Integral {
     fn partial_cmp(&self, other: &Integral) -> Option<Ordering> {
-        self.integer().partial_cmp(&other.integer())
+        use Integral::{Data, Text};
+
+        match (self, other) {
+            (Data { value: a }, Data { value: b }) => a.partial_cmp(b),
+            (Text { len, bytes }, Data { value: b }) => {
+                match parse_integer(&bytes[..*len]) {
+                    Ok(a) => a.partial_cmp(b),
+                    _ => None,
+                }
+            }
+            (Data { value: a }, Text { len, bytes }) => {
+                match parse_integer(&bytes[..*len]) {
+                    Ok(b) => a.partial_cmp(&b),
+                    _ => None,
+                }
+            }
+            (
+                Text {
+                    len: a_len,
+                    bytes: a_bytes,
+                },
+                Text {
+                    len: b_len,
+                    bytes: b_bytes,
+                },
+            ) => {
+                let a = parse_integer(&a_bytes[..*a_len]).ok()?;
+                let b = parse_integer(&b_bytes[..*b_len]).ok()?;
+                a.partial_cmp(&b)
+            }
+        }
+    }
+}
+
+impl Integral {
+    pub fn integer(&self) -> Option<i128> {
+        match self {
+            Integral::Data { value } => Some(*value),
+            Integral::Text { len, bytes } => parse_integer(&bytes[0..*len]).ok(),
+        }
+    }
+
+    pub fn compute(&mut self) -> Result<()> {
+        if let Integral::Text { len, bytes } = self {
+            let value = parse_integer(&bytes[0..*len])?;
+            *self = Integral::Data { value };
+        }
+
+        Ok(())
     }
 }
 
@@ -111,43 +149,6 @@ impl PartialOrd for Integral {
 pub enum Floating {
     Text { len: usize, bytes: [u8; 32] },
     Data { value: f64 },
-}
-
-impl Floating {
-    pub fn new<T>(val: T) -> Floating
-    where
-        Self: From<T>,
-    {
-        val.into()
-    }
-
-    pub fn float(&self) -> Option<f64> {
-        use std::str::from_utf8;
-
-        match self {
-            Floating::Data { value } => Some(*value),
-            Floating::Text { len, bytes } => {
-                from_utf8(&bytes[0..*len]).unwrap().parse::<f64>().ok()
-            }
-        }
-    }
-
-    pub fn compute(&mut self) -> Result<()> {
-        use std::str::from_utf8;
-
-        match self {
-            Floating::Data { .. } => Ok(()),
-            Floating::Text { len, bytes } => {
-                match from_utf8(&bytes[0..*len]).unwrap().parse::<f64>() {
-                    Ok(value) => {
-                        *self = Floating::Data { value };
-                        Ok(())
-                    }
-                    Err(err) => Err(Error::InvalidNumber(format!("{}", err))),
-                }
-            }
-        }
-    }
 }
 
 impl From<f64> for Floating {
@@ -172,12 +173,78 @@ impl Eq for Floating {}
 
 impl PartialEq for Floating {
     fn eq(&self, other: &Floating) -> bool {
-        self.float() == other.float()
+        use Floating::{Data, Text};
+
+        match (self, other) {
+            (Data { value: a }, Data { value: b }) => a.eq(b),
+            (Text { len, bytes }, Data { value: b }) => {
+                parse_float(&bytes[..*len]).map(|a| a.eq(b)).unwrap()
+            }
+            (Data { value: a }, Text { len, bytes }) => {
+                parse_float(&bytes[..*len]).map(|b| a.eq(&b)).unwrap()
+            }
+            (
+                Text {
+                    len: a_len,
+                    bytes: a_bytes,
+                },
+                Text {
+                    len: b_len,
+                    bytes: b_bytes,
+                },
+            ) => {
+                let a = parse_float(&a_bytes[..*a_len]).unwrap();
+                let b = parse_float(&b_bytes[..*b_len]).unwrap();
+                a.eq(&b)
+            }
+        }
     }
 }
 
 impl PartialOrd for Floating {
     fn partial_cmp(&self, other: &Floating) -> Option<Ordering> {
-        self.float().partial_cmp(&other.float())
+        use Floating::{Data, Text};
+
+        match (self, other) {
+            (Data { value: a }, Data { value: b }) => Some(a.total_cmp(b)),
+            (Text { len, bytes }, Data { value: b }) => {
+                parse_float(&bytes[..*len]).map(|a| a.total_cmp(b)).ok()
+            }
+            (Data { value: a }, Text { len, bytes }) => {
+                parse_float(&bytes[..*len]).map(|b| a.total_cmp(&b)).ok()
+            }
+            (
+                Text {
+                    len: a_len,
+                    bytes: a_bytes,
+                },
+                Text {
+                    len: b_len,
+                    bytes: b_bytes,
+                },
+            ) => {
+                let a = parse_float(&a_bytes[..*a_len]).unwrap();
+                let b = parse_float(&b_bytes[..*b_len]).unwrap();
+                Some(a.total_cmp(&b))
+            }
+        }
+    }
+}
+
+impl Floating {
+    pub fn float(&self) -> Option<f64> {
+        match self {
+            Floating::Data { value } => Some(*value),
+            Floating::Text { len, bytes } => parse_float(&bytes[0..*len]).ok(),
+        }
+    }
+
+    pub fn compute(&mut self) -> Result<()> {
+        if let Floating::Text { len, bytes } = self {
+            let value = parse_float(&bytes[..*len])?;
+            *self = Floating::Data { value };
+        }
+
+        Ok(())
     }
 }
