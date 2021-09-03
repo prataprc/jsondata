@@ -1,3 +1,20 @@
+0.8.0
+=====
+
+* **Breaking change**: Json method rename `typename()` method to `type_name()`.
+* implement `err_at!()` macro and Debug for Error type.
+* parse: Json parser, test fix and refactoring.
+  * optimize `parse_identifier()` implementation.
+  * fix testcase for parsing float number.
+* refactor `num.rs`.
+* replace `search_by_key()` with `[T].binary_search_by()` for `Property` array.
+  `stdlib` has an equivalent implementation to find a key in a sorted
+  array. Use that instead of `search_by_key()`.
+* ops.rs: where possible capture error instead of panic.
+* reimplement traits for Json type using `macro_rules`.
+* rustdoc.
+* update CI scripts.
+
 0.7.0
 =====
 
