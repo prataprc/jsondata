@@ -135,6 +135,13 @@ impl Integral {
         }
     }
 
+    pub fn integer_result(&self) -> Result<i128> {
+        match self {
+            Integral::Data { value } => Ok(*value),
+            Integral::Text { len, bytes } => parse_integer(&bytes[0..*len]),
+        }
+    }
+
     pub fn compute(&mut self) -> Result<()> {
         if let Integral::Text { len, bytes } = self {
             let value = parse_integer(&bytes[0..*len])?;
@@ -236,6 +243,13 @@ impl Floating {
         match self {
             Floating::Data { value } => Some(*value),
             Floating::Text { len, bytes } => parse_float(&bytes[0..*len]).ok(),
+        }
+    }
+
+    pub fn float_result(&self) -> Result<f64> {
+        match self {
+            Floating::Data { value } => Ok(*value),
+            Floating::Text { len, bytes } => parse_float(&bytes[0..*len]),
         }
     }
 

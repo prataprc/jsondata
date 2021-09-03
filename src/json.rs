@@ -7,12 +7,12 @@ use std::fmt::{self, Display, Write};
 use std::ops::RangeBounds;
 use std::str::FromStr;
 
-use crate::error::{Error, Result};
 use crate::lex::Lex;
 use crate::num::{Floating, Integral};
 use crate::parse::parse_value;
 use crate::property::Property;
 use crate::{jptr, ops};
+use crate::{Error, Result};
 
 // TODO: test case for all combination for JsonSerialize,
 // refer to examples/macro.rs
@@ -468,6 +468,22 @@ impl Json {
         match self {
             Json::__Error(err) => Err(err.clone()),
             _ => Ok(self),
+        }
+    }
+}
+
+impl Json {
+    pub(crate) fn to_integer_result(&self) -> Result<i128> {
+        match self {
+            Json::Integer(item) => item.integer_result(),
+            _ => Err(Error::InvalidType("not an integer".to_string())),
+        }
+    }
+
+    pub(crate) fn to_float_result(&self) -> Result<f64> {
+        match self {
+            Json::Float(item) => item.float_result(),
+            _ => Err(Error::InvalidType("not a float".to_string())),
         }
     }
 }

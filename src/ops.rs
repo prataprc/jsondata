@@ -10,11 +10,17 @@ use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::property::Property;
 
-// TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
-// for Sub, Mul, Div, Neg ...
-
 // TODO: Implement && || as short-circuiting logical operation. They are not
 // not implementable as `std` traits, hence figure out an apt API.
+
+macro_rules! check_error {
+    ($res:expr) => {{
+        match $res {
+            Ok(val) => val,
+            Err(err) => return Json::__Error(err),
+        }
+    }};
+}
 
 impl Add for Json {
     type Output = Json;
@@ -26,19 +32,23 @@ impl Add for Json {
             (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l + r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new(l + r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new(l as f64 + r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l + r as f64)
             }
             (S(l), S(r)) => {
@@ -83,19 +93,23 @@ impl Sub for Json {
             (Null, _) => rhs.clone(),  // Identity operation
             (_, Null) => self.clone(), // Identity operation
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l - r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new(l - r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new((l as f64) - r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l - (r as f64))
             }
             (Array(lhs), Array(rhs)) => {
@@ -134,28 +148,34 @@ impl Mul for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l * r)
             }
             (Float(_), Float(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new(l * r)
             }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_float_result());
                 Json::new((l as f64) * r)
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_integer_result());
                 Json::new(l * (r as f64))
             }
-            (S(s), Integer(_)) => match rhs.to_integer().unwrap() {
-                n if n <= 0 => Null,
-                n => S(s.repeat(n as usize)),
+            (S(s), Integer(_)) => match rhs.to_integer_result() {
+                Ok(n) if n <= 0 => Null,
+                Ok(n) => S(s.repeat(n as usize)),
+                Err(err) => Json::__Error(err),
             },
-            (Integer(_), S(s)) => match self.to_integer().unwrap() {
-                n if n <= 0 => Null,
-                n => S(s.repeat(n as usize)),
+            (Integer(_), S(s)) => match self.to_integer_result() {
+                Ok(n) if n <= 0 => Null,
+                Ok(n) => S(s.repeat(n as usize)),
+                Err(err) => Json::__Error(err),
             },
             (Object(this), Object(other)) => {
                 // TODO: this is not well defined.
@@ -182,15 +202,26 @@ impl Div for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_integer_result());
                 if r == 0 {
                     Null
                 } else {
                     Json::new(l / r)
                 }
             }
+            (Float(_), Float(_)) => {
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_float_result());
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new(l / r)
+                }
+            }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_float_result());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -198,19 +229,12 @@ impl Div for Json {
                 }
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_integer_result());
                 if r == 0 {
                     Null
                 } else {
                     Json::new(l / (r as f64))
-                }
-            }
-            (Float(_), Float(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
-                if r == 0_f64 {
-                    Null
-                } else {
-                    Json::new(l / r)
                 }
             }
             (S(s), S(patt)) => {
@@ -236,15 +260,26 @@ impl Rem for Json {
             (Null, _) => Json::Null,
             (_, Null) => Json::Null,
             (Integer(_), Integer(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_integer_result());
                 if r == 0 {
                     Null
                 } else {
                     Json::new(l % r)
                 }
             }
+            (Float(_), Float(_)) => {
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_float_result());
+                if r == 0_f64 {
+                    Null
+                } else {
+                    Json::new(l % r)
+                }
+            }
             (Integer(_), Float(_)) => {
-                let (l, r) = (self.to_integer().unwrap(), rhs.to_float().unwrap());
+                let l = check_error!(self.to_integer_result());
+                let r = check_error!(rhs.to_float_result());
                 if r == 0_f64 {
                     Null
                 } else {
@@ -252,19 +287,12 @@ impl Rem for Json {
                 }
             }
             (Float(_), Integer(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_integer().unwrap());
+                let l = check_error!(self.to_float_result());
+                let r = check_error!(rhs.to_integer_result());
                 if r == 0 {
                     Null
                 } else {
                     Json::new(l % (r as f64))
-                }
-            }
-            (Float(_), Float(_)) => {
-                let (l, r) = (self.to_float().unwrap(), rhs.to_float().unwrap());
-                if r == 0_f64 {
-                    Null
-                } else {
-                    Json::new(l % r)
                 }
             }
             (_, _) => {
@@ -281,8 +309,14 @@ impl Neg for Json {
     fn neg(self) -> Json {
         match self {
             Json::Null => Json::Null,
-            Json::Integer(_) => Json::new(-self.to_integer().unwrap()),
-            Json::Float(_) => Json::new(-self.to_float().unwrap()),
+            Json::Integer(_) => match self.to_integer_result() {
+                Ok(val) => Json::new(-val),
+                Err(err) => Json::__Error(err),
+            },
+            Json::Float(_) => match self.to_float_result() {
+                Ok(val) => Json::new(-val),
+                Err(err) => Json::__Error(err),
+            },
             _ => Json::__Error(Error::NegFail(format!("-{}", self.typename()))),
         }
     }
@@ -326,7 +360,9 @@ impl BitAnd for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.to_integer().unwrap() & y.to_integer().unwrap()).into()
+                let x = check_error!(x.to_integer_result());
+                let y = check_error!(y.to_integer_result());
+                (x & y).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());
@@ -346,7 +382,9 @@ impl BitOr for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.to_integer().unwrap() | y.to_integer().unwrap()).into()
+                let x = check_error!(x.to_integer_result());
+                let y = check_error!(y.to_integer_result());
+                (x | y).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());
@@ -366,7 +404,9 @@ impl BitXor for Json {
             (x @ Json::__Error(_), _) => x,
             (_, y @ Json::__Error(_)) => y,
             (x @ Integer(_), y @ Integer(_)) => {
-                (x.to_integer().unwrap() ^ y.to_integer().unwrap()).into()
+                let x = check_error!(x.to_integer_result());
+                let y = check_error!(y.to_integer_result());
+                (x ^ y).into()
             }
             (x, y) => {
                 let (x, y): (bool, bool) = (x.into(), y.into());
@@ -456,27 +496,6 @@ pub(crate) fn index_mut<'a>(val: &'a mut Json, key: &str) -> Result<&'a mut Json
         _ => Err(Error::InvalidContainer(val.typename())),
     }
 }
-
-//// TODO: To handle || and && short-circuiting operations.
-////impl And for Json {
-////    type Output=Json;
-////
-////    fn and(self, other: Json) -> Self::Output {
-////        let lhs = bool::from(self);
-////        let rhs = bool::from(other);
-////        Json::Bool(lhs & rhs)
-////    }
-////}
-////
-////impl Or for Json {
-////    type Output=Json;
-////
-////    fn or(self, other: Json) -> Self::Output {
-////        let lhs = bool::from(self);
-////        let rhs = bool::from(other);
-////        Json::Bool(lhs | rhs)
-////    }
-////}
 
 fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> {
     use crate::json::Json::Object;
