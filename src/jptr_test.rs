@@ -8,19 +8,19 @@ use crate::property::Property;
 fn test_quote() {
     let jptr = r#"data/~"\"#;
     let refv = r#"data~1~0\"\\"#.to_string();
-    assert_eq!(quote(&jptr), refv);
+    assert_eq!(quote(jptr), refv);
 
     let jptr = r#"\x00\x01\x02\x03\x04\x05\x06"#;
     let refv = "\\\\x00\\\\x01\\\\x02\\\\x03\\\\x04\\\\x05\\\\x06".to_string();
-    assert_eq!(quote(&jptr), refv);
+    assert_eq!(quote(jptr), refv);
 
     let jptr = r#"\x07\x08\x09\x0a\x0b\x0c\x0d"#;
     let refv = "\\\\x07\\\\x08\\\\x09\\\\x0a\\\\x0b\\\\x0c\\\\x0d".to_string();
-    assert_eq!(quote(&jptr), refv);
+    assert_eq!(quote(jptr), refv);
 
     let jptr = r#"\x0e\x0f"#;
     let refv = "\\\\x0e\\\\x0f".to_string();
-    assert_eq!(quote(&jptr), refv);
+    assert_eq!(quote(jptr), refv);
 }
 
 #[test]

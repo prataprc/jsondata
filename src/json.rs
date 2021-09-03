@@ -944,7 +944,7 @@ impl FromStr for Json {
 
     fn from_str(text: &str) -> Result<Json> {
         let mut lex = Lex::new(0, 1, 1);
-        parse_value(&text, &mut lex)
+        parse_value(text, &mut lex)
     }
 }
 
@@ -1022,7 +1022,7 @@ impl Display for Json {
             }
             Float(Floating::Data { value: v }) => write!(f, "{:e}", v),
             S(val) => {
-                encode_string(f, &val)?;
+                encode_string(f, val)?;
                 Ok(())
             }
             Array(val) => {
