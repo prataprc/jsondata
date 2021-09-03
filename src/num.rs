@@ -3,7 +3,7 @@
 // TODO: replace [u8; 32] to [u8; 64] once constant generic is available
 // in rust.
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, convert::TryInto};
 
 use crate::{Error, Result};
 
@@ -41,11 +41,19 @@ pub enum Integral {
     Data { value: i128 },
 }
 
-impl From<i128> for Integral {
-    fn from(value: i128) -> Integral {
-        Integral::Data { value }
-    }
+macro_rules! convert_to_integral {
+    ($($from:ty),*) => (
+        $(
+            impl From<$from> for Integral {
+                fn from(val: $from) -> Integral {
+                    Integral::Data { value: val.try_into().unwrap() }
+                }
+            }
+        )*
+    );
 }
+
+convert_to_integral! {u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, usize, isize }
 
 impl<'a> From<&'a str> for Integral {
     fn from(val: &str) -> Integral {
@@ -158,11 +166,19 @@ pub enum Floating {
     Data { value: f64 },
 }
 
-impl From<f64> for Floating {
-    fn from(value: f64) -> Floating {
-        Floating::Data { value }
-    }
+macro_rules! convert_to_float {
+    ($($from:ty),*) => (
+        $(
+            impl From<$from> for Floating {
+                fn from(val: $from) -> Floating {
+                    Floating::Data { value: val.into() }
+                }
+            }
+        )*
+    );
 }
+
+convert_to_float! {f32, f64}
 
 impl<'a> From<&'a str> for Floating {
     fn from(val: &str) -> Floating {
