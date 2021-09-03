@@ -5,10 +5,10 @@ use std::{char, f64};
 
 use lazy_static::lazy_static;
 
-use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::lex::Lex;
 use crate::property::{self, Property};
+use crate::{Error, Result};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     parse_whitespace(text, lex);
@@ -29,8 +29,7 @@ pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
         b'I' => parse_json5_float(text, lex, 2),
         b'N' => parse_json5_float(text, lex, 3),
         ch => {
-            let msg = lex.format(&format!("invalid token {}", ch));
-            Err(Error::ParseFail(msg))
+            err_at!(ParseFail, msg: "{}", lex.format(&format!("invalid token {}", ch)))
         }
     }
     //println!("valu -- {:?}", v);
@@ -43,7 +42,7 @@ fn parse_null(text: &str, lex: &mut Lex) -> Result<Json> {
         lex.incr_col(4);
         Ok(Json::Null)
     } else {
-        Err(Error::ParseFail(lex.format("expected null")))
+        err_at!(ParseFail, msg: "{}", lex.format("expected null"))
     }
 }
 
@@ -54,7 +53,7 @@ fn parse_true(text: &str, lex: &mut Lex) -> Result<Json> {
         lex.incr_col(4);
         Ok(Json::Bool(true))
     } else {
-        Err(Error::ParseFail(lex.format("expected true")))
+        err_at!(ParseFail, msg: "{}", lex.format("expected true"))
     }
 }
 
@@ -65,7 +64,7 @@ fn parse_false(text: &str, lex: &mut Lex) -> Result<Json> {
         lex.incr_col(5);
         Ok(Json::Bool(false))
     } else {
-        Err(Error::ParseFail(lex.format("expected false")))
+        err_at!(ParseFail, msg: "{}", lex.format("expected false"))
     }
 }
 
@@ -113,7 +112,7 @@ fn parse_json5_float(txt: &str, lex: &mut Lex, w: usize) -> Result<Json> {
         lex.off += l;
         Ok(res.clone())
     } else {
-        Err(Error::ParseFail(lex.format("expected json5 float")))
+        err_at!(ParseFail, msg: "{}", lex.format("expected json5 float"))
     }
 }
 
@@ -126,7 +125,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
 
     let (i, ch) = chars.next().unwrap(); // skip the opening quote
     if ch != '"' {
-        return Err(Error::ParseFail(lex.format("invalid string")));
+        err_at!(ParseFail, msg: "{}", lex.format("invalid string"))?;
     }
 
     while let Some((i, ch)) = chars.next() {
@@ -158,8 +157,10 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
             'u' => match decode_json_hex_code(&mut chars, lex)? {
                 code1 @ 0xDC00..=0xDFFF => {
                     lex.incr_col(i);
-                    let msg = format!("invalid codepoint {:x}", code1);
-                    return Err(Error::ParseFail(lex.format(&msg)));
+                    err_at!(
+                        ParseFail,
+                        msg: "{}", lex.format(&format!("invalid codepoint {:x}", code1))
+                    )?;
                 }
                 // Non-BMP characters are encoded as a sequence of
                 // two hex escapes, representing UTF-16 surrogates.
@@ -167,8 +168,13 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
                     let code2 = decode_json_hex_code2(&mut chars, lex)?;
                     if !(0xDC00..=0xDFFF).contains(&code2) {
                         lex.incr_col(i);
-                        let msg = format!("invalid codepoint surrogate {:x}", code2);
-                        return Err(Error::ParseFail(lex.format(&msg)));
+                        err_at!(
+                            ParseFail,
+                            msg: "{}",
+                            lex.format(
+                                &format!("invalid codepoint surrogate {:x}", code2)
+                            )
+                        )?;
                     }
                     let code = ((code1 - 0xD800) << 10) | ((code2 - 0xDC00) + 0x1_0000);
                     res.push(char::from_u32(code).unwrap());
@@ -178,21 +184,23 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
                     Some(ch) => res.push(ch),
                     None => {
                         lex.incr_col(i);
-                        let msg = format!("invalid unicode escape u{:x}", n);
-                        return Err(Error::ParseFail(lex.format(&msg)));
+                        err_at!(
+                            ParseFail,
+                            msg: "{}",
+                            lex.format(&format!("invalid unicode escape u{:x}", n))
+                        )?;
                     }
                 },
             },
             _ => {
                 lex.incr_col(i);
-                let err = "invalid string escape type";
-                return Err(Error::ParseFail(lex.format(&err)));
+                err_at!(ParseFail, msg: "{}", lex.format("invalid string escape type"))?
             }
         }
         escape = false;
     }
     lex.incr_col(i);
-    Err(Error::ParseFail(lex.format("incomplete string")))
+    err_at!(ParseFail, msg: "{}", lex.format("incomplete string"))
 }
 
 fn decode_json_hex_code2(chars: &mut CharIndices, lex: &mut Lex) -> Result<u32> {
@@ -203,7 +211,7 @@ fn decode_json_hex_code2(chars: &mut CharIndices, lex: &mut Lex) -> Result<u32> 
             }
         }
     }
-    Err(Error::ParseFail(lex.format("invalid string escape type")))
+    err_at!(ParseFail, msg: "{}", lex.format("invalid string escape type"))
 }
 
 fn decode_json_hex_code(chars: &mut CharIndices, lex: &mut Lex) -> Result<u32> {
@@ -212,7 +220,7 @@ fn decode_json_hex_code(chars: &mut CharIndices, lex: &mut Lex) -> Result<u32> {
     for (_, ch) in chars {
         if (ch as u32) > 128 || HEXNUM[ch as usize] == 20 {
             let msg = format!("invalid string escape code {:?}", ch);
-            return Err(Error::ParseFail(lex.format(&msg)));
+            err_at!(ParseFail, msg: "{}", lex.format(&msg))?;
         }
         code = code * 16 + u32::from(HEXNUM[ch as usize]);
         n += 1;
@@ -222,7 +230,7 @@ fn decode_json_hex_code(chars: &mut CharIndices, lex: &mut Lex) -> Result<u32> {
     }
     if n != 4 {
         let msg = format!("incomplete string escape code {:x}", code);
-        return Err(Error::ParseFail(lex.format(&msg)));
+        err_at!(ParseFail, msg: "{}", lex.format(&msg))?;
     }
     Ok(code)
 }
@@ -233,7 +241,7 @@ fn parse_array(text: &str, lex: &mut Lex) -> Result<Json> {
     let mut array: Vec<Json> = Vec::new();
     parse_whitespace(text, lex);
     if (&text[lex.off..]).as_bytes()[0] == b',' {
-        return Err(Error::ParseFail(lex.format("expected ','")));
+        err_at!(ParseFail, msg: "{}", lex.format("expected ','"))?;
     }
     loop {
         if (&text[lex.off..]).as_bytes()[0] == b']' {
@@ -275,7 +283,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
             }
             Some('"') => parse_string(text, lex)?.as_str().unwrap().to_string(),
             Some(ch) if ch.is_alphabetic() => parse_identifier(text, lex),
-            _ => break Err(Error::ParseFail(lex.format("invalid property key"))),
+            _ => err_at!(ParseFail, msg:"{}", lex.format("invalid property key"))?,
         };
         // colon
         parse_whitespace(text, lex);
@@ -292,7 +300,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
         parse_whitespace(text, lex);
         let mut chars = text[lex.off..].chars();
         match chars.next() {
-            None => break Err(Error::ParseFail(lex.format("unexpected eof"))),
+            None => err_at!(ParseFail, msg: "{}", lex.format("unexpected eof"))?,
             Some(',') => {
                 lex.incr_col(1);
             }
@@ -338,13 +346,14 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
     let progbytes = (&text[lex.off..]).as_bytes();
 
     if progbytes.is_empty() {
-        let msg = lex.format(&format!("missing token {}", b));
-        return Err(Error::ParseFail(msg));
+        err_at!(ParseFail, msg: "{}", lex.format(&format!("missing token {}", b)))?;
     }
 
     if progbytes[0] != b {
-        let msg = lex.format(&format!("invalid byte {}, {}", b, progbytes[0]));
-        return Err(Error::ParseFail(msg));
+        err_at!(
+            ParseFail,
+            msg: "{}", lex.format(&format!("invalid byte {}, {}", b, progbytes[0]))
+        )?;
     }
 
     lex.incr_col(1);
@@ -355,7 +364,7 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
 #[inline]
 fn not_eof(text: &str, lex: &mut Lex) -> Result<()> {
     if (&text[lex.off..]).is_empty() {
-        Err(Error::ParseFail(lex.format("unexpected eof")))
+        err_at!(ParseFail, msg: "{}", lex.format("unexpected eof"))
     } else {
         Ok(())
     }

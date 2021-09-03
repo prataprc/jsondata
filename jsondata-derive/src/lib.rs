@@ -107,7 +107,9 @@ fn get_try_into(attrs: &[syn::Attribute]) -> Option<syn::Type> {
             let mut iter = meta_list.nested.iter();
             loop {
                 match iter.next()? {
-                    syn::NestedMeta::Meta(syn::Meta::NameValue(nv)) => break Some(nv.clone()),
+                    syn::NestedMeta::Meta(syn::Meta::NameValue(nv)) => {
+                        break Some(nv.clone())
+                    }
                     _ => continue,
                 }
             }
@@ -138,6 +140,7 @@ fn from_json_to_type(name: &Ident, fields: &FieldsNamed) -> TokenStream {
 
             fn try_from(value: ::jsondata::Json) -> ::std::result::Result<#name, Self::Error> {
                 use ::std::convert::TryInto;
+                use ::jsondata::Error;
 
                 Ok(#name {
                     #token_builder
@@ -157,11 +160,11 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: {
                         let v: String = match value.get(&("/".to_string() + #key))?.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?;
                         match v.parse() {
                             Ok(v) => Ok(v),
-                            Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?
                     },
                 },
@@ -169,11 +172,11 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: {
                         let v: #intr_type = match value.get(&("/".to_string() + #key))?.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?;
                         match v.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => Err(::jsondata::Error::InvalidType(#key.to_string())),
+                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?
                     },
                 },
@@ -181,8 +184,7 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: match value.get(&("/".to_string() + #key))?.try_into() {
                         Ok(v) => Ok(v),
                         Err(err) => {
-                            let msg = format!("{} err: {}", #key.to_string(), err);
-                            Err(::jsondata::Error::InvalidType(msg))
+                            ::jsondata::err_at!(InvalidType, msg: "{} err: {}", #key.to_string(), err)
                         }
                     }?,
                 },

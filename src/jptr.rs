@@ -4,9 +4,9 @@
 //!
 //! [JSON Pointer RFC spec.]: https://tools.ietf.org/html/rfc6901
 
-use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::ops;
+use crate::{Error, Result};
 
 /// quote path fragment using backslash escape and tilde escape defined by the
 /// RFC specification.
@@ -53,9 +53,7 @@ pub fn unquote(fragment: &str) -> Result<String> {
             match ch {
                 '0' => outs.push('~'),
                 '1' => outs.push('/'),
-                _ => {
-                    return Err(Error::JptrFail(format!("invalid ~{}", ch)));
-                }
+                _ => err_at!(JptrFail, msg: "invalid ~{}", ch)?,
             }
             continue;
         }
@@ -87,9 +85,7 @@ pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String)> {
                 frag.push('/');
                 (state.0, false)
             }
-            ch if state.1 => {
-                return Err(Error::JptrFail(format!("invalid ~{}", ch)));
-            }
+            ch if state.1 => err_at!(JptrFail, msg: "invalid ~{}", ch)?,
             '/' => {
                 frags.push(frag.clone());
                 frag.truncate(0);
@@ -106,7 +102,10 @@ pub(crate) fn fragments(path: &str) -> Result<(Vec<String>, String)> {
     Ok((frags, frag))
 }
 
-pub(crate) fn lookup_mut<'a>(mut json: &'a mut Json, path: &str) -> Result<(&'a mut Json, String)> {
+pub(crate) fn lookup_mut<'a>(
+    mut json: &'a mut Json,
+    path: &str,
+) -> Result<(&'a mut Json, String)> {
     let (frags, key) = fragments(path)?;
     for frag in frags {
         json = ops::index_mut(json, frag.as_str())?
@@ -114,7 +113,10 @@ pub(crate) fn lookup_mut<'a>(mut json: &'a mut Json, path: &str) -> Result<(&'a 
     Ok((json, key))
 }
 
-pub(crate) fn lookup_ref<'a>(mut json_doc: &'a Json, path: &str) -> Result<(&'a Json, String)> {
+pub(crate) fn lookup_ref<'a>(
+    mut json_doc: &'a Json,
+    path: &str,
+) -> Result<(&'a Json, String)> {
     let (frags, key) = fragments(path)?;
     for frag in frags {
         json_doc = json_doc[frag.as_str()].to_result()?;
@@ -127,8 +129,7 @@ pub(crate) fn fix_prefix(path: &str) -> Result<&str> {
     if chars.next().unwrap() == '/' {
         Ok(chars.as_str())
     } else {
-        let msg = "pointer should start with forward solidus".to_string();
-        Err(Error::JptrFail(msg))
+        err_at!(JptrFail, msg: "pointer should start with forward solidus")
     }
 }
 

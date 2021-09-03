@@ -207,6 +207,7 @@ use std::ops::{
 #[doc(hidden)]
 pub use jsondata_derive::*;
 
+#[macro_use]
 mod error;
 mod json;
 mod jsons;

@@ -277,13 +277,13 @@ impl Json {
             Json::Array(arr) => match frag.parse::<usize>() {
                 Ok(n) => {
                     if n >= arr.len() {
-                        Err(Error::IndexOutofBound(n.try_into().unwrap()))
+                        err_at!(IndexOutofBound, msg: "{}", n)
                     } else {
                         arr[n] = value;
                         Ok(())
                     }
                 }
-                Err(err) => Err(Error::InvalidIndex(err.to_string())),
+                Err(err) => err_at!(InvalidIndex, msg: "{}", err),
             },
             Json::Object(props) => {
                 match props.binary_search_by(|p| p.as_key().cmp(&frag)) {
@@ -297,7 +297,7 @@ impl Json {
                     }
                 }
             }
-            _ => Err(Error::InvalidContainer(json.type_name())),
+            _ => err_at!(InvalidContainer, msg: "{}", json.type_name()),
         }
     }
 
@@ -314,13 +314,13 @@ impl Json {
             Json::Array(arr) => match frag.parse::<usize>() {
                 Ok(n) => {
                     if n >= arr.len() {
-                        Err(Error::IndexOutofBound(n.try_into().unwrap()))
+                        err_at!(IndexOutofBound, msg: "{}", n)
                     } else {
                         arr.remove(n);
                         Ok(())
                     }
                 }
-                Err(err) => Err(Error::InvalidIndex(err.to_string())),
+                Err(err) => err_at!(InvalidIndex, msg: "{}", err),
             },
             Json::Object(props) => {
                 match props.binary_search_by(|p| p.as_key().cmp(&frag)) {
@@ -328,10 +328,10 @@ impl Json {
                         props.remove(n);
                         Ok(())
                     }
-                    Err(_) => Err(Error::PropertyNotFound(frag)),
+                    Err(_) => err_at!(PropertyNotFound, msg: "{}", frag),
                 }
             }
-            _ => Err(Error::InvalidContainer(json.type_name())),
+            _ => err_at!(InvalidContainer, msg: "{}", json.type_name()),
         }
     }
 
@@ -350,7 +350,7 @@ impl Json {
                     j.push_str(&s);
                     Ok(())
                 } else {
-                    Err(Error::AppendString(value.type_name()))
+                    err_at!(AppendString, msg: "{}", value.type_name())
                 }
             }
             Json::Array(arr) => {
@@ -358,7 +358,7 @@ impl Json {
                 arr.insert(n, value);
                 Ok(())
             }
-            _ => Err(Error::InvalidContainer(json.type_name())),
+            _ => err_at!(InvalidContainer, msg: "{}", json.type_name()),
         }
     }
 
@@ -393,11 +393,19 @@ impl Json {
                 };
                 match (start, end) {
                     (Some(start), Some(end)) => Json::Array(arr[start..end].to_vec()),
-                    (None, _) => Json::__Error(Error::IndexOutofBound(s)),
-                    (_, None) => Json::__Error(Error::IndexOutofBound(e)),
+                    (None, _) => Json::__Error(
+                        (err_at!(IndexOutofBound, msg: "{}", s) as Result<()>)
+                            .unwrap_err(),
+                    ),
+                    (_, None) => Json::__Error(
+                        (err_at!(IndexOutofBound, msg: "{}", e) as Result<()>)
+                            .unwrap_err(),
+                    ),
                 }
             }
-            _ => Json::__Error(Error::NotAnArray(format!("{}", self))),
+            _ => Json::__Error(
+                (err_at!(NotAnArray, msg: "{}", self) as Result<()>).unwrap_err(),
+            ),
         }
     }
 }
@@ -475,14 +483,14 @@ impl Json {
     pub(crate) fn to_integer_result(&self) -> Result<i128> {
         match self {
             Json::Integer(item) => item.integer_result(),
-            _ => Err(Error::InvalidType("not an integer".to_string())),
+            _ => err_at!(InvalidType, msg: "not an integer"),
         }
     }
 
     pub(crate) fn to_float_result(&self) -> Result<f64> {
         match self {
             Json::Float(item) => item.float_result(),
-            _ => Err(Error::InvalidType("not a float".to_string())),
+            _ => err_at!(InvalidType, msg: "not a float"),
         }
     }
 }
@@ -701,7 +709,7 @@ macro_rules! convert_nums {
             fn try_from(val: Json) -> Result<f32> {
                 match val.$method() {
                     Some(val) => Ok(val as f32),
-                    None => Err(Error::InvalidType(val.type_name())),
+                    None => err_at!(InvalidType, msg: "{}", val.type_name()),
                 }
             }
         }
@@ -719,9 +727,9 @@ macro_rules! convert_nums {
                 match val.$method() {
                     Some(val) => match val.try_into() {
                         Ok(val) => Ok(val),
-                        Err(err) => Err(Error::InvalidNumber(err.to_string())),
+                        Err(err) => err_at!(InvalidNumber, msg: "{}", err),
                     },
-                    None => Err(Error::InvalidType(val.type_name())),
+                    None => err_at!(InvalidType, msg: "{}", val.type_name()),
                 }
             }
         }
@@ -762,7 +770,7 @@ impl TryFrom<Json> for String {
     fn try_from(val: Json) -> Result<String> {
         match val.as_str() {
             Some(s) => Ok(s.to_string()),
-            None => Err(Error::InvalidType(val.type_name())),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }
@@ -781,7 +789,7 @@ impl TryFrom<Json> for Vec<Property> {
     fn try_from(val: Json) -> Result<Vec<Property>> {
         match val.to_object() {
             Some(val) => Ok(val),
-            None => Err(Error::InvalidType(val.type_name())),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }
@@ -804,12 +812,11 @@ where
     fn try_from(val: Json) -> Result<(T,)> {
         match val.to_array() {
             Some(val) if val.len() == 1 => Ok((val[0].clone().try_into()?,)),
-            Some(v) => Err(Error::InvalidType(format!(
-                "{} tuple-arity-1 {}",
-                val.type_name(),
-                v.len(),
-            ))),
-            None => Err(Error::InvalidType(val.type_name())),
+            Some(v) => err_at!(
+                InvalidType,
+                msg: "{} tuple-arity-1 {}", val.type_name(), v.len()
+            ),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }
@@ -837,12 +844,11 @@ where
             Some(val) if val.len() == 2 => {
                 Ok((val[0].clone().try_into()?, val[1].clone().try_into()?))
             }
-            Some(v) => Err(Error::InvalidType(format!(
-                "{} tuple-arity-2 {}",
-                val.type_name(),
-                v.len(),
-            ))),
-            None => Err(Error::InvalidType(val.type_name())),
+            Some(v) => err_at!(
+                InvalidType,
+                msg: "{} tuple-arity-2 {}", val.type_name(), v.len()
+            ),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }
@@ -874,12 +880,11 @@ where
                 val[1].clone().try_into()?,
                 val[2].clone().try_into()?,
             )),
-            Some(v) => Err(Error::InvalidType(format!(
-                "{} tuple-arity-3 {}",
-                val.type_name(),
-                v.len()
-            ))),
-            None => Err(Error::InvalidType(val.type_name())),
+            Some(v) => err_at!(
+                InvalidType,
+                msg: "{} tuple-arity-3 {}", val.type_name(), v.len()
+            ),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }
@@ -909,7 +914,7 @@ where
                 }
                 Ok(out)
             }
-            None => Err(Error::InvalidType(val.type_name())),
+            None => err_at!(InvalidType, msg: "{}", val.type_name()),
         }
     }
 }

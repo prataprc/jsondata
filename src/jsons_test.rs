@@ -2,7 +2,6 @@
 
 use std::fs::File;
 
-use crate::error::Error;
 use crate::json::Json;
 use crate::jsons::Jsons;
 use crate::property::Property;
@@ -21,10 +20,12 @@ fn test_stream0() {
     let mut js: Jsons<&[u8]> = b" n".as_ref().into();
     let value = js.next().unwrap().unwrap();
     assert!(value.is_error());
-    assert_eq!(
-        value.to_error().unwrap(),
-        Error::ParseFail("expected null at offset:0 line:1 col:1".to_string())
-    );
+    match value.to_error() {
+        Some(err) => assert!(err
+            .to_string()
+            .contains("expected null at offset:0 line:1 col:1")),
+        _ => unreachable!(),
+    }
 }
 
 #[test]

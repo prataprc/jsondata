@@ -106,21 +106,18 @@ where
                 self.quant.truncate(0);
                 break res;
             }
-            let res = self.codes.next();
-            if res.is_none() && !self.quant.is_empty() {
-                let res = match self.quant.parse() {
-                    Ok(json) => Some(Ok(json)),
-                    Err(s) => Some(Ok(Json::__Error(s))),
-                };
-                //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
-                self.quant.truncate(0);
-                break res;
-            } else if res.is_none() {
-                break None;
-            }
-            ok_ch = match res.unwrap() {
-                Ok(x) => Ok(x),
-                Err(err) => Err(Error::IoError(err.to_string())),
+            ok_ch = match self.codes.next() {
+                Some(res) => err_at!(IoError, res),
+                None if !self.quant.is_empty() => {
+                    let res = match self.quant.parse() {
+                        Ok(json) => Some(Ok(json)),
+                        Err(s) => Some(Ok(Json::__Error(s))),
+                    };
+                    //println!("quant {:?} {:?}", self.quant.as_bytes(), res);
+                    self.quant.truncate(0);
+                    break res;
+                }
+                None => break None,
             }
         }
     }
@@ -147,7 +144,7 @@ where
                     break Some(Ok(()));
                 }
                 Some(Ok(ch)) => self.quant.push(ch),
-                Some(Err(err)) => break Some(Err(Error::IoError(err.to_string()))),
+                Some(Err(err)) => break Some(err_at!(IoError, msg: "{}", err)),
                 None => break Some(Ok(())),
             }
         }
@@ -158,7 +155,7 @@ where
             match self.codes.next()? {
                 Ok(ch) if !ch.is_whitespace() => break Some(Ok(ch)),
                 Ok(_) => (),
-                Err(err) => break Some(Err(Error::IoError(err.to_string()))),
+                res => break Some(err_at!(IoError, res)),
             }
         }
     }

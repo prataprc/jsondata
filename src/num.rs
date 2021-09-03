@@ -24,15 +24,16 @@ fn parse_integer(text: &[u8]) -> Result<i128> {
             from_utf8_unchecked(text).parse::<i128>()
         }
     };
-    res.map_err(|e| Error::InvalidNumber(e.to_string()))
+    err_at!(InvalidNumber, res)
 }
 
 #[inline]
 fn parse_float(text: &[u8]) -> Result<f64> {
     use std::str::from_utf8_unchecked;
 
-    let res = unsafe { from_utf8_unchecked(text).parse::<f64>() };
-    res.map_err(|e| Error::InvalidNumber(e.to_string()))
+    err_at!(InvalidNumber, unsafe {
+        from_utf8_unchecked(text).parse::<f64>()
+    })
 }
 
 #[derive(Clone, Debug)]
