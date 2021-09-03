@@ -11,7 +11,7 @@ use crate::error::{Error, Result};
 use crate::lex::Lex;
 use crate::num::{Floating, Integral};
 use crate::parse::parse_value;
-use crate::property::{self, Property};
+use crate::property::Property;
 use crate::{jptr, ops};
 
 // TODO: test case for all combination for JsonSerialize,
@@ -286,16 +286,18 @@ impl Json {
                 }
                 Err(err) => Err(Error::InvalidIndex(err.to_string())),
             },
-            Json::Object(props) => match property::search_by_key(&props, &frag) {
-                Ok(n) => {
-                    props[n].set_value(value);
-                    Ok(())
+            Json::Object(props) => {
+                match props.binary_search_by(|p| p.as_key().cmp(&frag)) {
+                    Ok(n) => {
+                        props[n].set_value(value);
+                        Ok(())
+                    }
+                    Err(n) => {
+                        props.insert(n, Property::new(frag, value));
+                        Ok(())
+                    }
                 }
-                Err(n) => {
-                    props.insert(n, Property::new(frag, value));
-                    Ok(())
-                }
-            },
+            }
             _ => Err(Error::InvalidContainer(json.typename())),
         }
     }
@@ -321,13 +323,15 @@ impl Json {
                 }
                 Err(err) => Err(Error::InvalidIndex(err.to_string())),
             },
-            Json::Object(props) => match property::search_by_key(&props, &frag) {
-                Ok(n) => {
-                    props.remove(n);
-                    Ok(())
+            Json::Object(props) => {
+                match props.binary_search_by(|p| p.as_key().cmp(&frag)) {
+                    Ok(n) => {
+                        props.remove(n);
+                        Ok(())
+                    }
+                    Err(_) => Err(Error::PropertyNotFound(frag)),
                 }
-                Err(_) => Err(Error::PropertyNotFound(frag)),
-            },
+            }
             _ => Err(Error::InvalidContainer(json.typename())),
         }
     }
@@ -614,11 +618,11 @@ impl Ord for Json {
                     if i == that.len() {
                         return Ordering::Greater;
                     }
-                    let cmp = a.as_ref_key().cmp(that[i].as_ref_key());
+                    let cmp = a.as_key().cmp(that[i].as_key());
                     if cmp != Ordering::Equal {
                         return cmp;
                     }
-                    let cmp = a.as_ref_value().cmp(that[i].as_ref_value());
+                    let cmp = a.as_value().cmp(that[i].as_value());
                     if cmp != Ordering::Equal {
                         return cmp;
                     }
@@ -1249,8 +1253,8 @@ impl Display for Json {
                 } else {
                     write!(f, "{{")?;
                     for (i, prop) in val.iter().enumerate() {
-                        encode_string(f, prop.as_ref_key())?;
-                        write!(f, ":{}", prop.as_ref_value())?;
+                        encode_string(f, prop.as_key())?;
+                        write!(f, ":{}", prop.as_value())?;
                         if i < (val_len - 1) {
                             write!(f, ",")?;
                         }
@@ -1288,8 +1292,9 @@ fn encode_string<W: Write>(w: &mut W, val: &str) -> fmt::Result {
 }
 
 pub fn insert(json: &mut Json, item: Property) {
+    let item_key = item.as_key();
     if let Json::Object(obj) = json {
-        match property::search_by_key(&obj, item.as_ref_key()) {
+        match obj.binary_search_by(|p| p.as_key().cmp(item_key)) {
             Ok(off) => {
                 obj.push(item);
                 obj.swap_remove(off);

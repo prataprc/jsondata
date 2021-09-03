@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 
 use crate::error::{Error, Result};
 use crate::json::Json;
-use crate::property::{self, Property};
+use crate::property::Property;
 
 // TODO: use macro to implement Add<Json> and Add<&Json> and similar variant
 // for Sub, Mul, Div, Neg ...
@@ -392,8 +392,10 @@ impl Not for Json {
 // lossy error message via Json::__Error
 lazy_static! {
     pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(-1));
-    pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray("--na--".to_string()));
-    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::InvalidIndex("--na--".to_string()));
+    pub static ref NOT_AN_ARRAY: Json =
+        Json::__Error(Error::NotAnArray("--na--".to_string()));
+    pub static ref NOT_AN_INDEX: Json =
+        Json::__Error(Error::InvalidIndex("--na--".to_string()));
     pub static ref NOT_A_CONTAINER: Json =
         Json::__Error(Error::InvalidContainer("--na--".to_string()));
     pub static ref PROPERTY_NOT_FOUND: Json =
@@ -420,8 +422,8 @@ impl Index<&str> for Json {
 
     fn index(&self, index: &str) -> &Json {
         match self {
-            Json::Object(obj) => match property::search_by_key(obj, index) {
-                Ok(off) => obj[off].as_ref_value(),
+            Json::Object(obj) => match obj.binary_search_by(|p| p.as_key().cmp(index)) {
+                Ok(off) => obj[off].as_value(),
                 Err(_) => &PROPERTY_NOT_FOUND,
             },
             Json::Array(arr) => match index.parse::<isize>() {
@@ -437,21 +439,21 @@ impl Index<&str> for Json {
     }
 }
 
-pub(crate) fn index_mut<'a>(j: &'a mut Json, i: &str) -> Result<&'a mut Json> {
-    match j {
-        Json::Object(obj) => match property::search_by_key(obj, i) {
+pub(crate) fn index_mut<'a>(val: &'a mut Json, key: &str) -> Result<&'a mut Json> {
+    match val {
+        Json::Object(obj) => match obj.binary_search_by(|p| p.as_key().cmp(key)) {
             Ok(off) => Ok(obj[off].as_mut_value()),
-            Err(_) => Err(Error::PropertyNotFound(i.to_string())),
+            Err(_) => Err(Error::PropertyNotFound(key.to_string())),
         },
-        Json::Array(arr) => match i.parse::<isize>() {
+        Json::Array(arr) => match key.parse::<isize>() {
             Ok(n) => match normalized_offset(n, arr.len()) {
                 Some(off) => Ok(&mut arr[off]),
                 None => Err(Error::IndexOutofBound(n)),
             },
             Err(err) => Err(Error::InvalidIndex(err.to_string())),
         },
-        Json::__Error(_) => Ok(j),
-        _ => Err(Error::InvalidContainer(j.typename())),
+        Json::__Error(_) => Ok(val),
+        _ => Err(Error::InvalidContainer(val.typename())),
     }
 }
 
@@ -480,9 +482,11 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
     use crate::json::Json::Object;
 
     for o in other.into_iter() {
-        match property::search_by_key(&this, o.as_ref_key()) {
+        match this.binary_search_by(|p| p.as_key().cmp(o.as_key())) {
             Ok(off) => match (this[off].clone().into_value(), o.clone().into_value()) {
-                (Object(val), Object(val2)) => this[off].set_value(Object(mixin_object(val, val2))),
+                (Object(val), Object(val2)) => {
+                    this[off].set_value(Object(mixin_object(val, val2)))
+                }
                 _ => this.insert(off, o),
             },
             Err(off) => this.insert(off, o.clone()),
