@@ -76,7 +76,7 @@ impl Add for Json {
                 obj
             }
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::AddFail(format!("{} + {}", x, y)))
             }
         }
@@ -131,7 +131,7 @@ impl Sub for Json {
                 Object(res)
             }
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::SubFail(format!("{} - {}", x, y)))
             }
         }
@@ -185,7 +185,7 @@ impl Mul for Json {
                 Json::Object(obj)
             }
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::MulFail(format!("{} * {}", x, y)))
             }
         }
@@ -243,7 +243,7 @@ impl Div for Json {
                 Json::Array(arr)
             }
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::DivFail(format!("{} / {}", x, y)))
             }
         }
@@ -296,7 +296,7 @@ impl Rem for Json {
                 }
             }
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::RemFail(format!("{} % {}", x, y)))
             }
         }
@@ -317,7 +317,7 @@ impl Neg for Json {
                 Ok(val) => Json::new(-val),
                 Err(err) => Json::__Error(err),
             },
-            _ => Json::__Error(Error::NegFail(format!("-{}", self.typename()))),
+            _ => Json::__Error(Error::NegFail(format!("-{}", self.type_name()))),
         }
     }
 }
@@ -329,7 +329,7 @@ impl Shl for Json {
         match (self.to_integer(), rhs.to_integer()) {
             (Some(l), Some(r)) => Json::new(l << r),
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::ShlFail(format!("{} << {}", x, y)))
             }
         }
@@ -343,7 +343,7 @@ impl Shr for Json {
         match (self.to_integer(), rhs.to_integer()) {
             (Some(l), Some(r)) => Json::new(l >> r),
             (_, _) => {
-                let (x, y) = (self.typename(), rhs.typename());
+                let (x, y) = (self.type_name(), rhs.type_name());
                 Json::__Error(Error::ShrFail(format!("{} >> {}", x, y)))
             }
         }
@@ -493,7 +493,7 @@ pub(crate) fn index_mut<'a>(val: &'a mut Json, key: &str) -> Result<&'a mut Json
             Err(err) => Err(Error::InvalidIndex(err.to_string())),
         },
         Json::__Error(_) => Ok(val),
-        _ => Err(Error::InvalidContainer(val.typename())),
+        _ => Err(Error::InvalidContainer(val.type_name())),
     }
 }
 

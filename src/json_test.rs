@@ -126,19 +126,19 @@ fn test_compute() {
 }
 
 #[test]
-fn test_typename() {
-    assert_eq!(Json::Null.typename(), "null".to_string());
-    assert_eq!(Json::new(true).typename(), "bool".to_string());
-    assert_eq!(Json::new(false).typename(), "bool".to_string());
-    assert_eq!(Json::new(10).typename(), "integer".to_string());
-    assert_eq!(Json::new(10.2).typename(), "float".to_string());
-    assert_eq!(Json::new("hello").typename(), "string".to_string());
+fn test_type_name() {
+    assert_eq!(Json::Null.type_name(), "null".to_string());
+    assert_eq!(Json::new(true).type_name(), "bool".to_string());
+    assert_eq!(Json::new(false).type_name(), "bool".to_string());
+    assert_eq!(Json::new(10).type_name(), "integer".to_string());
+    assert_eq!(Json::new(10.2).type_name(), "float".to_string());
+    assert_eq!(Json::new("hello").type_name(), "string".to_string());
 
     let items: Vec<Json> = vec![];
-    assert_eq!(Json::new(items).typename(), "array".to_string());
+    assert_eq!(Json::new(items).type_name(), "array".to_string());
 
     let props: Vec<Property> = vec![Property::new("a", Json::new(true))];
-    assert_eq!(Json::new(props).typename(), "object".to_string());
+    assert_eq!(Json::new(props).type_name(), "object".to_string());
 }
 
 #[test]

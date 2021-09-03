@@ -228,8 +228,7 @@ impl Json {
         Ok(())
     }
 
-    // TODO: rename this to type_name()
-    pub fn typename(&self) -> String {
+    pub fn type_name(&self) -> String {
         match self {
             Json::Null => "null".to_string(),
             Json::Bool(_) => "bool".to_string(),
@@ -298,7 +297,7 @@ impl Json {
                     }
                 }
             }
-            _ => Err(Error::InvalidContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.type_name())),
         }
     }
 
@@ -332,7 +331,7 @@ impl Json {
                     Err(_) => Err(Error::PropertyNotFound(frag)),
                 }
             }
-            _ => Err(Error::InvalidContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.type_name())),
         }
     }
 
@@ -351,7 +350,7 @@ impl Json {
                     j.push_str(&s);
                     Ok(())
                 } else {
-                    Err(Error::AppendString(value.typename()))
+                    Err(Error::AppendString(value.type_name()))
                 }
             }
             Json::Array(arr) => {
@@ -359,7 +358,7 @@ impl Json {
                 arr.insert(n, value);
                 Ok(())
             }
-            _ => Err(Error::InvalidContainer(json.typename())),
+            _ => Err(Error::InvalidContainer(json.type_name())),
         }
     }
 
@@ -702,7 +701,7 @@ macro_rules! convert_nums {
             fn try_from(val: Json) -> Result<f32> {
                 match val.$method() {
                     Some(val) => Ok(val as f32),
-                    None => Err(Error::InvalidType(val.typename())),
+                    None => Err(Error::InvalidType(val.type_name())),
                 }
             }
         }
@@ -722,7 +721,7 @@ macro_rules! convert_nums {
                         Ok(val) => Ok(val),
                         Err(err) => Err(Error::InvalidNumber(err.to_string())),
                     },
-                    None => Err(Error::InvalidType(val.typename())),
+                    None => Err(Error::InvalidType(val.type_name())),
                 }
             }
         }
@@ -763,7 +762,7 @@ impl TryFrom<Json> for String {
     fn try_from(val: Json) -> Result<String> {
         match val.as_str() {
             Some(s) => Ok(s.to_string()),
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
@@ -782,7 +781,7 @@ impl TryFrom<Json> for Vec<Property> {
     fn try_from(val: Json) -> Result<Vec<Property>> {
         match val.to_object() {
             Some(val) => Ok(val),
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
@@ -807,10 +806,10 @@ where
             Some(val) if val.len() == 1 => Ok((val[0].clone().try_into()?,)),
             Some(v) => Err(Error::InvalidType(format!(
                 "{} tuple-arity-1 {}",
-                val.typename(),
+                val.type_name(),
                 v.len(),
             ))),
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
@@ -840,10 +839,10 @@ where
             }
             Some(v) => Err(Error::InvalidType(format!(
                 "{} tuple-arity-2 {}",
-                val.typename(),
+                val.type_name(),
                 v.len(),
             ))),
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
@@ -877,10 +876,10 @@ where
             )),
             Some(v) => Err(Error::InvalidType(format!(
                 "{} tuple-arity-3 {}",
-                val.typename(),
+                val.type_name(),
                 v.len()
             ))),
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
@@ -910,7 +909,7 @@ where
                 }
                 Ok(out)
             }
-            None => Err(Error::InvalidType(val.typename())),
+            None => Err(Error::InvalidType(val.type_name())),
         }
     }
 }
