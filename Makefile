@@ -32,7 +32,7 @@ bench:
 flamegraph:
 	echo "not an executable"
 
-prepare:
+prepare: build test bench
 	check.sh check.out
 	perf.sh perf.out
 
