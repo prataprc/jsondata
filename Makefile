@@ -27,19 +27,19 @@ build:
 
 test:
 	# ... test ...
-	cargo +nightly test
-	cd jsondata-derive; cargo +nightly test
-	cargo +nightly run --example macro
 	# TODO: cargo +stable test --no-run
 	# TODO: cd jsondata-derive; cargo +stable test
 	# TODO: cargo +stable run --example macro
+	cargo +nightly test
+	cd jsondata-derive; cargo +nightly test
+	cargo +nightly run --example macro
 
 bench:
-	# ... test ...
-	cargo +nightly bench
-	cd jsondata-derive; cargo +nightly bench
+	# ... bench ...
 	# TODO: cargo +stable test --no-run
 	# TODO: cd jsondata-derive; cargo +stable test
+	cargo +nightly bench
+	cd jsondata-derive; cargo +nightly bench
 
 flamegraph:
 	echo "not an executable"
