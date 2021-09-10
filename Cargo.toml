@@ -18,6 +18,9 @@ debug = true
 [profile.bench]
 debug = true
 
+[lib]
+name = "jsondata"
+
 [dependencies]
 lazy_static = "1.2.0"
 unicode_reader = "0.1.1"
