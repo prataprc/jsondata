@@ -171,3 +171,5 @@ Contribution
 [fp-total-order]: https://en.m.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
 [blog1]: https://steve.hollasch.net/cgindex/coding/ieeefloat.html
 [MIT license]: https://opensource.org/licenses/MIT
+[spellcheck]: https://github.com/drahnr/cargo-spellcheck
+[dco]: https://developercertificate.org/

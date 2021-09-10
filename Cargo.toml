@@ -8,7 +8,7 @@ keywords = ["json", "json5"]
 categories = ["parsing", "encoding"]
 authors = ["prataprc <prataprc@gmail.com>"]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 exclude = ["template/**"]
 
