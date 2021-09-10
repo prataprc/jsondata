@@ -89,7 +89,10 @@ fn main() {
         field2: -10.12312312312311,
     };
 
-    let ref_s = r#"{"field1":1.0234567642211914e1,"field2":-1.012312312312311e1}"#;
+    let ref_s = format!(
+        "{{\"field1\":{:e},\"field2\":-1.012312312312311e1}}",
+        f_ref.field1 as f64,
+    );
 
     let jval: Json = f_ref.clone().try_into().unwrap();
     let f: Floats = jval.clone().try_into().unwrap();
