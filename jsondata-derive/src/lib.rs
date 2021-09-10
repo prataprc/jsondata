@@ -74,7 +74,7 @@ fn to_json_property(field: &Field) -> TokenStream {
 }
 
 fn get_from_str(attrs: &[syn::Attribute]) -> bool {
-    if attrs.len() == 0 {
+    if attrs.is_empty() {
         return false;
     }
     match attrs[0].parse_meta().unwrap() {
@@ -83,10 +83,9 @@ fn get_from_str(attrs: &[syn::Attribute]) -> bool {
             'outer: loop {
                 if let Some(syn::NestedMeta::Meta(syn::Meta::Path(p))) = iter.next() {
                     for seg in p.segments.iter() {
-                        if seg.ident.to_string() == "from_str" {
-                            break 'outer true;
-                        } else if seg.ident.to_string() == "to_string" {
-                            break 'outer true;
+                        match seg.ident.to_string().as_str() {
+                            "from_str" | "to_string" => break 'outer true,
+                            _ => (),
                         }
                     }
                 } else {
@@ -99,7 +98,7 @@ fn get_from_str(attrs: &[syn::Attribute]) -> bool {
 }
 
 fn get_try_into(attrs: &[syn::Attribute]) -> Option<syn::Type> {
-    if attrs.len() == 0 {
+    if attrs.is_empty() {
         return None;
     }
     let nv = match attrs[0].parse_meta().unwrap() {
@@ -118,13 +117,12 @@ fn get_try_into(attrs: &[syn::Attribute]) -> Option<syn::Type> {
     }?;
 
     let segs: Vec<&syn::PathSegment> = nv.path.segments.iter().collect();
-    if segs.first().unwrap().ident.to_string() == "try_into" {
-        Some(match &nv.lit {
+    match segs.first().unwrap().ident.to_string().as_str() {
+        "try_into" => Some(match &nv.lit {
             syn::Lit::Str(s) => s.parse().unwrap(),
             _ => panic!("invalid literal"),
-        })
-    } else {
-        None
+        }),
+        _ => None,
     }
 }
 

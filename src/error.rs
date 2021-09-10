@@ -130,7 +130,3 @@ impl fmt::Debug for Error {
 }
 
 impl error::Error for Error {}
-
-/// Result type, for jsondata functions and methods, that require a
-/// success or failure variant.
-pub type Result<T> = std::result::Result<T, Error>;

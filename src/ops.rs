@@ -6,9 +6,9 @@ use std::ops::{BitAnd, BitOr, BitXor, Index};
 
 use lazy_static::lazy_static;
 
-use crate::error::{Error, Result};
 use crate::json::Json;
 use crate::property::Property;
+use crate::{Error, Result};
 
 // TODO: Implement && || as short-circuiting logical operation. They are not
 // not implementable as `std` traits, hence figure out an apt API.

@@ -1,17 +1,29 @@
 build:
 	# ... build ...
-	cargo +nightly build
 	# TODO: cargo +stable build
+	# TODO: cd jsondata-derive; cargo +nightly build
+	cargo +nightly build
+	cd jsondata-derive; cargo +nightly build
+	#
 	# ... test ...
-	cargo +nightly test --no-run
 	# TODO: cargo +stable test --no-run
+	# TODO: cd jsondata-derive; cargo +nightly test --no-run
+	cargo +nightly test --no-run
+	cd jsondata-derive; cargo +nightly test --no-run
+	#
 	# ... bench ...
 	cargo +nightly bench --no-run
+	cd jsondata-derive; cargo +nightly bench --no-run
+	#
 	# ... doc ...
-	cargo +nightly doc
 	# TODO: cargo +stable doc
+	# TODO: cd jsondata-derive; cargo +nightly bench --no-run
+	cargo +nightly doc
+	cd jsondata-derive; cargo +nightly bench --no-run
+	#
 	# ... meta commands ...
 	cargo +nightly clippy --all-targets --all-features
+	cd jsondata-derive; cargo +nightly clippy --all-targets --all-features
 
 test:
 	# ... test ...

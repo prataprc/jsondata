@@ -207,6 +207,10 @@ use std::ops::{
 #[doc(hidden)]
 pub use jsondata_derive::*;
 
+/// Result type, for jsondata functions and methods, that require a
+/// success or failure variant.
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[macro_use]
 mod error;
 mod json;
@@ -220,7 +224,7 @@ mod property;
 pub mod jptr;
 
 // Re-exports for API documentation.
-pub use crate::error::{Error, Result};
+pub use crate::error::Error;
 pub use crate::json::Json;
 pub use crate::jsons::Jsons;
 pub use crate::property::Property;
