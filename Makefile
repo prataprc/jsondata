@@ -13,8 +13,22 @@ build:
 	# ... meta commands ...
 	cargo +nightly clippy --all-targets --all-features
 
+test:
+	# ... test ...
+	cargo +nightly test
+	cd jsondata-derive; cargo +nightly test
+	# TODO: cargo +stable test --no-run
+	# TODO: cd jsondata-derive; cargo +nightly test
+
+bench:
+	# ... test ...
+	cargo +nightly bench
+	cd jsondata-derive; cargo +nightly bench
+	# TODO: cargo +stable test --no-run
+	# TODO: cd jsondata-derive; cargo +nightly test
+
 flamegraph:
-	echo "no executable"
+	echo "not an executable"
 
 prepare:
 	check.sh check.out
