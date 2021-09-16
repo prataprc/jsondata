@@ -33,22 +33,26 @@ fn impl_jsonize_type(input: &DeriveInput) -> TokenStream {
 }
 
 fn from_type_to_json(name: &Ident, fields: &FieldsNamed) -> TokenStream {
+    let croot = get_root_crate();
+
     let mut token_builder = quote! {};
     for field in fields.named.iter() {
         token_builder.extend(to_json_property(field));
     }
     quote! {
-        impl ::std::convert::From<#name> for ::jsondata::Json {
-            fn from(value: #name) -> ::jsondata::Json {
-                let mut props: Vec<::jsondata::Property> = vec![];
+        impl ::std::convert::From<#name> for #croot::Json {
+            fn from(value: #name) -> #croot::Json {
+                let mut props: Vec<#croot::Property> = vec![];
                 #token_builder;
-                ::jsondata::Json::new(props)
+                #croot::Json::new(props)
             }
         }
     }
 }
 
 fn to_json_property(field: &Field) -> TokenStream {
+    let croot = get_root_crate();
+
     match &field.ident {
         Some(field_name) => {
             let key = field_name.to_string().to_lowercase();
@@ -56,16 +60,16 @@ fn to_json_property(field: &Field) -> TokenStream {
             match (is_from_str, get_try_into(&field.attrs)) {
                 (true, _) => quote! {
                     let v: Json = value.#field_name.to_string().into();
-                    props.push(::jsondata::Property::new(#key, v));
+                    props.push(#croot::Property::new(#key, v));
                 },
                 (false, Some(intr_type)) => quote! {
                     let v: #intr_type = value.#field_name.try_into().unwrap();
                     let v: Json = v.into();
-                    props.push(::jsondata::Property::new(#key, v));
+                    props.push(#croot::Property::new(#key, v));
                 },
                 (false, None) => quote! {
                     let v = value.#field_name.into();
-                    props.push(::jsondata::Property::new(#key, v));
+                    props.push(#croot::Property::new(#key, v));
                 },
             }
         }
@@ -127,18 +131,20 @@ fn get_try_into(attrs: &[syn::Attribute]) -> Option<syn::Type> {
 }
 
 fn from_json_to_type(name: &Ident, fields: &FieldsNamed) -> TokenStream {
+    let croot = get_root_crate();
+
     let mut token_builder = quote! {};
     for field in fields.named.iter() {
         token_builder.extend(to_type_field(field));
     }
 
     quote! {
-        impl ::std::convert::TryFrom<::jsondata::Json> for #name {
-            type Error = ::jsondata::Error;
+        impl ::std::convert::TryFrom<#croot::Json> for #name {
+            type Error = #croot::Error;
 
-            fn try_from(value: ::jsondata::Json) -> ::std::result::Result<#name, Self::Error> {
+            fn try_from(value: #croot::Json) -> ::std::result::Result<#name, Self::Error> {
                 use ::std::convert::TryInto;
-                use ::jsondata::Error;
+                use #croot::Error;
 
                 Ok(#name {
                     #token_builder
@@ -149,6 +155,8 @@ fn from_json_to_type(name: &Ident, fields: &FieldsNamed) -> TokenStream {
 }
 
 fn to_type_field(field: &Field) -> TokenStream {
+    let croot = get_root_crate();
+
     match &field.ident {
         Some(field_name) => {
             let key = field_name.to_string().to_lowercase();
@@ -158,11 +166,11 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: {
                         let v: String = match value.get(&("/".to_string() + #key))?.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
+                            Err(err) => #croot::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?;
                         match v.parse() {
                             Ok(v) => Ok(v),
-                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
+                            Err(err) => #croot::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?
                     },
                 },
@@ -170,11 +178,11 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: {
                         let v: #intr_type = match value.get(&("/".to_string() + #key))?.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
+                            Err(err) => #croot::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?;
                         match v.try_into() {
                             Ok(v) => Ok(v),
-                            Err(err) => ::jsondata::err_at!(InvalidType, msg: "{}", #key.to_string()),
+                            Err(err) => #croot::err_at!(InvalidType, msg: "{}", #key.to_string()),
                         }?
                     },
                 },
@@ -182,12 +190,22 @@ fn to_type_field(field: &Field) -> TokenStream {
                     #field_name: match value.get(&("/".to_string() + #key))?.try_into() {
                         Ok(v) => Ok(v),
                         Err(err) => {
-                            ::jsondata::err_at!(InvalidType, msg: "{} err: {}", #key.to_string(), err)
+                            #croot::err_at!(InvalidType, msg: "{} err: {}", #key.to_string(), err)
                         }
                     }?,
                 },
             }
         }
         None => TokenStream::new(),
+    }
+}
+
+fn get_root_crate() -> TokenStream {
+    // TODO: can this be fixed ?
+    let local = module_path!().ends_with("json_test");
+    if local {
+        quote! { crate }
+    } else {
+        quote! { ::jsondata }
     }
 }
