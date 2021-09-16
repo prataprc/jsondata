@@ -435,6 +435,7 @@ impl Json {
     pub fn to_float(&self) -> Option<f64> {
         match self {
             Json::Float(item) => item.float(),
+            Json::Integer(item) => item.float(),
             _ => None,
         }
     }

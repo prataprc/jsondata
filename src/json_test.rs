@@ -2,8 +2,8 @@
 
 use std::f64;
 
-use crate::json::Json;
 use crate::property::Property;
+use crate::Json;
 
 #[test]
 fn test_json_constructor() {

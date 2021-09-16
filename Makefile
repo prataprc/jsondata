@@ -30,9 +30,11 @@ test:
 	# TODO: cargo +stable test --no-run
 	# TODO: cd jsondata-derive; cargo +stable test
 	# TODO: cargo +stable run --example macro
+	# TODO: cargo +stable run --example mixed_integer
 	cargo +nightly test
 	cd jsondata-derive; cargo +nightly test
 	cargo +nightly run --example macro
+	cargo +nightly run --example mixed_integer
 
 bench:
 	# ... bench ...

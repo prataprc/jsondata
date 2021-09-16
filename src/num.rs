@@ -151,6 +151,16 @@ impl Integral {
         }
     }
 
+    pub fn float(&self) -> Option<f64> {
+        let val = self.integer()?;
+        if -9007199254740992 <= val && val <= 9007199254740992 {
+            Some(val as f64)
+        } else {
+            // TODO: strict accuracy or tolerant behaviour
+            None
+        }
+    }
+
     pub fn compute(&mut self) -> Result<()> {
         if let Integral::Text { len, bytes } = self {
             let value = parse_integer(&bytes[0..*len])?;
