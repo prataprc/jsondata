@@ -27,7 +27,7 @@ build:
 
 test:
 	# ... test ...
-	# TODO: cargo +stable test --no-run
+	# TODO: cargo +stable test
 	# TODO: cd jsondata-derive; cargo +stable test
 	# TODO: cargo +stable run --example macro
 	# TODO: cargo +stable run --example mixed_integer
@@ -38,8 +38,8 @@ test:
 
 bench:
 	# ... bench ...
-	# TODO: cargo +stable test --no-run
-	# TODO: cd jsondata-derive; cargo +stable test
+	# TODO: cargo +stable bench
+	# TODO: cd jsondata-derive; cargo +stable bench
 	cargo +nightly bench
 	cd jsondata-derive; cargo +nightly bench
 
