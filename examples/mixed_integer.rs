@@ -52,14 +52,14 @@ fn main() {
     println!("{:?}", out.unwrap());
 
     let text = r#"{"a": 256}"#;
-    let out = U8::try_from(Json::from_str(&text).unwrap());
+    let out = U8::try_from(Json::from_str(text).unwrap());
     assert!(out.is_err());
 
     let text = r#"{"a": 2.123456789}"#;
-    let out = F32::try_from(Json::from_str(&text).unwrap());
+    let out = F32::try_from(Json::from_str(text).unwrap());
     assert!(out.is_ok());
     println!("{:?}", out.clone().unwrap());
-    assert!(out.unwrap().a == 2.123456789); // Note .000000089 is ignored by f32.
+    assert!((out.unwrap().a - 2.123_456_7).abs() < 0.000001);
 
     let texts = [
         r#"{"a": 0}"#,
@@ -77,7 +77,7 @@ fn main() {
         r#"{"a": 18446744073709551615}"#,
     ];
     for (i, text) in texts.iter().enumerate() {
-        let out = F64::try_from(Json::from_str(&text).unwrap());
+        let out = F64::try_from(Json::from_str(text).unwrap());
         match i {
             0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 => println!("{:?}", out.unwrap()),
             _ => assert!(out.is_err()),
