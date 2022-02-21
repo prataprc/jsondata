@@ -82,7 +82,7 @@ fn main() {
     assert_eq!(jval.to_string(), ref_s);
     assert_eq!(p, p_ref);
 
-    println!("{}", jval.to_string());
+    println!("{}", jval);
 
     let f_ref = Floats {
         field1: 10.234_567,
@@ -101,5 +101,5 @@ fn main() {
     assert!((f.field1 - f_ref.field1).abs() < f32::EPSILON);
     assert!((f.field2 - f_ref.field2).abs() < f64::EPSILON);
 
-    println!("{}", jval.to_string());
+    println!("{}", jval);
 }

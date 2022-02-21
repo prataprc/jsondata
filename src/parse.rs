@@ -16,7 +16,7 @@ pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     not_eof(text, lex)?;
 
     //println!("text -- {:?}", &text[lex.off..].as_bytes());
-    let bs = (&text[lex.off..]).as_bytes();
+    let bs = text[lex.off..].as_bytes();
     match bs[0] {
         b'n' => parse_null(text, lex),
         b't' => parse_true(text, lex),
@@ -121,7 +121,7 @@ fn parse_string(text: &str, lex: &mut Lex) -> Result<Json> {
 
     let mut escape = false;
     let mut res = String::new();
-    let mut chars = (&text[lex.off..]).char_indices();
+    let mut chars = text[lex.off..].char_indices();
 
     let (i, ch) = chars.next().unwrap(); // skip the opening quote
     if ch != '"' {
@@ -240,11 +240,11 @@ fn parse_array(text: &str, lex: &mut Lex) -> Result<Json> {
 
     let mut array: Vec<Json> = Vec::new();
     parse_whitespace(text, lex);
-    if (&text[lex.off..]).as_bytes()[0] == b',' {
+    if text[lex.off..].as_bytes()[0] == b',' {
         err_at!(ParseFail, msg: "{}", lex.format("expected ','"))?;
     }
     loop {
-        if (&text[lex.off..]).as_bytes()[0] == b']' {
+        if text[lex.off..].as_bytes()[0] == b']' {
             // end of array.
             lex.incr_col(1);
             break Ok(Json::Array(array));
@@ -253,7 +253,7 @@ fn parse_array(text: &str, lex: &mut Lex) -> Result<Json> {
         array.push(parse_value(text, lex)?);
 
         parse_whitespace(text, lex);
-        if (&text[lex.off..]).as_bytes()[0] == b',' {
+        if text[lex.off..].as_bytes()[0] == b',' {
             // skip comma
             lex.incr_col(1);
             parse_whitespace(text, lex);
@@ -268,7 +268,7 @@ fn parse_object(text: &str, lex: &mut Lex) -> Result<Json> {
 
     let mut m: Vec<Property> = Vec::new();
 
-    if (&text[lex.off..]).as_bytes()[0] == b'}' {
+    if text[lex.off..].as_bytes()[0] == b'}' {
         lex.incr_col(1);
         return Ok(Json::Object(m));
     }
@@ -343,7 +343,7 @@ fn parse_whitespace(text: &str, lex: &mut Lex) {
 
 #[inline]
 fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
-    let progbytes = (&text[lex.off..]).as_bytes();
+    let progbytes = text[lex.off..].as_bytes();
 
     if progbytes.is_empty() {
         err_at!(ParseFail, msg: "{}", lex.format(&format!("missing token {}", b)))?;
@@ -363,7 +363,7 @@ fn check_next_byte(text: &str, lex: &mut Lex, b: u8) -> Result<()> {
 
 #[inline]
 fn not_eof(text: &str, lex: &mut Lex) -> Result<()> {
-    if (&text[lex.off..]).is_empty() {
+    if text[lex.off..].is_empty() {
         err_at!(ParseFail, msg: "{}", lex.format("unexpected eof"))
     } else {
         Ok(())
