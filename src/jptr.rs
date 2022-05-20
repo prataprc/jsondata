@@ -4,9 +4,7 @@
 //!
 //! [JSON Pointer RFC spec.]: https://tools.ietf.org/html/rfc6901
 
-use crate::json::Json;
-use crate::ops;
-use crate::{Error, Result};
+use crate::{json::Json, ops, Error, Result};
 
 /// quote path fragment using backslash escape and tilde escape defined by the
 /// RFC specification.

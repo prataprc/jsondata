@@ -4,8 +4,7 @@ use std::io;
 
 use unicode_reader::CodePoints;
 
-use crate::json::Json;
-use crate::{Error, Result};
+use crate::{json::Json, Error, Result};
 
 /// Jsons can parse a stream of JSON text supplied by any [Read] instance.
 /// For Example:

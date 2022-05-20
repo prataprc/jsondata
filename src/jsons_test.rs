@@ -2,9 +2,7 @@
 
 use std::fs::File;
 
-use crate::json::Json;
-use crate::jsons::Jsons;
-use crate::property::Property;
+use crate::{json::Json, jsons::Jsons, property::Property};
 
 #[test]
 fn test_stream0() {

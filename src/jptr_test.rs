@@ -1,8 +1,7 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
 use crate::jptr::{quote, unquote};
-use crate::json::Json;
-use crate::property::Property;
+use crate::{json::Json, property::Property};
 
 #[test]
 fn test_quote() {

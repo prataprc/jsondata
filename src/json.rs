@@ -2,17 +2,11 @@
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::convert::{From, TryFrom, TryInto};
-use std::default::Default;
 use std::fmt::{self, Display, Write};
-use std::ops::RangeBounds;
-use std::str::FromStr;
+use std::{default::Default, ops::RangeBounds, str::FromStr};
 
-use crate::lex::Lex;
 use crate::num::{Floating, Integral};
-use crate::parse::parse_value;
-use crate::property::Property;
-use crate::{jptr, ops};
-use crate::{Error, Result};
+use crate::{jptr, lex::Lex, ops, parse::parse_value, property::Property, Error, Result};
 
 // TODO: test case for all combination for JsonSerialize,
 // refer to examples/macro.rs

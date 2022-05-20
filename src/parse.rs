@@ -5,10 +5,8 @@ use std::{char, f64};
 
 use lazy_static::lazy_static;
 
-use crate::json::Json;
-use crate::lex::Lex;
 use crate::property::{self, Property};
-use crate::{Error, Result};
+use crate::{json::Json, lex::Lex, Error, Result};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     parse_whitespace(text, lex);

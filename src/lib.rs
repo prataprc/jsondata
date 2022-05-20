@@ -200,9 +200,9 @@
 )]
 
 #[allow(unused_imports)]
-use std::ops::{
-    Add, BitAnd, BitOr, BitXor, Div, Index, Mul, Neg, Not, Rem, Shl, Shr, Sub,
-};
+use std::ops::{Add, BitAnd, BitOr, BitXor, Div};
+#[allow(unused_imports)]
+use std::ops::{Index, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 
 #[doc(hidden)]
 pub use jsondata_derive::*;
@@ -224,7 +224,7 @@ mod property;
 pub mod jptr;
 
 // Re-exports for API documentation.
-pub use crate::error::Error;
-pub use crate::json::Json;
-pub use crate::jsons::Jsons;
-pub use crate::property::Property;
+pub use error::Error;
+pub use json::Json;
+pub use jsons::Jsons;
+pub use property::Property;

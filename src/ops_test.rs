@@ -1,7 +1,6 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
-use crate::json::Json;
-use crate::property::Property;
+use crate::{json::Json, property::Property};
 
 #[test]
 fn test_ops_add() {
@@ -59,9 +58,11 @@ fn test_ops_add() {
     assert_eq!(refval, lhs + rhs);
 
     // Object addition
-    let lhs: Json = vec![Property::new("a", 10.into()), Property::new("b", 11.into())].into();
+    let lhs: Json =
+        vec![Property::new("a", 10.into()), Property::new("b", 11.into())].into();
     let rhs: Json = vec![Property::new("b", 20.into())].into();
-    let refval: Json = vec![Property::new("a", 10.into()), Property::new("b", 20.into())].into();
+    let refval: Json =
+        vec![Property::new("a", 10.into()), Property::new("b", 20.into())].into();
     assert_eq!(refval, lhs + rhs);
 }
 
@@ -122,7 +123,8 @@ fn test_ops_sub() {
     assert_eq!(refval, lhs - rhs);
 
     // Object substraction
-    let lhs: Json = vec![Property::new("a", 10.into()), Property::new("b", 20.into())].into();
+    let lhs: Json =
+        vec![Property::new("a", 10.into()), Property::new("b", 20.into())].into();
     let rhs: Json = vec![Property::new("b", 20.into())].into();
     let refval: Json = vec![Property::new("a", 10.into())].into();
     assert_eq!(refval, lhs - rhs);
