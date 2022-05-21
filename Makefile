@@ -1,13 +1,13 @@
 build:
 	# ... build ...
 	# TODO: cargo +stable build
-	# TODO: cd jsondata-derive; cargo +nightly build
+	# TODO: cd jsondata-derive; cargo +stable build
 	cargo +nightly build
 	cd jsondata-derive; cargo +nightly build
 	#
 	# ... test ...
 	# TODO: cargo +stable test --no-run
-	# TODO: cd jsondata-derive; cargo +nightly test --no-run
+	# TODO: cd jsondata-derive; cargo +stable test --no-run
 	cargo +nightly test --no-run
 	cd jsondata-derive; cargo +nightly test --no-run
 	#
@@ -17,7 +17,7 @@ build:
 	#
 	# ... doc ...
 	# TODO: cargo +stable doc
-	# TODO: cd jsondata-derive; cargo +nightly bench --no-run
+	# TODO: cd jsondata-derive; cargo +stable bench --no-run
 	cargo +nightly doc
 	cd jsondata-derive; cargo +nightly bench --no-run
 	#
