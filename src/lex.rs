@@ -19,9 +19,6 @@ impl Lex {
     }
 
     pub fn format(&self, prefix: &str) -> String {
-        format!(
-            "{} at offset:{} line:{} col:{}",
-            prefix, self.off, self.row, self.col
-        )
+        format!("{} at offset:{} line:{} col:{}", prefix, self.off, self.row, self.col)
     }
 }

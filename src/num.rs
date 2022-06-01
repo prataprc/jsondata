@@ -31,9 +31,7 @@ fn parse_integer(text: &[u8]) -> Result<i128> {
 fn parse_float(text: &[u8]) -> Result<f64> {
     use std::str::from_utf8_unchecked;
 
-    err_at!(InvalidNumber, unsafe {
-        from_utf8_unchecked(text).parse::<f64>()
-    })
+    err_at!(InvalidNumber, unsafe { from_utf8_unchecked(text).parse::<f64>() })
 }
 
 #[derive(Clone, Debug)]
@@ -61,10 +59,7 @@ impl<'a> From<&'a str> for Integral {
         let src = val.as_bytes();
         let mut bytes = [0_u8; 32];
         bytes[..src.len()].copy_from_slice(src);
-        Integral::Text {
-            len: val.len(),
-            bytes,
-        }
+        Integral::Text { len: val.len(), bytes }
     }
 }
 
@@ -83,14 +78,8 @@ impl PartialEq for Integral {
                 parse_integer(&bytes[..*len]).map(|b| a.eq(&b)).unwrap()
             }
             (
-                Text {
-                    len: a_len,
-                    bytes: a_bytes,
-                },
-                Text {
-                    len: b_len,
-                    bytes: b_bytes,
-                },
+                Text { len: a_len, bytes: a_bytes },
+                Text { len: b_len, bytes: b_bytes },
             ) => {
                 let a = parse_integer(&a_bytes[..*a_len]).unwrap();
                 let b = parse_integer(&b_bytes[..*b_len]).unwrap();
@@ -119,14 +108,8 @@ impl PartialOrd for Integral {
                 }
             }
             (
-                Text {
-                    len: a_len,
-                    bytes: a_bytes,
-                },
-                Text {
-                    len: b_len,
-                    bytes: b_bytes,
-                },
+                Text { len: a_len, bytes: a_bytes },
+                Text { len: b_len, bytes: b_bytes },
             ) => {
                 let a = parse_integer(&a_bytes[..*a_len]).ok()?;
                 let b = parse_integer(&b_bytes[..*b_len]).ok()?;
@@ -196,10 +179,7 @@ impl<'a> From<&'a str> for Floating {
         let src = val.as_bytes();
         let mut bytes = [0_u8; 32];
         bytes[..src.len()].copy_from_slice(src);
-        Floating::Text {
-            len: val.len(),
-            bytes,
-        }
+        Floating::Text { len: val.len(), bytes }
     }
 }
 
@@ -218,14 +198,8 @@ impl PartialEq for Floating {
                 parse_float(&bytes[..*len]).map(|b| a.eq(&b)).unwrap()
             }
             (
-                Text {
-                    len: a_len,
-                    bytes: a_bytes,
-                },
-                Text {
-                    len: b_len,
-                    bytes: b_bytes,
-                },
+                Text { len: a_len, bytes: a_bytes },
+                Text { len: b_len, bytes: b_bytes },
             ) => {
                 let a = parse_float(&a_bytes[..*a_len]).unwrap();
                 let b = parse_float(&b_bytes[..*b_len]).unwrap();
@@ -248,14 +222,8 @@ impl PartialOrd for Floating {
                 parse_float(&bytes[..*len]).map(|b| a.total_cmp(&b)).ok()
             }
             (
-                Text {
-                    len: a_len,
-                    bytes: a_bytes,
-                },
-                Text {
-                    len: b_len,
-                    bytes: b_bytes,
-                },
+                Text { len: a_len, bytes: a_bytes },
+                Text { len: b_len, bytes: b_bytes },
             ) => {
                 let a = parse_float(&a_bytes[..*a_len]).unwrap();
                 let b = parse_float(&b_bytes[..*b_len]).unwrap();

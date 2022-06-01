@@ -127,8 +127,7 @@ fn test_jptr_set() {
     json.set("/ ", Json::new("hello")).unwrap();
     json.set("/m~0n", Json::new("world")).unwrap();
 
-    json.set("/d", Json::new::<Vec<Property>>(Vec::new()))
-        .unwrap();
+    json.set("/d", Json::new::<Vec<Property>>(Vec::new())).unwrap();
     json.set("/d/key1", Json::new("value")).unwrap();
 
     assert_eq!(json, refv);

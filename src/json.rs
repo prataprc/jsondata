@@ -589,16 +589,8 @@ impl Ord for Json {
                         Ordering::Equal
                     }
                 } else {
-                    let is = if fs.is_infinite() {
-                        fs.signum() as i32
-                    } else {
-                        2
-                    };
-                    let io = if fo.is_infinite() {
-                        fo.signum() as i32
-                    } else {
-                        2
-                    };
+                    let is = if fs.is_infinite() { fs.signum() as i32 } else { 2 };
+                    let io = if fo.is_infinite() { fo.signum() as i32 } else { 2 };
                     is.cmp(&io)
                 }
             }

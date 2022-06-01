@@ -84,10 +84,7 @@ fn main() {
 
     println!("{}", jval);
 
-    let f_ref = Floats {
-        field1: 10.234_567,
-        field2: -10.12312312312311,
-    };
+    let f_ref = Floats { field1: 10.234_567, field2: -10.12312312312311 };
 
     let ref_s = format!(
         "{{\"field1\":{:e},\"field2\":-1.012312312312311e1}}",

@@ -238,9 +238,8 @@ fn test_json5_object() {
     let value = Json::new(vec![Property::new("image", props)]);
     assert_eq!(json, value);
 
-    let mut json: Json = r#"[ { name: "Joe", age: 27 }, { name: "Jane", age: 32 }, ]"#
-        .parse()
-        .unwrap();
+    let mut json: Json =
+        r#"[ { name: "Joe", age: 27 }, { name: "Jane", age: 32 }, ]"#.parse().unwrap();
     json.compute().unwrap();
     let obj1 = Json::new::<Vec<Property>>(vec![
         Property::new("age", 27.into()),

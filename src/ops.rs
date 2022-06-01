@@ -440,18 +440,12 @@ impl Not for Json {
 }
 
 lazy_static! {
-    pub static ref INDEX_OUT_OF_BOUND: Json = Json::__Error(Error::IndexOutofBound(
-        "ops.rs".to_string(),
-        "-1".to_string()
-    ));
-    pub static ref NOT_AN_ARRAY: Json = Json::__Error(Error::NotAnArray(
-        "ops.rs".to_string(),
-        "--na--".to_string()
-    ));
-    pub static ref NOT_AN_INDEX: Json = Json::__Error(Error::InvalidIndex(
-        "ops.rs".to_string(),
-        "--na--".to_string()
-    ));
+    pub static ref INDEX_OUT_OF_BOUND: Json =
+        Json::__Error(Error::IndexOutofBound("ops.rs".to_string(), "-1".to_string()));
+    pub static ref NOT_AN_ARRAY: Json =
+        Json::__Error(Error::NotAnArray("ops.rs".to_string(), "--na--".to_string()));
+    pub static ref NOT_AN_INDEX: Json =
+        Json::__Error(Error::InvalidIndex("ops.rs".to_string(), "--na--".to_string()));
     pub static ref NOT_A_CONTAINER: Json = Json::__Error(Error::InvalidContainer(
         "ops.rs".to_string(),
         "--na--".to_string()

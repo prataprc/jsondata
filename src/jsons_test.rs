@@ -19,9 +19,9 @@ fn test_stream0() {
     let value = js.next().unwrap().unwrap();
     assert!(value.is_error());
     match value.to_error() {
-        Some(err) => assert!(err
-            .to_string()
-            .contains("expected null at offset:0 line:1 col:1")),
+        Some(err) => {
+            assert!(err.to_string().contains("expected null at offset:0 line:1 col:1"))
+        }
         _ => unreachable!(),
     }
 }
@@ -110,10 +110,7 @@ fn test_stream2() {
         ])
     );
 
-    assert_eq!(
-        js.next().unwrap().unwrap(),
-        "汉语 / 漢語; Hàn\u{8} \tyǔ ".into()
-    );
+    assert_eq!(js.next().unwrap().unwrap(), "汉语 / 漢語; Hàn\u{8} \tyǔ ".into());
 }
 
 #[test]
@@ -173,10 +170,7 @@ fn test_stream3() {
         ])
     );
 
-    assert_eq!(
-        js.next().unwrap().unwrap(),
-        Json::new::<Vec<Property>>(vec![])
-    );
+    assert_eq!(js.next().unwrap().unwrap(), Json::new::<Vec<Property>>(vec![]));
     assert_eq!(
         js.next().unwrap().unwrap(),
         Json::new(vec![Property::new("key1", "value1".into())])
