@@ -9,7 +9,7 @@ use crate::Json;
 fn test_json_constructor() {
     use self::Json;
 
-    assert_eq!(Json::new(10), Json::Integer("10".into()));
+    assert_eq!(Json::new(10), Json::Integer("10".try_into().unwrap()));
 }
 
 #[test]

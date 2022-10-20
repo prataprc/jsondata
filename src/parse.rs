@@ -75,7 +75,7 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json> {
         if is_float && !is_hex {
             Ok(Json::Float(t.into()))
         } else {
-            Ok(Json::Integer(t.into()))
+            Ok(Json::Integer(t.try_into()?))
         }
     };
 

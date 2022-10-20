@@ -32,12 +32,15 @@ and document database.
 Deferred conversion for numbers
 ===============================
 
-Converting JSON numbers to Rust native type is not always desired.
-Especially in the context of big-data where data is stored in JSON
-format and we need to lookup, only, specific fields within the document.
+Converting JSON numbers to Rust native type is not always desired. Especially
+in the context of big-data where data is stored in JSON format and we need to
+lookup, only, specific fields within the document.
 
-This implementation provides deferred conversion for JSON numbers
-that leads to a **[performance improvement of upto 30%][commit-deferred]**.
+This implementation provides deferred conversion for JSON numbers that leads
+to a **[performance improvement of upto 30%][commit-deferred]**.
+
+**Caveat**: If numerical text is greated than 128 characters, deferred conversion
+won't work, that is, text shall be parsed immediately.
 
 CRUD operations on JSON document
 ================================

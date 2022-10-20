@@ -1,13 +1,13 @@
 build:
 	# ... build ...
-	# TODO: cargo +stable build
-	# TODO: cd jsondata-derive; cargo +stable build
+	cargo +stable build
+	cd jsondata-derive; cargo +stable build
 	cargo +nightly build
 	cd jsondata-derive; cargo +nightly build
 	#
 	# ... test ...
-	# TODO: cargo +stable test --no-run
-	# TODO: cd jsondata-derive; cargo +stable test --no-run
+	cargo +stable test --no-run
+	cd jsondata-derive; cargo +stable test --no-run
 	cargo +nightly test --no-run
 	cd jsondata-derive; cargo +nightly test --no-run
 	#
@@ -16,8 +16,8 @@ build:
 	cd jsondata-derive; cargo +nightly bench --no-run
 	#
 	# ... doc ...
-	# TODO: cargo +stable doc
-	# TODO: cd jsondata-derive; cargo +stable bench --no-run
+	cargo +stable doc
+	cd jsondata-derive; cargo +stable bench --no-run
 	cargo +nightly doc
 	cd jsondata-derive; cargo +nightly bench --no-run
 	#
@@ -26,20 +26,22 @@ build:
 	cd jsondata-derive; cargo +nightly clippy --all-targets --all-features
 
 test:
-	# ... test ...
-	# TODO: cargo +stable test
-	# TODO: cd jsondata-derive; cargo +stable test
-	# TODO: cargo +stable run --example macro
-	# TODO: cargo +stable run --example mixed_integer
+	# ... test stable ...
+	cargo +stable test
+	cd jsondata-derive; cargo +stable test
+	cargo +stable run --example macro
+	cargo +stable run --example mixed_integer
+	# ... test nightly ...
 	cargo +nightly test
 	cd jsondata-derive; cargo +nightly test
 	cargo +nightly run --example macro
 	cargo +nightly run --example mixed_integer
 
 bench:
-	# ... bench ...
+	# ... bench stable ...
 	# TODO: cargo +stable bench
 	# TODO: cd jsondata-derive; cargo +stable bench
+	# ... bench nightly ...
 	cargo +nightly bench
 	cd jsondata-derive; cargo +nightly bench
 

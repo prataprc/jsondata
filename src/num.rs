@@ -1,8 +1,5 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
-// TODO: replace [u8; 32] to [u8; 64] once constant generic is available
-// in rust.
-
 use std::{cmp::Ordering, convert::TryInto};
 
 use crate::{Error, Result};
@@ -36,7 +33,7 @@ fn parse_float(text: &[u8]) -> Result<f64> {
 
 #[derive(Clone, Debug)]
 pub enum Integral {
-    Text { len: usize, bytes: [u8; 32] },
+    Text { len: usize, bytes: [u8; 128] },
     Data { value: i128 },
 }
 
@@ -54,12 +51,24 @@ macro_rules! convert_to_integral {
 
 convert_to_integral! {u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, usize, isize }
 
-impl<'a> From<&'a str> for Integral {
-    fn from(val: &str) -> Integral {
+impl<'a> TryFrom<&'a str> for Integral {
+    type Error = Error;
+
+    fn try_from(val: &str) -> Result<Integral> {
         let src = val.as_bytes();
-        let mut bytes = [0_u8; 32];
-        bytes[..src.len()].copy_from_slice(src);
-        Integral::Text { len: val.len(), bytes }
+        let val = match src.len() {
+            n if n < 128 => {
+                let mut bytes = [0_u8; 128];
+                bytes[..n].copy_from_slice(src);
+                Integral::Text { len: n, bytes }
+            }
+            _ => {
+                let value = parse_integer(src)?;
+                Integral::Data { value }
+            }
+        };
+
+        Ok(val)
     }
 }
 
@@ -156,7 +165,7 @@ impl Integral {
 
 #[derive(Clone, Debug)]
 pub enum Floating {
-    Text { len: usize, bytes: [u8; 32] },
+    Text { len: usize, bytes: [u8; 128] },
     Data { value: f64 },
 }
 
@@ -177,7 +186,7 @@ convert_to_float! {f32, f64}
 impl<'a> From<&'a str> for Floating {
     fn from(val: &str) -> Floating {
         let src = val.as_bytes();
-        let mut bytes = [0_u8; 32];
+        let mut bytes = [0_u8; 128];
         bytes[..src.len()].copy_from_slice(src);
         Floating::Text { len: val.len(), bytes }
     }
