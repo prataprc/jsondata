@@ -1,3 +1,17 @@
+0.8.1
+=====
+
+* Instead of using `val.into()` and `val.try_into()` to convert between types,
+  use `<T>::from(val)` and `<T>::try_from(val)` to convert between types.
+* Remove `#![feature(total_cmp)]`
+  * Now `jsondata` is available on stable release channel.
+  * Make Integral::Text and Floating::Text to hold onto 128 character number-text.
+    Anything greater shall be parsed, that is, deferred conversion won't work
+    for numerical text greater than 128 characters.
+* Cleanup
+
+Note: valgrind still doesn't work on mac-m1.
+
 0.8.0
 =====
 
@@ -33,7 +47,7 @@
 Breaking type change.
 - Integral and Floating types are implemented as enum, instead of struct.
 
-- Fix "as ..." conversions to try_into().unwrap()
+- Fix "as ..." conversions to `try_into().unwrap()`
 - Implement From<usize>, From<u64>, From<u32> for Json type.
 
 0.6.1

@@ -1,6 +1,6 @@
 [package]
 name = "jsondata"
-version = "0.8.0"
+version = "0.8.1"
 description = "JSON processing package for document databases"
 repository = "https://github.com/bnclabs/jsondata"
 documentation = "https://docs.rs/jsondata"
