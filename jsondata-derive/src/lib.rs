@@ -14,7 +14,7 @@ use syn::*;
 pub fn jsonize_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input: DeriveInput = syn::parse(input).unwrap();
     let gen = impl_jsonize_type(&input);
-    gen.into()
+    proc_macro::TokenStream::from(gen)
 }
 
 fn impl_jsonize_type(input: &DeriveInput) -> TokenStream {
@@ -59,12 +59,12 @@ fn to_json_property(field: &Field) -> TokenStream {
             let is_from_str = get_from_str(&field.attrs);
             match (is_from_str, get_try_into(&field.attrs)) {
                 (true, _) => quote! {
-                    let v: Json = value.#field_name.to_string().into();
+                    let v = Json::from(value.#field_name.to_string());
                     props.push(#croot::Property::new(#key, v));
                 },
                 (false, Some(intr_type)) => quote! {
                     let v: #intr_type = value.#field_name.try_into().unwrap();
-                    let v: Json = v.into();
+                    let v = Json::from(v);
                     props.push(#croot::Property::new(#key, v));
                 },
                 (false, None) => quote! {

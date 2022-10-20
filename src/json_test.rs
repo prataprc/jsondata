@@ -73,11 +73,11 @@ fn test_deferred() {
     let inp = r#" [10123.1231, 1231.123123, 1233.123123, 123.1231231, 12312e10]"#;
     let value: Json = inp.parse().unwrap();
     let refval = Json::Array(vec![
-        Json::Float("10123.1231".into()),
-        Json::Float("1231.123123".into()),
-        Json::Float("1233.123123".into()),
-        Json::Float("123.1231231".into()),
-        Json::Float("12312e10".into()),
+        Json::Float("10123.1231".try_into().unwrap()),
+        Json::Float("1231.123123".try_into().unwrap()),
+        Json::Float("1233.123123".try_into().unwrap()),
+        Json::Float("123.1231231".try_into().unwrap()),
+        Json::Float("12312e10".try_into().unwrap()),
     ]);
     assert_eq!(value, refval);
 }

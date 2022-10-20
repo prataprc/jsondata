@@ -77,8 +77,8 @@ fn main() {
         r#""field4":-100,"field5":1000,"field6":-1000,"field7":10000,"#,
         r#""field8":-10000,"field9":1000000}"#
     );
-    let jval: Json = p_ref.clone().into();
-    let p: Parent = jval.clone().try_into().unwrap();
+    let jval = Json::from(p_ref.clone());
+    let p = Parent::try_from(jval.clone()).unwrap();
     assert_eq!(jval.to_string(), ref_s);
     assert_eq!(p, p_ref);
 
@@ -91,8 +91,8 @@ fn main() {
         f_ref.field1 as f64,
     );
 
-    let jval: Json = f_ref.clone().try_into().unwrap();
-    let f: Floats = jval.clone().try_into().unwrap();
+    let jval: Json = Json::try_from(f_ref.clone()).unwrap();
+    let f: Floats = Floats::try_from(jval.clone()).unwrap();
 
     assert_eq!(jval.to_string(), ref_s);
     assert!((f.field1 - f_ref.field1).abs() < f32::EPSILON);

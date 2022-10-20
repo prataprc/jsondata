@@ -58,9 +58,9 @@ use crate::{jptr, lex::Lex, ops, parse::parse_value, property::Property, Error, 
 /// `i128::max()`.
 ///
 /// ```
-/// let json: jsondata::Json = 10.into();
-/// let json: jsondata::Json = true.into();
-/// let json: jsondata::Json = "hello world".into();
+/// let json = jsondata::Json::from(10);
+/// let json = jsondata::Json::from(true);
+/// let json = jsondata::Json::from("hello world");
 /// ```
 ///
 /// On the other direction, [Json] enum can be converted to Rust native
@@ -141,7 +141,7 @@ impl Json {
     where
         Self: From<T>,
     {
-        value.into()
+        Json::from(value)
     }
 
     /// Minbound return a Json value that sort before every other [Json] type.
@@ -383,7 +383,7 @@ impl Json {
                 let (end, e) = match range.end_bound() {
                     Included(n) => (ops::normalized_offset((*n) + 1, arr.len()), *n),
                     Excluded(n) => (ops::normalized_offset(*n, arr.len()), *n),
-                    Unbounded => (Some(arr.len()), arr.len().try_into().unwrap()),
+                    Unbounded => (Some(arr.len()), isize::try_from(arr.len()).unwrap()),
                 };
                 match (start, end) {
                     (Some(start), Some(end)) => Json::Array(arr[start..end].to_vec()),
@@ -783,10 +783,10 @@ impl TryFrom<Json> for Vec<Property> {
 
 impl<T> From<(T,)> for Json
 where
-    T: Into<Json>,
+    Json: From<T>,
 {
     fn from(val: (T,)) -> Json {
-        Json::Array(vec![val.0.into()])
+        Json::Array(vec![Json::from(val.0)])
     }
 }
 
@@ -798,7 +798,7 @@ where
 
     fn try_from(val: Json) -> Result<(T,)> {
         match val.to_array() {
-            Some(val) if val.len() == 1 => Ok((val[0].clone().try_into()?,)),
+            Some(val) if val.len() == 1 => Ok((T::try_from(val[0].clone())?,)),
             Some(v) => err_at!(
                 InvalidType,
                 msg: "{} tuple-arity-1 {}", val.type_name(), v.len()
@@ -810,11 +810,10 @@ where
 
 impl<U, V> From<(U, V)> for Json
 where
-    U: Into<Json>,
-    V: Into<Json>,
+    Json: From<U> + From<V>,
 {
     fn from(val: (U, V)) -> Json {
-        let inner = vec![val.0.into(), val.1.into()];
+        let inner = vec![Json::from(val.0), Json::from(val.1)];
         Json::Array(inner)
     }
 }
@@ -829,7 +828,7 @@ where
     fn try_from(val: Json) -> Result<(U, V)> {
         match val.to_array() {
             Some(val) if val.len() == 2 => {
-                Ok((val[0].clone().try_into()?, val[1].clone().try_into()?))
+                Ok((U::try_from(val[0].clone())?, V::try_from(val[1].clone())?))
             }
             Some(v) => err_at!(
                 InvalidType,
@@ -842,12 +841,10 @@ where
 
 impl<A, B, C> From<(A, B, C)> for Json
 where
-    A: Into<Json>,
-    B: Into<Json>,
-    C: Into<Json>,
+    Json: From<A> + From<B> + From<C>,
 {
     fn from(val: (A, B, C)) -> Json {
-        let inner = vec![val.0.into(), val.1.into(), val.2.into()];
+        let inner = vec![Json::from(val.0), Json::from(val.1), Json::from(val.2)];
         Json::Array(inner)
     }
 }
@@ -863,9 +860,9 @@ where
     fn try_from(val: Json) -> Result<(A, B, C)> {
         match val.to_array() {
             Some(val) if val.len() == 3 => Ok((
-                val[0].clone().try_into()?,
-                val[1].clone().try_into()?,
-                val[2].clone().try_into()?,
+                A::try_from(val[0].clone())?,
+                B::try_from(val[1].clone())?,
+                C::try_from(val[2].clone())?,
             )),
             Some(v) => err_at!(
                 InvalidType,
@@ -878,10 +875,10 @@ where
 
 impl<T> From<Vec<T>> for Json
 where
-    T: Into<Json>,
+    Json: From<T>,
 {
     fn from(val: Vec<T>) -> Json {
-        let inner: Vec<Json> = val.into_iter().map(|v| v.into()).collect();
+        let inner: Vec<Json> = val.into_iter().map(|v| Json::from(v)).collect();
         Json::Array(inner)
     }
 }
@@ -897,7 +894,7 @@ where
             Some(val) => {
                 let mut out = vec![];
                 for v in val.into_iter() {
-                    out.push(v.try_into()?);
+                    out.push(T::try_from(v)?);
                 }
                 Ok(out)
             }

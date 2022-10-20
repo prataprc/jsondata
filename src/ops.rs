@@ -1,6 +1,5 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
-use std::convert::TryInto;
 use std::ops::{Add, Div, Mul, Neg, Not, Rem, Shl, Shr, Sub};
 use std::ops::{BitAnd, BitOr, BitXor, Index};
 
@@ -373,11 +372,11 @@ impl BitAnd for Json {
             (x @ Integer(_), y @ Integer(_)) => {
                 let x = check_error!(x.to_integer_result());
                 let y = check_error!(y.to_integer_result());
-                (x & y).into()
+                Json::from(x & y)
             }
             (x, y) => {
-                let (x, y): (bool, bool) = (x.into(), y.into());
-                (x & y).into()
+                let (x, y) = (bool::from(x), bool::from(y));
+                Json::from(x & y)
             }
         }
     }
@@ -395,11 +394,11 @@ impl BitOr for Json {
             (x @ Integer(_), y @ Integer(_)) => {
                 let x = check_error!(x.to_integer_result());
                 let y = check_error!(y.to_integer_result());
-                (x | y).into()
+                Json::from(x | y)
             }
             (x, y) => {
-                let (x, y): (bool, bool) = (x.into(), y.into());
-                (x | y).into()
+                let (x, y) = (bool::from(x), bool::from(y));
+                Json::from(x | y)
             }
         }
     }
@@ -417,11 +416,11 @@ impl BitXor for Json {
             (x @ Integer(_), y @ Integer(_)) => {
                 let x = check_error!(x.to_integer_result());
                 let y = check_error!(y.to_integer_result());
-                (x ^ y).into()
+                Json::from(x ^ y)
             }
             (x, y) => {
-                let (x, y): (bool, bool) = (x.into(), y.into());
-                (x ^ y).into()
+                let (x, y) = (bool::from(x), bool::from(y));
+                Json::from(x ^ y)
             }
         }
     }
@@ -434,8 +433,8 @@ impl Not for Json {
         if self.is_error() {
             return self;
         }
-        let value: bool = self.into();
-        value.not().into()
+        let value = bool::from(self);
+        Json::from(value.not())
     }
 }
 
@@ -529,10 +528,10 @@ fn mixin_object(mut this: Vec<Property>, other: Vec<Property>) -> Vec<Property> 
 }
 
 pub fn normalized_offset(off: isize, len: usize) -> Option<usize> {
-    let len = len.try_into().unwrap();
+    let len = isize::try_from(len).unwrap();
     let off = if off < 0 { off + len } else { off };
     if off >= 0 && off < len {
-        Some(off.try_into().unwrap())
+        Some(usize::try_from(off).unwrap())
     } else {
         None
     }

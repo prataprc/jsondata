@@ -6,7 +6,7 @@ use std::{char, f64};
 use lazy_static::lazy_static;
 
 use crate::property::{self, Property};
-use crate::{json::Json, lex::Lex, Error, Result};
+use crate::{json::Json, lex::Lex, num, Error, Result};
 
 pub fn parse_value(text: &str, lex: &mut Lex) -> Result<Json> {
     parse_whitespace(text, lex);
@@ -73,9 +73,9 @@ fn parse_num(text: &str, lex: &mut Lex) -> Result<Json> {
         lex.incr_col(i);
         //println!("parse_num -- {}", t);
         if is_float && !is_hex {
-            Ok(Json::Float(t.into()))
+            Ok(Json::Float(num::Floating::try_from(t)?))
         } else {
-            Ok(Json::Integer(t.try_into()?))
+            Ok(Json::Integer(num::Integral::try_from(t)?))
         }
     };
 

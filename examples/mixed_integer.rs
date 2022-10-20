@@ -45,7 +45,7 @@ fn main() {
         j: (-9223372036854775808, 9223372036854775807),
     };
 
-    let jval1: Json = data1.into();
+    let jval1 = Json::from(data1);
     let text = jval1.to_string();
     let out = Data::try_from(Json::from_str(&text).unwrap());
     assert!(out.is_ok());

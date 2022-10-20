@@ -1,6 +1,6 @@
 // Copyright © 2019 R Pratap Chakravarthy. All rights reserved.
 
-use std::{cmp::Ordering, convert::TryInto};
+use std::cmp::Ordering;
 
 use crate::{Error, Result};
 
@@ -42,7 +42,7 @@ macro_rules! convert_to_integral {
         $(
             impl From<$from> for Integral {
                 fn from(val: $from) -> Integral {
-                    Integral::Data { value: val.try_into().unwrap() }
+                    Integral::Data { value: i128::try_from(val).unwrap() }
                 }
             }
         )*
@@ -145,7 +145,7 @@ impl Integral {
 
     pub fn float(&self) -> Option<f64> {
         let val = self.integer()?;
-        if -9007199254740992 <= val && val <= 9007199254740992 {
+        if (-9007199254740992..=9007199254740992).contains(&val) {
             Some(val as f64)
         } else {
             // TODO: strict accuracy or tolerant behaviour
@@ -183,12 +183,24 @@ macro_rules! convert_to_float {
 
 convert_to_float! {f32, f64}
 
-impl<'a> From<&'a str> for Floating {
-    fn from(val: &str) -> Floating {
+impl<'a> TryFrom<&'a str> for Floating {
+    type Error = Error;
+
+    fn try_from(val: &str) -> Result<Floating> {
         let src = val.as_bytes();
-        let mut bytes = [0_u8; 128];
-        bytes[..src.len()].copy_from_slice(src);
-        Floating::Text { len: val.len(), bytes }
+        let val = match src.len() {
+            n if n < 128 => {
+                let mut bytes = [0_u8; 128];
+                bytes[..src.len()].copy_from_slice(src);
+                Floating::Text { len: val.len(), bytes }
+            }
+            _ => {
+                let value = parse_float(src)?;
+                Floating::Data { value }
+            }
+        };
+
+        Ok(val)
     }
 }
 
