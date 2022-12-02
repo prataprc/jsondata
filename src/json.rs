@@ -1004,7 +1004,15 @@ impl Display for Json {
                 let arg = from_utf8(&bytes[..*len]).unwrap();
                 write!(f, "{}", arg)
             }
-            Float(Floating::Data { value: v }) => write!(f, "{:e}", v),
+            Float(Floating::Data { value: v }) => {
+                if *v == f64::INFINITY {
+                    write!(f, "Infinity")
+                } else if *v == f64::NEG_INFINITY {
+                    write!(f, "-Infinity")
+                } else {
+                    write!(f, "{:e}", v)
+                }
+            },
             S(val) => {
                 encode_string(f, val)?;
                 Ok(())

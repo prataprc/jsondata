@@ -75,7 +75,15 @@ impl Display for JsonQC {
             JsonQC::Bool(true) => write!(f, "true"),
             JsonQC::Bool(false) => write!(f, "false"),
             JsonQC::Integer(val) => write!(f, "{}", val),
-            JsonQC::Float(val) => write!(f, "{:e}", val),
+            JsonQC::Float(val) => {
+                if *val == f64::INFINITY {
+                    write!(f, "Infinity")
+                } else if *val == f64::NEG_INFINITY {
+                    write!(f, "-Infinity")
+                } else {
+                    write!(f, "{:e}", val)
+                }
+            },
             JsonQC::String(val) => json::encode_string(f, &val)
             JsonQC::Array(val) => {
                 if val.len() == 0 {
